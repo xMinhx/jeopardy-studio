@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+}
+body {
+  margin: 0;
+}
+
+/* Digital font for timer digits */
+.digital {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: 0.03em;
+}
+
+/* ---------------------------------------------------
+   Blink digits hard 3 times when timer hits 0
+--------------------------------------------------- */
+@keyframes blink-hard-3 {
+  0%, 33%, 66%, 100% { opacity: 1; }
+  16.5%, 49.5%, 82.5% { opacity: 0; }
+}
+
+/* One-shot, 3-blink animation (matches React code) */
+.blink-hard-3 {
+  animation: blink-hard-3 1.2s steps(1, end) 3 forwards;
+}
+
+/* ---------------------------------------------------
+   Ring glow animations (normal = green, alert = red)
+--------------------------------------------------- */
+@keyframes quiz-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 32px 10px rgba(16, 185, 129, 0.25);
+  }
+}
+@keyframes quiz-glow-red {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 32px 10px rgba(239, 68, 68, 0.25);
+  }
+}
+
+.ring-glow {
+  animation: quiz-glow 2s ease-in-out infinite;
+}
+.ring-glow--alert {
+  animation: quiz-glow-red 2s ease-in-out infinite;
+}
+
+/* ---------------------------------------------------
+   Bounce effect for ticking timer (only when running)
+--------------------------------------------------- */
+@keyframes tick-bounce {
+  0%   { transform: scale(1); }
+  20%  { transform: scale(1.06); }
+  40%  { transform: scale(1); }
+  100% { transform: scale(1); }
+}
+.tick-bounce {
+  animation: tick-bounce 0.25s ease-out;
+}

@@ -1,0 +1,131 @@
+{
+  "rows": 5,
+  "cols": 6,
+  "categories": ["Science", "Geography", "History", "Film", "Sports", "Food"],
+  "grid": [
+    [
+      { "value": 100, "question": "What planet is known as the Red Planet?" },
+      { "value": 100, "question": "What is the tallest mountain in the world?" },
+      {
+        "value": 100,
+        "question": "Which city was destroyed in 79 CE by the eruption of Mount Vesuvius?"
+      },
+      {
+        "value": 100,
+        "question": "Which 1997 movie features Jack and Rose aboard a doomed ship?"
+      },
+      {
+        "value": 100,
+        "question": "Which country is popularly believed to have invented hockey?"
+      },
+      {
+        "value": 100,
+        "question": "What ingredient makes bread rise?"
+      }
+    ],
+    [
+      {
+        "value": 200,
+        "question": "At what temperature does water freeze in Celsius?"
+      },
+      {
+        "value": 200,
+        "question": "What are the five oceans of the world?"
+      },
+      {
+        "value": 200,
+        "question": "Which Ancient World wonder still stands today?"
+      },
+      {
+        "value": 200,
+        "question": "Which animated movie follows a clownfish searching for his son?"
+      },
+      {
+        "value": 200,
+        "question": "In golf, what term means one stroke under par?"
+      },
+      {
+        "value": 200,
+        "question": "What is the difference between broth and stock?"
+      }
+    ],
+    [
+      {
+        "value": 300,
+        "question": "What is the chemical symbol for gold?"
+      },
+      {
+        "value": 300,
+        "question": "How many time zones does Australia have?"
+      },
+      {
+        "value": 300,
+        "question": "Who discovered penicillin?"
+      },
+      {
+        "value": 300,
+        "question": "Which blue alien movie became one of the highest-grossing films ever?"
+      },
+      {
+        "value": 300,
+        "question": "How many points is a touchdown worth in football?"
+      },
+      {
+        "value": 300,
+        "question": "What was the first food grown in space?"
+      }
+    ],
+    [
+      {
+        "value": 400,
+        "question": "What is the largest organ in the human body?"
+      },
+      {
+        "value": 400,
+        "question": "Which river, named after the sacred lotus flower, flows into a 839,000-square-mile body of water?"
+      },
+      {
+        "value": 400,
+        "question": "In what year was the first internet domain registered?"
+      },
+      {
+        "value": 400,
+        "question": "Which director is known for films such as Inception, Interstellar, and Oppenheimer?"
+      },
+      {
+        "value": 400,
+        "question": "Which Olympic event combines cross-country skiing and rifle shooting?"
+      },
+      {
+        "value": 400,
+        "question": "What is the process of baking a pie crust before adding the filling called?"
+      }
+    ],
+    [
+      {
+        "value": 500,
+        "question": "What is the pH of a neutral substance?"
+      },
+      {
+        "value": 500,
+        "question": "What is the world's smallest sea?"
+      },
+      {
+        "value": 500,
+        "question": "What section did The New York Times first publish on October 10, 1896?"
+      },
+      {
+        "value": 500,
+        "question": "In The Matrix, what color pill does Neo take to learn the truth?"
+      },
+      {
+        "value": 500,
+        "question": "Which NHL trophy is awarded to the league's MVP?"
+      },
+      {
+        "value": 500,
+        "question": "Which fruits of the genus Vaccinium are often called \"brain berries\"?"
+      }
+    ]
+  ]
+}
