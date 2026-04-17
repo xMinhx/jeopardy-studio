@@ -27,7 +27,10 @@ A polished, dual-window Jeopardy-style scoreboard desktop app built for quiz sho
 
 ## Screenshots
 
-> _Coming soon — run the app locally and take your own!_
+<p align="center">
+  <img src="public/screenshots/control.png" alt="Control Window" width="45%" />
+  <img src="public/screenshots/display.png" alt="Display Window" width="45%" />
+</p>
 
 ---
 
@@ -65,7 +68,7 @@ Packaged installers are output to the `release/` directory.
 |-----|--------|
 | `Space` | Start / pause the timer |
 | `R` | Reset the timer |
-| `1` – `6` | Set timer preset (15 s → 90 s) |
+| `1` – `6` | Set timer preset (10 s → 60 s) |
 
 ---
 
@@ -76,7 +79,7 @@ Packaged installers are output to the `release/` directory.
 │   ├── main/         # Electron main process & window management
 │   └── preload/      # Secure IPC bridge (contextBridge)
 ├── src/
-│   ├── windows/      # Control.tsx (host UI) · Display.tsx (audience UI)
+│   ├── features/     # Feature modules (teams, board, timer)
 │   ├── store/        # Zustand state (board, teams, timer)
 │   ├── hooks/        # useTimer · useTimerAudio · useAnimatedNumber
 │   ├── services/     # Default board presets
@@ -90,36 +93,14 @@ Packaged installers are output to the `release/` directory.
 
 ---
 
-## Tech Stack
-
-| Layer | Choice |
-|-------|--------|
-| Desktop shell | Electron 31 |
-| Frontend | React 18 + TypeScript 5.6 |
-| Styling | Tailwind CSS 3.4 |
-| State | Zustand 4.5 |
-| Validation | Zod 3.23 |
-| Build | Vite 5.4 + Electron Builder |
-| Tests | Vitest 2.1 + React Testing Library |
-
----
-
-## Configuration
-
-Load a custom board by going to **File → Import** in the Control window and selecting a JSON file. The format is documented in [`SPEC.md`](SPEC.md).
-
-A default board (`public/board-default.json`) is bundled with the app and loads automatically on first launch.
-
----
-
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feat/my-feature`
-3. Commit your changes
+3. Commit your changes (we follow [Conventional Commits](https://www.conventionalcommits.org/))
 4. Open a pull request
 
-Please read [`AGENTS.md`](AGENTS.md) for coding conventions and contribution guidelines before submitting.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ---
 
