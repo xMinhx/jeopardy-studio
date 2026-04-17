@@ -1,8 +1,9 @@
 // Electron main process
 'use strict';
 
-const { app, BrowserWindow, ipcMain, protocol } = require('electron');
+const { app, BrowserWindow, ipcMain, protocol, dialog } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 const isDev = !!process.env.VITE_DEV_SERVER_URL;
 const rendererDistPath = path.normalize(path.join(__dirname, '../../dist/renderer'));
@@ -112,6 +113,29 @@ function registerIpcHandlers() {
   ipcMain.on('timer:tick', (_e, payload) => {
     if (!displayWindow) return;
     displayWindow.webContents.send('timer:tick', payload);
+  });
+
+  // ── File I/O ──────────────────────────────────────────────────────────────
+  ipcMain.handle('file:open', async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog(controlWindow, {
+      title: 'Import Board JSON',
+      filters: [{ name: 'JSON', extensions: ['json'] }],
+      properties: ['openFile'],
+    });
+    if (canceled || filePaths.length === 0) return null;
+    const content = fs.readFileSync(filePaths[0], 'utf-8');
+    return JSON.parse(content);
+  });
+
+  ipcMain.handle('file:save', async (_e, data) => {
+    const { canceled, filePath } = await dialog.showSaveDialog(controlWindow, {
+      title: 'Export Board JSON',
+      defaultPath: 'my-jeopardy-board.json',
+      filters: [{ name: 'JSON', extensions: ['json'] }],
+    });
+    if (canceled || !filePath) return false;
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+    return true;
   });
 }
 

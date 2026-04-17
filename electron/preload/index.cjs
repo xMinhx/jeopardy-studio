@@ -24,4 +24,6 @@ contextBridge.exposeInMainWorld('api', {
   },
   sendTimerTick: (remainingMs, durationMs, running, ended = false, displayMs) =>
     ipcRenderer.send('timer:tick', { remainingMs, durationMs, running, ended, displayMs }),
+  importBoard: async () => ipcRenderer.invoke('file:open'),
+  exportBoard: async (data) => ipcRenderer.invoke('file:save', data),
 });

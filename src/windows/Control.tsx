@@ -383,7 +383,28 @@ export default function Control() {
 
       {/* ── Board section ── */}
       <section className="rounded border p-4">
-        <h2 className="font-medium mb-3">Board</h2>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-medium">Board</h2>
+          <div className="flex gap-2">
+            <button
+              className="rounded bg-slate-100 px-3 py-1 text-sm"
+              onClick={async () => {
+                const data = await window.api?.importBoard?.();
+                if (data) setAll(data);
+              }}
+            >
+              Import JSON
+            </button>
+            <button
+              className="rounded bg-slate-100 px-3 py-1 text-sm"
+              onClick={() => {
+                void window.api?.exportBoard?.({ teams, board });
+              }}
+            >
+              Export JSON
+            </button>
+          </div>
+        </div>
 
         {/* Board config controls */}
         <div className="mb-3 flex flex-wrap items-center gap-3 text-sm">
