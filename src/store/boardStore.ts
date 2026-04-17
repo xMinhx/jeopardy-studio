@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type { Board } from "@/types/board";
 import type { Cell, CellState } from "@/types/cell";
 import type { Team } from "@/types/team";
@@ -98,196 +99,203 @@ export interface BoardState {
 // Store implementation
 // ---------------------------------------------------------------------------
 
-export const useBoardStore = create<BoardState>((set) => ({
-  teams: defaultTeams,
-  board: DEFAULT_BOARD,
+export const useBoardStore = create<BoardState>()(
+  persist(
+    (set) => ({
+      teams: defaultTeams,
+      board: DEFAULT_BOARD,
 
-  setAll: (next) => set({ teams: next.teams, board: next.board }),
+      setAll: (next) => set({ teams: next.teams, board: next.board }),
 
-  // ── Teams ────────────────────────────────────────────────────────────────
+      // ── Teams ────────────────────────────────────────────────────────────────
 
-  addTeam: (team) => set((s) => ({ teams: [...s.teams, team] })),
+      addTeam: (team) => set((s) => ({ teams: [...s.teams, team] })),
 
-  removeTeam: (teamId) =>
-    set((s) => ({
-      teams: s.teams.filter((t) => t.id !== teamId),
-      board: {
-        ...s.board,
-        grid: s.board.grid.map((row) =>
-          row.map((cell) => clearTeamFromCell(cell, teamId)),
-        ),
-      },
-    })),
+      removeTeam: (teamId) =>
+        set((s) => ({
+          teams: s.teams.filter((t) => t.id !== teamId),
+          board: {
+            ...s.board,
+            grid: s.board.grid.map((row) =>
+              row.map((cell) => clearTeamFromCell(cell, teamId)),
+            ),
+          },
+        })),
 
-  setTeamName: (teamId, name) =>
-    set((s) => ({
-      teams: s.teams.map((t) => (t.id === teamId ? { ...t, name } : t)),
-    })),
+      setTeamName: (teamId, name) =>
+        set((s) => ({
+          teams: s.teams.map((t) => (t.id === teamId ? { ...t, name } : t)),
+        })),
 
-  setTeamColor: (teamId, color) =>
-    set((s) => ({
-      teams: s.teams.map((t) => (t.id === teamId ? { ...t, color } : t)),
-    })),
+      setTeamColor: (teamId, color) =>
+        set((s) => ({
+          teams: s.teams.map((t) => (t.id === teamId ? { ...t, color } : t)),
+        })),
 
-  moveTeam: (teamId, delta) =>
-    set((s) => {
-      const idx = s.teams.findIndex((t) => t.id === teamId);
-      const target = idx + delta;
-      if (idx === -1 || target < 0 || target >= s.teams.length) return {};
-      const teams = s.teams.slice();
-      const [moved] = teams.splice(idx, 1);
-      teams.splice(target, 0, moved);
-      return { teams };
+      moveTeam: (teamId, delta) =>
+        set((s) => {
+          const idx = s.teams.findIndex((t) => t.id === teamId);
+          const target = idx + delta;
+          if (idx === -1 || target < 0 || target >= s.teams.length) return {};
+          const teams = s.teams.slice();
+          const [moved] = teams.splice(idx, 1);
+          teams.splice(target, 0, moved);
+          return { teams };
+        }),
+
+      moveTeamTo: (teamId, index) =>
+        set((s) => {
+          const from = s.teams.findIndex((t) => t.id === teamId);
+          if (from === -1) return {};
+          const to = Math.max(0, Math.min(index, s.teams.length - 1));
+          if (from === to) return {};
+          const teams = s.teams.slice();
+          const [moved] = teams.splice(from, 1);
+          teams.splice(to, 0, moved);
+          return { teams };
+        }),
+
+      updateScore: (teamId, delta) =>
+        set((s) => ({
+          teams: s.teams.map((t) =>
+            t.id === teamId ? { ...t, score: t.score + delta } : t,
+          ),
+        })),
+
+      // ── Board editing ────────────────────────────────────────────────────────
+
+      setCategories: (categories) =>
+        set((s) => ({ board: { ...s.board, categories } })),
+
+      setCategoryTitle: (index, title) =>
+        set((s) => {
+          const categories = s.board.categories.slice();
+          if (index >= 0 && index < categories.length) categories[index] = title;
+          return { board: { ...s.board, categories } };
+        }),
+
+      setCellValue: (row, col, value) =>
+        set((s) => ({
+          board: { ...s.board, grid: updateCell(s.board.grid, row, col, { value }) },
+        })),
+
+      setCellQuestion: (row, col, question) =>
+        set((s) => ({
+          board: {
+            ...s.board,
+            grid: updateCell(s.board.grid, row, col, { question }),
+          },
+        })),
+
+      rebuildBoard: (rows, cols, base) =>
+        set((s) => ({
+          board: {
+            rows,
+            cols,
+            categories: Array.from(
+              { length: cols },
+              (_, i) => s.board.categories[i] ?? `Cat ${i + 1}`,
+            ),
+            grid: createDefaultGrid(rows, cols, base),
+          },
+        })),
+
+      // ── Cell workflow ────────────────────────────────────────────────────────
+
+      revealAndLockCell: (row, col, teamId) =>
+        set((s) => {
+          const cell = s.board.grid[row][col];
+          if (cell.state === "disabled" || cell.state === "claimed") return {};
+          return {
+            board: {
+              ...s.board,
+              grid: updateCell(s.board.grid, row, col, {
+                state: "locked",
+                lockedTeamId: teamId,
+              }),
+            },
+          };
+        }),
+
+      markCellIncorrect: (row, col) =>
+        set((s) => {
+          const cell = s.board.grid[row][col];
+          if (cell.state !== "locked") return {};
+          return {
+            board: {
+              ...s.board,
+              grid: updateCell(s.board.grid, row, col, {
+                state: "open",
+                lockedTeamId: undefined,
+              }),
+            },
+          };
+        }),
+
+      claimCellCorrect: (row, col) =>
+        set((s) => {
+          const cell = s.board.grid[row][col];
+          const teamId = cell.lockedTeamId;
+          if (cell.state !== "locked" || !teamId) return {};
+          return {
+            board: {
+              ...s.board,
+              grid: updateCell(s.board.grid, row, col, {
+                state: "claimed",
+                ownerTeamId: teamId,
+                lockedTeamId: undefined,
+              }),
+            },
+            teams: s.teams.map((t) =>
+              t.id === teamId ? { ...t, score: t.score + cell.value } : t,
+            ),
+          };
+        }),
+
+      unclaimCell: (row, col) =>
+        set((s) => {
+          const cell = s.board.grid[row][col];
+          const prevOwner = cell.ownerTeamId;
+          return {
+            board: {
+              ...s.board,
+              grid: updateCell(s.board.grid, row, col, {
+                state: "hidden",
+                ownerTeamId: undefined,
+                lockedTeamId: undefined,
+              }),
+            },
+            teams: s.teams.map((t) =>
+              prevOwner && t.id === prevOwner
+                ? { ...t, score: t.score - cell.value }
+                : t,
+            ),
+          };
+        }),
+
+      setCellDisabled: (row, col, disabled) =>
+        set((s) => {
+          const cell = s.board.grid[row][col];
+          const prevOwner = cell.ownerTeamId;
+          return {
+            board: {
+              ...s.board,
+              grid: updateCell(s.board.grid, row, col, {
+                state: disabled ? "disabled" : "hidden",
+                ownerTeamId: undefined,
+                lockedTeamId: undefined,
+              }),
+            },
+            teams: s.teams.map((t) =>
+              prevOwner && t.id === prevOwner
+                ? { ...t, score: t.score - cell.value }
+                : t,
+            ),
+          };
+        }),
     }),
-
-  moveTeamTo: (teamId, index) =>
-    set((s) => {
-      const from = s.teams.findIndex((t) => t.id === teamId);
-      if (from === -1) return {};
-      const to = Math.max(0, Math.min(index, s.teams.length - 1));
-      if (from === to) return {};
-      const teams = s.teams.slice();
-      const [moved] = teams.splice(from, 1);
-      teams.splice(to, 0, moved);
-      return { teams };
-    }),
-
-  updateScore: (teamId, delta) =>
-    set((s) => ({
-      teams: s.teams.map((t) =>
-        t.id === teamId ? { ...t, score: t.score + delta } : t,
-      ),
-    })),
-
-  // ── Board editing ────────────────────────────────────────────────────────
-
-  setCategories: (categories) =>
-    set((s) => ({ board: { ...s.board, categories } })),
-
-  setCategoryTitle: (index, title) =>
-    set((s) => {
-      const categories = s.board.categories.slice();
-      if (index >= 0 && index < categories.length) categories[index] = title;
-      return { board: { ...s.board, categories } };
-    }),
-
-  setCellValue: (row, col, value) =>
-    set((s) => ({
-      board: { ...s.board, grid: updateCell(s.board.grid, row, col, { value }) },
-    })),
-
-  setCellQuestion: (row, col, question) =>
-    set((s) => ({
-      board: {
-        ...s.board,
-        grid: updateCell(s.board.grid, row, col, { question }),
-      },
-    })),
-
-  rebuildBoard: (rows, cols, base) =>
-    set((s) => ({
-      board: {
-        rows,
-        cols,
-        categories: Array.from(
-          { length: cols },
-          (_, i) => s.board.categories[i] ?? `Cat ${i + 1}`,
-        ),
-        grid: createDefaultGrid(rows, cols, base),
-      },
-    })),
-
-  // ── Cell workflow ────────────────────────────────────────────────────────
-
-  revealAndLockCell: (row, col, teamId) =>
-    set((s) => {
-      const cell = s.board.grid[row][col];
-      if (cell.state === "disabled" || cell.state === "claimed") return {};
-      return {
-        board: {
-          ...s.board,
-          grid: updateCell(s.board.grid, row, col, {
-            state: "locked",
-            lockedTeamId: teamId,
-          }),
-        },
-      };
-    }),
-
-  markCellIncorrect: (row, col) =>
-    set((s) => {
-      const cell = s.board.grid[row][col];
-      if (cell.state !== "locked") return {};
-      return {
-        board: {
-          ...s.board,
-          grid: updateCell(s.board.grid, row, col, {
-            state: "open",
-            lockedTeamId: undefined,
-          }),
-        },
-      };
-    }),
-
-  claimCellCorrect: (row, col) =>
-    set((s) => {
-      const cell = s.board.grid[row][col];
-      const teamId = cell.lockedTeamId;
-      if (cell.state !== "locked" || !teamId) return {};
-      return {
-        board: {
-          ...s.board,
-          grid: updateCell(s.board.grid, row, col, {
-            state: "claimed",
-            ownerTeamId: teamId,
-            lockedTeamId: undefined,
-          }),
-        },
-        teams: s.teams.map((t) =>
-          t.id === teamId ? { ...t, score: t.score + cell.value } : t,
-        ),
-      };
-    }),
-
-  unclaimCell: (row, col) =>
-    set((s) => {
-      const cell = s.board.grid[row][col];
-      const prevOwner = cell.ownerTeamId;
-      return {
-        board: {
-          ...s.board,
-          grid: updateCell(s.board.grid, row, col, {
-            state: "hidden",
-            ownerTeamId: undefined,
-            lockedTeamId: undefined,
-          }),
-        },
-        teams: s.teams.map((t) =>
-          prevOwner && t.id === prevOwner
-            ? { ...t, score: t.score - cell.value }
-            : t,
-        ),
-      };
-    }),
-
-  setCellDisabled: (row, col, disabled) =>
-    set((s) => {
-      const cell = s.board.grid[row][col];
-      const prevOwner = cell.ownerTeamId;
-      return {
-        board: {
-          ...s.board,
-          grid: updateCell(s.board.grid, row, col, {
-            state: disabled ? "disabled" : "hidden",
-            ownerTeamId: undefined,
-            lockedTeamId: undefined,
-          }),
-        },
-        teams: s.teams.map((t) =>
-          prevOwner && t.id === prevOwner
-            ? { ...t, score: t.score - cell.value }
-            : t,
-        ),
-      };
-    }),
-}));
+    {
+      name: "jeopardy-scoreboard-storage",
+    },
+  ),
+);
