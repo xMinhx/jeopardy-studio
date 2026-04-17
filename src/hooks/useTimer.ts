@@ -34,9 +34,10 @@ export function useTimer(initialMs = 30000): [TimerState, TimerApi] {
 
   const rafRef = useRef<number | null>(null);
   const endAtRef = useRef<number | null>(null);
+  const tickRef = useRef<() => void>();
 
   const tick = useCallback(() => {
-    rafRef.current = requestAnimationFrame(tick);
+    rafRef.current = requestAnimationFrame(() => tickRef.current?.());
     setState((prev) => {
       if (!prev.running || endAtRef.current == null) return prev;
       const rem = Math.max(0, Math.ceil(endAtRef.current - performance.now()));
@@ -50,6 +51,10 @@ export function useTimer(initialMs = 30000): [TimerState, TimerApi] {
       return { ...prev, remainingMs: rem };
     });
   }, []);
+
+  useEffect(() => {
+    tickRef.current = tick;
+  }, [tick]);
 
   const start = useCallback(
     (ms?: number) => {

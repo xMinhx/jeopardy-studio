@@ -6,10 +6,6 @@ export function useAnimatedNumber(value: number, duration = 600) {
   const rafRef = useRef<number>();
   const startRef = useRef<number>();
 
-  useEffect(() => {
-    currentRef.current = value;
-    setAnimated(value);
-  }, []); // initialize
 
   useEffect(() => {
     if (value === currentRef.current) return;

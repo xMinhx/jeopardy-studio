@@ -70,8 +70,8 @@ export default function Control() {
 
   // ── Sync board dimensions when rebuilt ────────────────────────────────────
   useEffect(() => {
-    setRows(board.rows);
-    setCols(board.cols);
+    setRows((current) => (current !== board.rows ? board.rows : current));
+    setCols((current) => (current !== board.cols ? board.cols : current));
   }, [board.rows, board.cols]);
 
   // ── Load preset on mount ───────────────────────────────────────────────────
@@ -147,17 +147,27 @@ export default function Control() {
       if (e.code === "Space") {
         e.preventDefault();
         if (timer.running) {
-          if (timer.remainingMs > FINAL_LOCK_MS) handlePause();
+          if (timer.remainingMs > FINAL_LOCK_MS) {
+            handlePause();
+          }
         } else {
-          timer.remainingMs === 0 ? handleStart(timer.durationMs) : handleResume();
+          if (timer.remainingMs === 0) {
+            handleStart(timer.durationMs);
+          } else {
+            handleResume();
+          }
         }
       }
-      if (e.key.toLowerCase() === "r") handleReset();
+      if (e.key.toLowerCase() === "r") {
+        handleReset();
+      }
 
       const presets: Record<string, number> = {
         "1": 10000, "2": 15000, "3": 20000, "4": 30000, "5": 45000, "6": 60000,
       };
-      if (e.key in presets) handleStart(presets[e.key]);
+      if (e.key in presets) {
+        handleStart(presets[e.key]);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -261,7 +271,15 @@ export default function Control() {
               className="rounded bg-slate-100 px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={pauseButtonDisabled}
               title={pauseTooltip}
-              onClick={() => { if (!pauseButtonDisabled) timer.running ? handlePause() : handleResume(); }}
+              onClick={() => {
+                if (!pauseButtonDisabled) {
+                  if (timer.running) {
+                    handlePause();
+                  } else {
+                    handleResume();
+                  }
+                }
+              }}
             >
               {timer.running ? "Pause" : "Resume"}
             </button>
@@ -313,7 +331,11 @@ export default function Control() {
             </button>
             <button
               className="rounded bg-slate-100 px-2 py-1 text-sm"
-              onClick={() => void resetAudio().then(() => startAudio(2000))}
+              onClick={() => {
+                void resetAudio().then(() => {
+                  void startAudio(2000);
+                });
+              }}
             >
               Preview
             </button>

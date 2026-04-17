@@ -218,8 +218,10 @@ export function useTimerAudio(
 
   // Pre-load buffers on mount
   useEffect(() => {
-    void loadBuffers();
-  }, [loadBuffers]);
+    if (!ready) {
+      void loadBuffers();
+    }
+  }, [loadBuffers, ready]);
 
   // Stop all sources on unmount
   useEffect(() => () => stopSources(), [stopSources]);
