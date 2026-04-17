@@ -18,6 +18,7 @@ export const CellSchema = z
       .optional(),
     lockedTeamId: z.string().optional(),
     ownerTeamId: z.string().optional(),
+    // Legacy field: kept for backwards-compatible JSON imports.
     disabled: z.boolean().optional(),
   })
   .transform(({ disabled, state, ownerTeamId, ...cell }) => ({
@@ -34,6 +35,10 @@ export const BoardSchema = z.object({
   grid: z.array(z.array(CellSchema)),
 });
 
+/**
+ * The shape of state that may be saved/restored or sent between windows.
+ * Derived from the Zod schemas to avoid duplication with `persisted-state.ts`.
+ */
 export const PersistedStateSchema = z.object({
   teams: z.array(TeamSchema),
   board: BoardSchema,

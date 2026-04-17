@@ -1,4 +1,4 @@
-import type { Cell } from './cell';
+import type { Cell } from "./cell";
 
 export interface Board {
   rows: number;
@@ -7,8 +7,10 @@ export interface Board {
   grid: Cell[][]; // [row][col]
 }
 
-export const isValidBoard = (b: Board) =>
-  b.categories.length === b.cols &&
-  b.grid.length === b.rows &&
-  b.grid.every((row) => row.length === b.cols);
-
+export function isValidBoard(b: Board): boolean {
+  return (
+    b.categories.length === b.cols &&
+    b.grid.length === b.rows &&
+    b.grid.every((row) => row.length === b.cols)
+  );
+}

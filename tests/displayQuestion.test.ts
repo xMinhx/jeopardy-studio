@@ -1,14 +1,18 @@
+/**
+ * Tests for resolveTimerQuestion (previously tested via Display.tsx internal export).
+ * Now tests the extracted utility in boardUtils.ts directly.
+ */
 import { describe, expect, it } from "vitest";
-import { resolveTimerQuestionSnapshot } from "@/windows/Display";
+import { resolveTimerQuestion } from "@/features/board/boardUtils";
 
-describe("resolveTimerQuestionSnapshot", () => {
+describe("resolveTimerQuestion", () => {
   const teams = [
     { id: "A", name: "Team A", color: "#f00", score: 0 },
     { id: "B", name: "Team B", color: "#00f", score: 0 },
   ];
 
   it("captures the currently active locked question", () => {
-    const next = resolveTimerQuestionSnapshot(
+    const next = resolveTimerQuestion(
       null,
       {
         rows: 1,
@@ -47,7 +51,7 @@ describe("resolveTimerQuestionSnapshot", () => {
       lockedTeamName: "Team A",
     };
 
-    const next = resolveTimerQuestionSnapshot(
+    const next = resolveTimerQuestion(
       current,
       {
         rows: 1,
@@ -79,7 +83,7 @@ describe("resolveTimerQuestionSnapshot", () => {
       question: "What is gravity?",
     };
 
-    const next = resolveTimerQuestionSnapshot(
+    const next = resolveTimerQuestion(
       current,
       {
         rows: 1,

@@ -1,4 +1,4 @@
-export type CellWorkflowState =
+export type CellState =
   | "hidden"
   | "locked"
   | "open"
@@ -9,11 +9,7 @@ export interface Cell {
   id: string;
   value: number;
   question: string;
-  state: CellWorkflowState;
+  state: CellState;
   lockedTeamId?: string;
   ownerTeamId?: string;
 }
-
-export type CellDisplayState = CellWorkflowState;
-
-export const cellState = (c: Cell): CellDisplayState => c.state;

@@ -42,11 +42,16 @@ describe("boardStore", () => {
     expect(updated.score).toBe(200);
   });
 
-  it("claims, unclaims and disables cells", () => {
+  it("claims, unclaims and disables cells via the proper workflow", () => {
     const id = useBoardStore.getState().teams[0].id;
     const value = useBoardStore.getState().board.grid[0][0].value;
     const base = useBoardStore.getState().teams.find((t) => t.id === id)!.score;
-    useBoardStore.getState().claimCell(0, 0, id);
+
+    // Reveal → lock → correct is the workflow that results in "claimed"
+    useBoardStore.getState().revealAndLockCell(0, 0, id);
+    expect(useBoardStore.getState().board.grid[0][0].state).toBe("locked");
+
+    useBoardStore.getState().claimCellCorrect(0, 0);
     expect(useBoardStore.getState().board.grid[0][0].ownerTeamId).toBe(id);
     expect(useBoardStore.getState().board.grid[0][0].state).toBe("claimed");
     expect(useBoardStore.getState().teams.find((t) => t.id === id)!.score).toBe(
@@ -68,10 +73,13 @@ describe("boardStore", () => {
 
   it("removes a team and unclaims its cells", () => {
     const store = useBoardStore.getState();
-    // Ensure a claim for team A
     const teamId = store.teams[0].id;
-    useBoardStore.getState().claimCell(0, 1, teamId);
+
+    // Use the proper workflow to claim a cell
+    useBoardStore.getState().revealAndLockCell(0, 1, teamId);
+    useBoardStore.getState().claimCellCorrect(0, 1);
     expect(useBoardStore.getState().board.grid[0][1].ownerTeamId).toBe(teamId);
+
     // Remove the team
     useBoardStore.getState().removeTeam(teamId);
     // Team is gone
