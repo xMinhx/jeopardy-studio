@@ -34,6 +34,8 @@ interface WindowApi {
     ended?: boolean,
     displayMs?: number,
   ) => void;
+  importBoard?: () => Promise<AppSnapshot | null>;
+  exportBoard?: (data: AppSnapshot) => Promise<boolean>;
 }
 
 declare global {

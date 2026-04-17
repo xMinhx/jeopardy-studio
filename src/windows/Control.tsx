@@ -6,6 +6,7 @@ import { loadBoardPreset } from "@/services/defaultPreset";
 import { buildTeam } from "@/features/teams/teamFactory";
 import { TeamRow } from "@/features/teams/components/TeamRow";
 import { getActiveQuestions } from "@/features/board/boardUtils";
+import { PersistedStateSchema } from "@/types/schema";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -389,8 +390,14 @@ export default function Control() {
             <button
               className="rounded bg-slate-100 px-3 py-1 text-sm"
               onClick={async () => {
-                const data = await window.api?.importBoard?.();
-                if (data) setAll(data);
+                try {
+                  const raw = await window.api?.importBoard?.();
+                  if (!raw) return;
+                  const parsed = PersistedStateSchema.parse(raw);
+                  setAll(parsed);
+                } catch (err) {
+                  alert(`Invalid board file: ${err instanceof Error ? err.message : String(err)}`);
+                }
               }}
             >
               Import JSON
