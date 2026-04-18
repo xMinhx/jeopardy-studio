@@ -87,7 +87,7 @@ export interface BoardState {
   // ── Cell workflow: hidden → open → claimed | disabled ──────────
   openCell(row: number, col: number): void;
   awardCell(row: number, col: number, teamId: string): void;
-  penalizeTeam(row: number, col: number, teamId: string): void;
+  penalizeTeam(row: number, col: number, teamId: string, amount?: number): void;
   unclaimCell(row: number, col: number): void;
   setCellDisabled(row: number, col: number, disabled: boolean): void;
   setCellDailyDouble(row: number, col: number, isDailyDouble: boolean): void;
@@ -119,12 +119,14 @@ export interface BoardState {
     category: string;
     question: string;
     wagers: Record<string, number>;
+    resolvedTeams: string[];
   };
   startFinalJeopardy(): void;
   setFinalJeopardyCategory(category: string): void;
   setFinalJeopardyQuestion(question: string): void;
   setFinalJeopardyWager(teamId: string, amount: number): void;
   advanceFinalJeopardy(): void;
+  resolveFinalJeopardyTeam(teamId: string, isCorrect: boolean): void;
   cancelFinalJeopardy(): void;
 }
 
@@ -149,6 +151,7 @@ export const useBoardStore = create<BoardState>()(
         category: "",
         question: "",
         wagers: {},
+        resolvedTeams: [],
       },
       settings: {
         volume: 0.7,
@@ -382,6 +385,21 @@ export const useBoardStore = create<BoardState>()(
           };
         }),
 
+      resolveFinalJeopardyTeam: (teamId, isCorrect) =>
+        set((s) => {
+          if (s.finalJeopardy.resolvedTeams.includes(teamId)) return {};
+          const wager = s.finalJeopardy.wagers[teamId] ?? 0;
+          return {
+            teams: s.teams.map((t) =>
+              t.id === teamId ? { ...t, score: t.score + (isCorrect ? wager : -wager) } : t
+            ),
+            finalJeopardy: {
+              ...s.finalJeopardy,
+              resolvedTeams: [...s.finalJeopardy.resolvedTeams, teamId],
+            },
+          };
+        }),
+
       cancelFinalJeopardy: () =>
         set({
           finalJeopardy: {
@@ -390,6 +408,7 @@ export const useBoardStore = create<BoardState>()(
             category: "",
             question: "",
             wagers: {},
+            resolvedTeams: [],
           },
         }),
 
@@ -416,11 +435,11 @@ export const useBoardStore = create<BoardState>()(
           };
         }),
 
-      penalizeTeam: (row, col, teamId) =>
+      penalizeTeam: (row, col, teamId, amount) =>
         set((s) => {
           const cell = s.board.grid[row][col];
           const isDD = s.dailyDouble.stage === "question";
-          const points = isDD ? s.dailyDouble.wager : cell.value;
+          const points = amount !== undefined ? amount : (isDD ? s.dailyDouble.wager : cell.value);
 
           return {
             teams: s.teams.map((t) =>
@@ -514,6 +533,7 @@ export const useBoardStore = create<BoardState>()(
             category: "",
             question: "",
             wagers: {},
+            resolvedTeams: [],
           },
         })),
     }),

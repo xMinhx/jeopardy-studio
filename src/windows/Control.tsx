@@ -51,8 +51,9 @@ export default function Control() {
     startFinalJeopardy,
     setFinalJeopardyCategory,
     setFinalJeopardyQuestion,
-    setFinalJeopardyWager,
+     setFinalJeopardyWager,
     advanceFinalJeopardy,
+    resolveFinalJeopardyTeam,
     cancelFinalJeopardy,
   } = useBoardStore();
 
@@ -590,20 +591,20 @@ export default function Control() {
                     </div>
                     <div className="flex divide-x">
                       <button
-                        className="flex-1 py-3 text-xs font-black text-emerald-600 hover:bg-emerald-50 active:bg-emerald-100 transition-all"
+                        className="flex-1 py-3 text-xs font-black text-emerald-600 hover:bg-emerald-50 active:bg-emerald-100 transition-all disabled:opacity-30 disabled:grayscale"
+                        disabled={finalJeopardy.resolvedTeams.includes(t.id)}
                         onClick={() => {
-                          const wager = finalJeopardy.wagers[t.id] ?? 0;
-                          useBoardStore.getState().updateScore(t.id, wager);
+                          resolveFinalJeopardyTeam(t.id, true);
                           playScoreUp();
                         }}
                       >
                         CORRECT
                       </button>
                       <button
-                        className="flex-1 py-3 text-xs font-black text-rose-500 hover:bg-rose-50 active:bg-rose-100 transition-all"
+                        className="flex-1 py-3 text-xs font-black text-rose-500 hover:bg-rose-50 active:bg-rose-100 transition-all disabled:opacity-30 disabled:grayscale"
+                        disabled={finalJeopardy.resolvedTeams.includes(t.id)}
                         onClick={() => {
-                          const wager = finalJeopardy.wagers[t.id] ?? 0;
-                          useBoardStore.getState().updateScore(t.id, -wager);
+                          resolveFinalJeopardyTeam(t.id, false);
                           playScoreDown();
                         }}
                       >
@@ -855,7 +856,14 @@ export default function Control() {
                           disabled={otherTeamPlayingDD}
                           onClick={() => handlePenalize(activePrompt.row, activePrompt.col, team.id)}
                         >
-                          PENALIZE {isPlayingDD && `-${dailyDouble.wager}`}
+                          {isPlayingDD ? `-${dailyDouble.wager}` : "WRONG"}
+                        </button>
+                        <button
+                          className="flex-1 py-2 text-[10px] font-bold text-slate-400 hover:bg-slate-50 transition-colors disabled:pointer-events-none"
+                          disabled={otherTeamPlayingDD}
+                          onClick={() => penalizeTeam(activePrompt.row, activePrompt.col, team.id, 0)}
+                        >
+                          0 PTS
                         </button>
                       </div>
                     </div>
