@@ -493,7 +493,10 @@ export default function Control() {
               {!finalJeopardy.isActive ? (
                 <button
                   className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-700 shadow-md transition-all"
-                  onClick={startFinalJeopardy}
+                  onClick={() => {
+                    playFinalJeopardy();
+                    startFinalJeopardy();
+                  }}
                 >
                   Initiate Final Round
                 </button>
