@@ -2,80 +2,364 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   EXECUTIVE STUDIO — Design System
+   Based on the Stitch "Executive Studio Host Control Panel" mock.
+
+   Palette  :  Deep Navy Canvas + Cream text + Victory Gold (#e6b319) accent
+   Headings :  Newsreader (serif) — editorial, prestigious
+   Body/Data:  Inter (sans-serif) — clean, legible
+   Radius   :  12px (cards) → rounded-xl in Tailwind
+   Mode     :  Dark-first
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   CSS Custom Properties — Design Tokens
+   -------------------------------------------------------------------------- */
+:root {
+  /* --- Canvas / Surface Hierarchy --- */
+  --surface-base:         #0c0f1a;   /* deepest background */
+  --surface-raised:       #12172a;   /* card surface */
+  --surface-overlay:      #1a2138;   /* modals, side panels */
+  --surface-input:        #1f2640;   /* input fields */
+  --surface-highlight:    #252d4a;   /* hovered rows, active states */
+
+  /* --- Gold Accent --- */
+  --gold:                 #e6b319;
+  --gold-dim:             #b08a10;
+  --gold-glow:            rgba(230, 179, 25, 0.25);
+  --gold-subtle:          rgba(230, 179, 25, 0.08);
+
+  /* --- Text --- */
+  --text-primary:         #f0ead6;   /* warm cream — not pure white */
+  --text-secondary:       #9ba3bf;   /* muted slate-blue */
+  --text-muted:           #4e5670;   /* very muted */
+  --text-gold:            #e6b319;
+
+  /* --- Semantic --- */
+  --success:              #34d399;
+  --danger:               #f87171;
+  --warning:              #fbbf24;
+  --info:                 #60a5fa;
+
+  /* --- Borders --- */
+  --border-subtle:        rgba(240, 234, 214, 0.06);
+  --border-strong:        rgba(230, 179, 25, 0.3);
+
+  /* --- Typography Scale --- */
+  --font-serif:           'Newsreader', Georgia, serif;
+  --font-sans:            'Inter', system-ui, sans-serif;
+  --font-mono:            ui-monospace, 'Cascadia Code', 'JetBrains Mono', monospace;
+
+  /* --- Spacing & Radius --- */
+  --radius-sm:            8px;
+  --radius-md:            12px;
+  --radius-lg:            20px;
+  --radius-xl:            28px;
+
+  /* --- Shadows & Glow --- */
+  --shadow-card:          0 4px 24px rgba(0,0,0,0.4), 0 1px 0 rgba(240,234,214,0.04) inset;
+  --shadow-gold:          0 0 40px rgba(230, 179, 25, 0.2);
+  --shadow-deep:          0 20px 60px rgba(0,0,0,0.6);
+}
+
+/* --------------------------------------------------------------------------
+   Base Reset
+   -------------------------------------------------------------------------- */
 html, body, #root {
   height: 100%;
-}
-body {
   margin: 0;
 }
 
-/* Digital font for timer digits */
+body {
+  background-color: var(--surface-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* --------------------------------------------------------------------------
+   Typography Utilities
+   -------------------------------------------------------------------------- */
+
+/* Newsreader headline — editorial, serif */
+.font-serif    { font-family: var(--font-serif); }
+.font-sans-app { font-family: var(--font-sans); }
+
+/* Display headline — e.g. category title on audience board */
+.text-display {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+/* Tabular numeric data (scores, wagers) */
+.text-data {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: 0.02em;
+}
+
+/* Gold accent text */
+.text-gold { color: var(--text-gold); }
+
+/* --------------------------------------------------------------------------
+   Reusable Component Classes
+   -------------------------------------------------------------------------- */
+
+/* ── Studio Card ───────────────────────────────────────────────────────── */
+.studio-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+/* ── Gold Border Card (highlight / active state) ─────────────────────── */
+.studio-card--gold {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-card), var(--shadow-gold);
+}
+
+/* ── Panel Section (sidebar blocks in Control) ───────────────────────── */
+.studio-panel {
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+}
+
+/* ── Section Label (e.g., "FINAL JEOPARDY", "TEAMS") ─────────────────── */
+.studio-label {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── Primary Button (Gold CTA) ───────────────────────────────────────── */
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--gold);
+  color: #0c0f1a;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.625rem 1.25rem;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+.btn-gold:hover {
+  background: #f0c420;
+  box-shadow: 0 0 20px var(--gold-glow);
+}
+.btn-gold:active { transform: scale(0.97); }
+.btn-gold:disabled { opacity: 0.4; pointer-events: none; }
+
+/* ── Ghost Button ────────────────────────────────────────────────────── */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid rgba(155, 163, 191, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 0.625rem 1.25rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.btn-ghost:hover {
+  border-color: var(--gold);
+  color: var(--text-gold);
+  background: var(--gold-subtle);
+}
+.btn-ghost:disabled { opacity: 0.35; pointer-events: none; }
+
+/* ── Success / Danger Buttons ────────────────────────────────────────── */
+.btn-success {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--success);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.5rem 0.875rem;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.btn-success:hover { background: rgba(52, 211, 153, 0.22); box-shadow: 0 0 12px rgba(52,211,153,0.2); }
+.btn-success:disabled { opacity: 0.3; pointer-events: none; }
+
+.btn-danger {
+  background: rgba(248, 113, 113, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.5rem 0.875rem;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.btn-danger:hover { background: rgba(248, 113, 113, 0.2); }
+.btn-danger:disabled { opacity: 0.3; pointer-events: none; }
+
+/* ── Studio Input ────────────────────────────────────────────────────── */
+.studio-input {
+  background: var(--surface-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+}
+.studio-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+}
+.studio-input::placeholder { color: var(--text-muted); }
+
+/* ── Board Cell (Audience display) ──────────────────────────────────── */
+.board-cell {
+  background: linear-gradient(160deg, #1a2240 0%, #111830 100%);
+  border: 1px solid rgba(230, 179, 25, 0.12);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  position: relative;
+  overflow: hidden;
+}
+.board-cell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(230,179,25,0.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+.board-cell:hover {
+  transform: translateY(-3px) scale(1.02);
+  border-color: rgba(230, 179, 25, 0.4);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px var(--gold-glow);
+}
+.board-cell--claimed {
+  background: linear-gradient(160deg, #0f1a15 0%, #0a1210 100%);
+  border-color: rgba(52, 211, 153, 0.15);
+  opacity: 0.5;
+  cursor: default;
+}
+.board-cell--disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+}
+
+/* ── Score Badge (Audience display) ─────────────────────────────────── */
+.score-badge {
+  background: linear-gradient(160deg, var(--surface-raised) 0%, var(--surface-overlay) 100%);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.5rem;
+  text-align: center;
+}
+
+/* ── Gold Divider ─────────────────────────────────────────────────────── */
+.gold-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0.3;
+}
+
+/* ── Shimmer / Glow animation (for active question) ─────────────────── */
+@keyframes shimmer-gold {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.shimmer-gold-text {
+  background: linear-gradient(90deg, var(--gold) 0%, #fff8d6 40%, var(--gold) 80%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer-gold 3s linear infinite;
+}
+
+/* --------------------------------------------------------------------------
+   Keep existing functional animations
+   -------------------------------------------------------------------------- */
+
+/* Digital font for timer */
 .digital {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums lining-nums;
   letter-spacing: 0.03em;
 }
 
-/* ---------------------------------------------------
-   Blink digits hard 3 times when timer hits 0
---------------------------------------------------- */
+/* Timer blink */
 @keyframes blink-hard-3 {
   0%, 33%, 66%, 100% { opacity: 1; }
   16.5%, 49.5%, 82.5% { opacity: 0; }
 }
-
-/* One-shot, 3-blink animation (matches React code) */
 .blink-hard-3 {
   animation: blink-hard-3 1.2s steps(1, end) 3 forwards;
 }
 
-/* ---------------------------------------------------
-   Ring glow animations (normal = green, alert = red)
---------------------------------------------------- */
+/* Ring glow (normal) */
 @keyframes quiz-glow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.35);
-  }
-  50% {
-    box-shadow: 0 0 32px 10px rgba(16, 185, 129, 0.25);
-  }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.35); }
+  50%       { box-shadow: 0 0 32px 10px rgba(52, 211, 153, 0.25); }
 }
 @keyframes quiz-glow-red {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35);
-  }
-  50% {
-    box-shadow: 0 0 32px 10px rgba(239, 68, 68, 0.25);
-  }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.35); }
+  50%       { box-shadow: 0 0 32px 10px rgba(248, 113, 113, 0.25); }
 }
+.ring-glow       { animation: quiz-glow     2s ease-in-out infinite; }
+.ring-glow--alert { animation: quiz-glow-red 2s ease-in-out infinite; }
 
-.ring-glow {
-  animation: quiz-glow 2s ease-in-out infinite;
+/* Gold pulse (for Daily Double / Final Jeopardy CTAs) */
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 var(--gold-glow); }
+  50%       { box-shadow: 0 0 24px 8px var(--gold-glow); }
 }
-.ring-glow--alert {
-  animation: quiz-glow-red 2s ease-in-out infinite;
-}
+.pulse-gold { animation: pulse-gold 2s ease-in-out infinite; }
 
-/* ---------------------------------------------------
-   Bounce effect for ticking timer (only when running)
---------------------------------------------------- */
+/* Timer tick */
 @keyframes tick-bounce {
   0%   { transform: scale(1); }
   20%  { transform: scale(1.06); }
   40%  { transform: scale(1); }
   100% { transform: scale(1); }
 }
-.tick-bounce {
-  animation: tick-bounce 0.25s ease-out;
-}
+.tick-bounce { animation: tick-bounce 0.25s ease-out; }
 
-/* ---------------------------------------------------
-   Electron Drag Regions
---------------------------------------------------- */
-.drag-region {
-  -webkit-app-region: drag;
-}
-.no-drag {
-  -webkit-app-region: no-drag;
-}
-
+/* Electron drag regions */
+.drag-region  { -webkit-app-region: drag; }
+.no-drag      { -webkit-app-region: no-drag; }
