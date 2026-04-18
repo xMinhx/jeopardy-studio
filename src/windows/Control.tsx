@@ -60,13 +60,6 @@ export default function Control() {
 
   const { playScoreUp, playScoreDown, playDailyDouble, playQuestionReveal, playFinalJeopardy, playWinnerReveal } = useGameAudio();
 
-  useEffect(() => {
-    if (finalJeopardy.stage === "resolution" && finalJeopardy.resolvedTeams.length === teams.length && teams.length > 0) {
-      const t = setTimeout(() => playWinnerReveal(), 1000);
-      return () => clearTimeout(t);
-    }
-  }, [finalJeopardy.stage, finalJeopardy.resolvedTeams.length, teams.length, playWinnerReveal]);
-
   // Timer state
   const [timer, t] = useTimer(30000);
   const {
@@ -596,6 +589,9 @@ export default function Control() {
                         onClick={() => {
                           resolveFinalJeopardyTeam(t.id, true);
                           playScoreUp();
+                          if (finalJeopardy.resolvedTeams.length + 1 >= teams.length) {
+                            setTimeout(() => playWinnerReveal(), 1200);
+                          }
                         }}
                       >
                         CORRECT
@@ -606,6 +602,9 @@ export default function Control() {
                         onClick={() => {
                           resolveFinalJeopardyTeam(t.id, false);
                           playScoreDown();
+                          if (finalJeopardy.resolvedTeams.length + 1 >= teams.length) {
+                            setTimeout(() => playWinnerReveal(), 1200);
+                          }
                         }}
                       >
                         INCORRECT
