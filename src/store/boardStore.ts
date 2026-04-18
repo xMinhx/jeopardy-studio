@@ -458,6 +458,8 @@ export const useBoardStore = create<BoardState>()(
         set((s) => {
           const cell = s.board.grid[row][col];
           const prevOwner = cell.ownerTeamId;
+          const isDDCell = s.dailyDouble.cellPosition?.row === row && s.dailyDouble.cellPosition?.col === col;
+
           return {
             board: {
               ...s.board,
@@ -471,6 +473,9 @@ export const useBoardStore = create<BoardState>()(
                 ? { ...t, score: t.score - cell.value }
                 : t,
             ),
+            dailyDouble: isDDCell
+              ? { stage: "none", teamId: null, wager: 0, cellPosition: null }
+              : s.dailyDouble,
           };
         }),
 
@@ -478,6 +483,8 @@ export const useBoardStore = create<BoardState>()(
         set((s) => {
           const cell = s.board.grid[row][col];
           const prevOwner = cell.ownerTeamId;
+          const isDDCell = s.dailyDouble.cellPosition?.row === row && s.dailyDouble.cellPosition?.col === col;
+
           return {
             board: {
               ...s.board,
@@ -491,6 +498,9 @@ export const useBoardStore = create<BoardState>()(
                 ? { ...t, score: t.score - cell.value }
                 : t,
             ),
+            dailyDouble: isDDCell
+              ? { stage: "none", teamId: null, wager: 0, cellPosition: null }
+              : s.dailyDouble,
           };
         }),
       resetRound: () =>
