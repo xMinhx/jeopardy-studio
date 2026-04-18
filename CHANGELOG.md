@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-04-17
 
 ### Added
-- Initial release of Jeopardy Scoreboard.
+- Initial release of Jeopardy Studio.
 - Dual-window architecture for Control and Display.
 - Live scoreboard with team management and timer.
 - Dynamic 5x5 board with category and cell management.

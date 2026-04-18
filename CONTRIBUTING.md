@@ -1,6 +1,6 @@
-# Contributing to Jeopardy Scoreboard
+# Contributing to Jeopardy Studio
 
-First off, thank you for considering contributing to Jeopardy Scoreboard! It's people like you that make it a great tool for everyone.
+First off, thank you for considering contributing to Jeopardy Studio! It's people like you that make it a great tool for everyone.
 
 ## Code of Conduct
 
@@ -10,7 +10,7 @@ By participating in this project, you agree to abide by our Code of Conduct. (Se
 
 ### Reporting Bugs
 
-- Check the [Issues](https://github.com/xMinhx/jeopardy-scoreboard/issues) to see if it has already been reported.
+- Check the [Issues](https://github.com/xMinhx/jeopardy-studio/issues) to see if it has already been reported.
 - If not, open a new issue with a clear title and description, as much relevant information as possible, and a way to demonstrate the problem.
 
 ### Suggesting Enhancements
