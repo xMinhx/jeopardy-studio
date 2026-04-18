@@ -559,8 +559,14 @@ export default function Control() {
                       <input
                         type="number"
                         className="w-full rounded border border-slate-200 py-1.5 pl-5 pr-2 text-sm font-bold"
-                        value={finalJeopardy.wagers[t.id] ?? 0}
-                        onChange={(e) => setFinalJeopardyWager(t.id, Number(e.target.value))}
+                        value={(finalJeopardy.wagers[t.id] ?? 0) === 0 ? "" : finalJeopardy.wagers[t.id]}
+                        max={Math.max(0, t.score)}
+                        min={0}
+                        onChange={(e) => {
+                          const val = e.target.value === "" ? 0 : parseInt(e.target.value, 10);
+                          const max = Math.max(0, t.score);
+                          setFinalJeopardyWager(t.id, Math.min(val, max));
+                        }}
                       />
                     </div>
                   </div>
@@ -725,8 +731,15 @@ export default function Control() {
                       <input
                         type="number"
                         className="w-full rounded-xl border-2 border-amber-200 bg-white py-4 pl-10 pr-4 text-3xl font-black text-amber-900 focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-500/20"
-                        value={dailyDouble.wager}
-                        onChange={(e) => setDailyDoubleWager(Number(e.target.value))}
+                        value={dailyDouble.wager === 0 ? "" : dailyDouble.wager}
+                        max={Math.max(teams.find(team => team.id === dailyDouble.teamId)?.score || 0, 1000)}
+                        min={0}
+                        onChange={(e) => {
+                          const val = e.target.value === "" ? 0 : parseInt(e.target.value, 10);
+                          const team = teams.find(team => team.id === dailyDouble.teamId);
+                          const max = Math.max(team?.score || 0, 1000);
+                          setDailyDoubleWager(Math.min(val, max));
+                        }}
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-2">
@@ -758,7 +771,10 @@ export default function Control() {
                 <button
                   className="flex-1 rounded-xl bg-amber-500 py-4 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-amber-500/30 hover:bg-amber-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none"
                   disabled={!dailyDouble.teamId || dailyDouble.wager < 5}
-                  onClick={confirmWager}
+                  onClick={() => {
+                    playQuestionReveal();
+                    confirmWager();
+                  }}
                 >
                   Reveal Question
                 </button>
