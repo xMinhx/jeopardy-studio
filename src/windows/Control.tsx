@@ -8,6 +8,7 @@ import { TeamRow } from "@/features/teams/components/TeamRow";
 import { getActiveQuestions } from "@/features/board/boardUtils";
 import { useGameAudio } from "@/hooks/useGameAudio";
 import { PersistedStateSchema } from "@/types/schema";
+import { AnimatedNumber } from "@/features/common/components/AnimatedNumber";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -553,7 +554,7 @@ export default function Control() {
                     <div className="flex items-center gap-2 mb-2">
                       <div className="h-2 w-2 rounded-full" style={{ backgroundColor: t.color }} />
                       <span className="text-xs font-bold text-slate-700">{t.name}</span>
-                      <span className="ml-auto text-[10px] font-mono text-slate-400">{t.score} pts</span>
+                      <span className="ml-auto text-[10px] font-mono text-slate-400"><AnimatedNumber value={t.score} /> pts</span>
                     </div>
                     <div className="relative">
                       <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">$</span>
@@ -714,7 +715,7 @@ export default function Control() {
                           />
                           <span className="font-bold">{t.name}</span>
                         </div>
-                        <span className="text-sm font-mono">{t.score} pts</span>
+                        <span className="text-sm font-mono"><AnimatedNumber value={t.score} /> pts</span>
                       </button>
                     ))}
                   </div>

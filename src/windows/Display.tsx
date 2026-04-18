@@ -9,6 +9,7 @@ import {
   resolveTimerQuestion,
   type ActiveQuestionSnapshot,
 } from "@/features/board/boardUtils";
+import { AnimatedNumber } from "@/features/common/components/AnimatedNumber";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -409,7 +410,7 @@ function DailyDoubleSplash({
               <div className="mt-6 flex flex-col items-center gap-1">
                 <span className="text-xs uppercase tracking-[0.4em] text-amber-500/80 font-bold">Current Wager</span>
                 <div className="rounded-2xl bg-slate-900/80 border border-white/10 px-12 py-5 text-6xl font-black tabular-nums text-amber-400 shadow-2xl backdrop-blur-xl">
-                  ${dailyDouble.wager.toLocaleString()}
+                  <AnimatedNumber value={dailyDouble.wager} prefix="$" />
                 </div>
               </div>
             </div>
@@ -518,7 +519,7 @@ function FinalJeopardySplash({
                   </div>
                   <div className="text-2xl font-black uppercase tracking-widest text-white">{t.name}</div>
                   <div className="mt-4 text-5xl font-black tabular-nums text-slate-100">
-                    {t.score.toLocaleString()}
+                    <AnimatedNumber value={t.score} />
                   </div>
                   <div className="mt-2 text-xs font-bold uppercase tracking-widest text-slate-500">Final Score</div>
                 </div>
