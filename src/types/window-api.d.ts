@@ -36,6 +36,7 @@ interface WindowApi {
   ) => void;
   importBoard?: () => Promise<AppSnapshot | null>;
   exportBoard?: (data: AppSnapshot) => Promise<boolean>;
+  toggleFullscreen?: (target?: 'control' | 'display') => void;
 }
 
 declare global {

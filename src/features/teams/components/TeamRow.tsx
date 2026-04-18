@@ -14,15 +14,19 @@ interface TeamRowProps {
  * Supports drag-and-drop reordering.
  */
 export function TeamRow({ team, index, isActive, onSelect }: TeamRowProps) {
-  const { updateScore, setTeamName, setTeamColor, moveTeam, moveTeamTo, removeTeam } =
-    useBoardStore();
+  const updateScore = useBoardStore((s) => s.updateScore);
+  const setTeamName = useBoardStore((s) => s.setTeamName);
+  const setTeamColor = useBoardStore((s) => s.setTeamColor);
+  const moveTeam = useBoardStore((s) => s.moveTeam);
+  const moveTeamTo = useBoardStore((s) => s.moveTeamTo);
+  const removeTeam = useBoardStore((s) => s.removeTeam);
+  const teamsCount = useBoardStore((s) => s.teams.length);
 
-  const teams = useBoardStore((s) => s.teams);
   const isFirst = index === 0;
-  const isLast = index === teams.length - 1;
+  const isLast = index === teamsCount - 1;
 
   const handleRemove = () => {
-    if (teams.length <= 1) {
+    if (teamsCount <= 1) {
       alert("At least one team is required.");
       return;
     }
@@ -33,8 +37,8 @@ export function TeamRow({ team, index, isActive, onSelect }: TeamRowProps) {
 
   return (
     <div
-      className={`flex items-center justify-between rounded border p-2 hover:bg-slate-50 ${
-        isActive ? "ring-2 ring-emerald-500" : ""
+      className={`flex items-center justify-between rounded border p-2 transition-colors hover:bg-[--surface-overlay] ${
+        isActive ? "border-[--gold] bg-[--gold] bg-opacity-10 ring-1 ring-[--gold]" : "border-[--border-subtle] bg-[--surface-base]"
       }`}
       draggable
       onDragStart={(e) => {
@@ -50,28 +54,28 @@ export function TeamRow({ team, index, isActive, onSelect }: TeamRowProps) {
       onClick={() => onSelect(team.id)}
     >
       <div className="flex items-center gap-3">
-        <span className="cursor-grab select-none px-1 text-slate-400">::</span>
+        <span className="cursor-grab select-none px-1 text-[--text-muted]">::</span>
 
         <input
           type="color"
-          className="h-6 w-8 cursor-pointer rounded border p-0"
+          className="h-6 w-8 cursor-pointer rounded border border-[--border-strong] bg-transparent p-0 overflow-hidden"
           value={team.color}
-          onChange={(e) => setTeamColor(team.id, e.target.value)}
+          onChange={(e) => { e.stopPropagation(); setTeamColor(team.id, e.target.value); }}
           title="Team color"
           onClick={(e) => e.stopPropagation()}
         />
 
         <input
-          className="w-44 rounded border px-2 py-1 text-sm"
+          className="w-44 rounded border border-[--border-strong] bg-[--surface-input] px-3 py-1.5 text-sm text-[--text-primary] focus:border-[--gold] focus:outline-none"
           value={team.name}
-          onChange={(e) => setTeamName(team.id, e.target.value)}
+          onChange={(e) => { e.stopPropagation(); setTeamName(team.id, e.target.value); }}
           onClick={(e) => e.stopPropagation()}
         />
       </div>
 
       <div className="flex items-center gap-2">
         <button
-          className="h-8 w-8 rounded bg-slate-100 font-bold hover:bg-slate-200"
+          className="h-8 w-8 rounded bg-[--surface-input] font-bold text-[--text-primary] hover:bg-[--surface-highlight]"
           onClick={(e) => { e.stopPropagation(); updateScore(team.id, -100); }}
           title="Subtract 100"
         >
@@ -79,16 +83,17 @@ export function TeamRow({ team, index, isActive, onSelect }: TeamRowProps) {
         </button>
         <input
           type="number"
-          className="w-20 rounded border px-2 py-1 text-right text-sm font-medium tabular-nums focus:ring-1 focus:ring-emerald-500"
+          className="w-20 rounded border border-[--border-strong] bg-[--surface-input] px-2 py-1.5 text-right text-sm font-medium tabular-nums text-[--gold] focus:border-[--gold] focus:outline-none"
           value={team.score}
           onChange={(e) => {
+            e.stopPropagation();
             const next = Number(e.target.value);
             if (!isNaN(next)) updateScore(team.id, next - team.score);
           }}
           onClick={(e) => e.stopPropagation()}
         />
         <button
-          className="h-8 w-8 rounded bg-slate-100 font-bold hover:bg-slate-200"
+          className="h-8 w-8 rounded bg-[--surface-input] font-bold text-[--text-primary] hover:bg-[--surface-highlight]"
           onClick={(e) => { e.stopPropagation(); updateScore(team.id, 100); }}
           title="Add 100"
         >
@@ -97,25 +102,25 @@ export function TeamRow({ team, index, isActive, onSelect }: TeamRowProps) {
 
         <div className="ml-1 flex items-center gap-1">
           <button
-            className="rounded bg-slate-100 px-2 py-1 text-sm"
+            className="rounded bg-[--surface-input] px-2 py-1 text-sm text-[--text-primary] disabled:opacity-30 hover:bg-[--surface-highlight]"
             title="Move up"
             disabled={isFirst}
             onClick={(e) => { e.stopPropagation(); moveTeam(team.id, -1); }}
           >
-            ↑
+            ^
           </button>
           <button
-            className="rounded bg-slate-100 px-2 py-1 text-sm"
+            className="rounded bg-[--surface-input] px-2 py-1 text-sm text-[--text-primary] disabled:opacity-30 hover:bg-[--surface-highlight]"
             title="Move down"
             disabled={isLast}
             onClick={(e) => { e.stopPropagation(); moveTeam(team.id, 1); }}
           >
-            ↓
+            v
           </button>
         </div>
 
         <button
-          className="ml-2 rounded bg-red-50 px-2 py-1 text-sm text-red-600 hover:bg-red-100"
+          className="ml-2 rounded border border-red-500/30 bg-transparent px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-red-400 hover:bg-red-500/10"
           title="Remove team"
           onClick={(e) => { e.stopPropagation(); handleRemove(); }}
         >

@@ -58,7 +58,7 @@ export default function Control() {
     cancelFinalJeopardy,
   } = useBoardStore();
 
-  const { playScoreUp, playScoreDown, playDailyDouble, playQuestionReveal, playFinalJeopardy } = useGameAudio();
+  const { playScoreUp, playScoreDown, playDailyDouble, playQuestionReveal, playFinalJeopardy, playWinnerReveal } = useGameAudio();
 
   // Timer state
   const [timer, t] = useTimer(30000);
@@ -196,6 +196,10 @@ export default function Control() {
       if (e.key in presets) {
         handleStart(presets[e.key]);
       }
+      if (e.key === "F11") {
+        e.preventDefault();
+        window.api?.toggleFullscreen?.('control');
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -271,28 +275,38 @@ export default function Control() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-screen overflow-hidden text-slate-900">
-      <div className="h-8 drag-region flex items-center px-4 shrink-0 bg-white/50 border-b border-slate-100/50">
-        <span className="text-[10px] uppercase tracking-widest text-slate-400 font-medium">Jeopardy Control</span>
+    <div className="flex flex-col h-screen overflow-hidden text-[--text-primary]" style={{ background: "var(--surface-base)" }}>
+      <div className="h-10 drag-region flex items-center px-6 shrink-0 border-b border-[--border-subtle] bg-[--surface-panel]">
+        <span className="studio-label">Jeopardy Control</span>
       </div>
-      <div className="p-6 pt-2 grid gap-4 overflow-y-auto flex-1">
-        <header className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Control Window</h1>
-          <div className="text-sm text-slate-500">view=control</div>
+      <div className="px-8 py-4 grid gap-6 overflow-y-auto flex-1">
+        <header className="flex items-center justify-between mb-2">
+          <h1 className="text-3xl font-serif text-[--gold]">Host Control</h1>
+          <div className="flex items-center gap-4">
+            <button
+              className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[--text-muted] hover:text-[--gold] transition-colors group"
+              onClick={() => window.api?.toggleFullscreen?.('control')}
+              title="Toggle fullscreen (F11)"
+            >
+              [ Fullscreen ]
+              <span className="opacity-0 group-hover:opacity-60 transition-opacity text-[9px] normal-case tracking-normal font-normal">F11</span>
+            </button>
+            <div className="studio-label">view=control</div>
+          </div>
         </header>
 
       {/* ── Timer section ── */}
-      <section className="rounded border p-4">
-        <h2 className="font-medium mb-3">Timer</h2>
-        <div className="mb-2 flex flex-wrap items-center gap-3">
+      <section className="studio-card p-6">
+        <h2 className="text-xl font-serif mb-4 text-[--text-primary]">Timer</h2>
+        <div className="mb-4 flex flex-wrap items-center gap-4">
           {/* Duration input */}
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-slate-600">Duration</label>
+          <div className="flex items-center gap-3">
+            <label className="text-sm font-sans text-[--text-secondary]">Duration</label>
             <input
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              className="w-24 rounded border px-2 py-1 text-sm"
+              className="studio-input w-24"
               value={durationInput}
               onChange={(e) => setDurationInput(e.target.value.replace(/[^0-9]/g, ""))}
               onBlur={() => {
@@ -303,13 +317,13 @@ export default function Control() {
               }}
               onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
             />
-            <span className="text-sm text-slate-600">sec</span>
+            <span className="text-sm text-[--text-secondary]">sec</span>
           </div>
 
           {/* Play/Pause/Reset */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <button
-              className="rounded bg-slate-100 px-3 py-1"
+              className="btn-gold"
               onClick={() => {
                 const rounded = Math.max(15000, Math.round(timer.durationMs / 15000) * 15000);
                 handleStart(rounded);
@@ -320,7 +334,7 @@ export default function Control() {
               Start
             </button>
             <button
-              className="rounded bg-slate-100 px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+              className="px-4 py-2 rounded font-bold text-sm bg-[--surface-overlay] border border-[--border-strong] text-[--text-primary] disabled:opacity-50"
               disabled={pauseButtonDisabled}
               title={pauseTooltip}
               onClick={() => {
@@ -335,18 +349,18 @@ export default function Control() {
             >
               {timer.running ? "Pause" : "Resume"}
             </button>
-            <button className="rounded bg-slate-100 px-3 py-1" onClick={handleReset}>
+            <button className="px-4 py-2 rounded font-bold text-sm bg-[--surface-overlay] border border-[--border-strong] text-[--text-primary]" onClick={handleReset}>
               Reset
             </button>
           </div>
 
           {/* Presets */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-600">Presets:</span>
+            <span className="text-sm text-[--text-secondary]">Presets:</span>
             {TIMER_PRESETS_SEC.map((s) => (
               <button
                 key={s}
-                className="rounded bg-slate-100 px-2 py-1 text-sm"
+                className="px-2 py-1 rounded text-xs font-bold bg-[--surface-overlay] border border-[--border-subtle] text-[--text-secondary] hover:text-[--text-primary] hover:border-[--border-strong]"
                 onClick={() => { t.setDuration(s * 1000); setDurationInput(String(s)); }}
               >
                 {s}s
@@ -356,33 +370,34 @@ export default function Control() {
         </div>
 
         {/* Progress bar + volume */}
-        <div className="mt-3 flex items-center gap-4">
-          <div className="min-w-[110px] text-2xl font-semibold tabular-nums">
+        <div className="mt-6 flex items-center gap-4">
+          <div className="min-w-[110px] text-3xl font-serif text-[--gold] text-data tabular-nums">
             {Math.floor(timer.remainingMs / 1000)}s
           </div>
-          <div className="h-2 flex-1 overflow-hidden rounded bg-slate-200">
+          <div className="h-3 flex-1 overflow-hidden rounded-full bg-[--surface-overlay] border border-[--border-subtle]">
             <div
-              className="h-full bg-emerald-500 transition-all"
+              className="h-full bg-[--gold] transition-all"
               style={{
                 width: `${Math.max(0, (timer.remainingMs / timer.durationMs) * 100)}%`,
               }}
             />
           </div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-slate-600">Vol</label>
+          <div className="flex items-center gap-3">
+            <label className="text-sm text-[--text-secondary]">Vol</label>
             <input
               type="range"
               min={0}
               max={1}
               step={0.05}
+              className="accent-[--gold]"
               value={settings.volume}
               onChange={(e) => setGlobalVolume(Number(e.target.value))}
             />
-            <button className="rounded bg-slate-100 px-2 py-1 text-sm" onClick={t.toggleMute}>
+            <button className="px-3 py-1 rounded text-xs font-bold bg-[--surface-overlay] border border-[--border-subtle] text-[--text-secondary]" onClick={t.toggleMute}>
               {timer.muted ? "Unmute" : "Mute"}
             </button>
             <button
-              className="rounded bg-slate-100 px-2 py-1 text-sm"
+              className="px-3 py-1 rounded text-xs font-bold bg-[--surface-overlay] border border-[--border-subtle] text-[--text-secondary]"
               onClick={() => {
                 void resetAudio().then(() => {
                   void startAudio(2000);
@@ -395,32 +410,38 @@ export default function Control() {
         </div>
 
         {/* Display mode toggles */}
-        <div className="mt-3 flex items-center gap-2">
+        <div className="mt-6 flex items-center gap-3">
           <button
-            className="rounded bg-slate-100 px-3 py-1"
+            className="px-4 py-2 rounded font-bold text-sm bg-[--surface-overlay] border border-[--border-strong] text-[--text-primary] hover:bg-[--surface-highlight]"
             onClick={() => window.api?.showTimer?.()}
           >
-            Show Timer
+            Show Timer Window
           </button>
           <button
-            className="rounded bg-slate-100 px-3 py-1"
+            className="px-4 py-2 rounded font-bold text-sm bg-[--surface-overlay] border border-[--border-strong] text-[--text-primary] hover:bg-[--surface-highlight]"
             onClick={() => window.api?.showScoreboard?.()}
           >
             Show Scoreboard
+          </button>
+          <button
+            className="px-4 py-2 rounded font-bold text-sm bg-[--surface-overlay] border border-[--border-strong] text-[--gold] hover:bg-[--gold] hover:bg-opacity-10 transition-colors"
+            onClick={() => window.api?.toggleFullscreen?.('display')}
+          >
+            Fullscreen Display
           </button>
         </div>
       </section>
 
       {/* ── Teams section ── */}
-      <section className="rounded border p-4">
-        <h2 className="font-medium mb-3">Teams</h2>
-        <div className="mb-2 flex items-center justify-between text-sm text-slate-600">
+      <section className="studio-card p-6">
+        <h2 className="text-xl font-serif mb-4 text-[--text-primary]">Teams</h2>
+        <div className="mb-4 flex items-center justify-between text-sm text-[--text-secondary]">
           <div>Click a team to select it as the active team</div>
-          <button className="rounded bg-slate-100 px-3 py-1" onClick={handleAddTeam}>
+          <button className="btn-gold" onClick={handleAddTeam}>
             + Add Team
           </button>
         </div>
-        <div className="grid gap-2">
+        <div className="grid gap-3">
           {teams.map((team, idx) => (
             <TeamRow
               key={team.id}
@@ -434,12 +455,12 @@ export default function Control() {
       </section>
 
       {/* ── Board section ── */}
-      <section className="rounded border p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-medium">Board</h2>
-          <div className="flex gap-2">
+      <section className="studio-card p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-serif text-[--text-primary]">Board</h2>
+          <div className="flex gap-3">
             <button
-              className="rounded bg-slate-100 px-3 py-1 text-sm"
+              className="px-4 py-2 rounded font-bold text-sm bg-[--surface-overlay] border border-[--border-strong] text-[--text-primary] hover:bg-[--border-subtle]"
               onClick={async () => {
                 try {
                   const raw = await window.api?.importBoard?.();
@@ -454,16 +475,16 @@ export default function Control() {
               Import JSON
             </button>
             <button
-              className="rounded bg-slate-100 px-3 py-1 text-sm"
+              className="px-4 py-2 rounded font-bold text-sm bg-[--surface-overlay] border border-[--border-strong] text-[--text-primary] hover:bg-[--border-subtle]"
               onClick={() => {
                 void window.api?.exportBoard?.({ teams, board });
               }}
             >
               Export JSON
             </button>
-            <div className="h-4 w-[1px] bg-slate-200 mx-1" />
+            <div className="h-6 w-[1px] bg-[--border-strong] mx-2" />
             <button
-              className="rounded bg-red-50 px-3 py-1 text-sm text-red-600 hover:bg-red-100"
+              className="px-4 py-2 rounded font-bold text-sm border border-red-500/30 text-red-400 hover:bg-red-500/10"
               onClick={() => {
                 if (window.confirm("Reset the current round? This will clear all scores and hide all questions. Questions and categories will be kept.")) {
                   resetRound();
@@ -473,7 +494,7 @@ export default function Control() {
               Reset Round
             </button>
             <button
-              className="rounded bg-red-50 px-3 py-1 text-sm text-red-600 hover:bg-red-100"
+              className="px-4 py-2 rounded font-bold text-sm border border-red-500/30 text-red-400 hover:bg-red-500/10"
               onClick={() => {
                 if (window.confirm("Full Game Reset? This will reset all teams to defaults, set scores to 0, and hide all questions. Questions and categories will be kept.")) {
                   resetAll();
@@ -486,13 +507,13 @@ export default function Control() {
         </div>
         
         {/* Final Jeopardy Control Section */}
-        <section className="mb-6 rounded-xl border-2 border-indigo-200 bg-indigo-50/50 p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-black uppercase tracking-widest text-indigo-900">Final Jeopardy</h3>
-            <div className="flex gap-2">
+        <section className="mb-8 rounded-xl border border-[--gold] bg-[--surface-overlay] p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-serif text-[--gold]">Final Jeopardy</h3>
+            <div className="flex gap-3">
               {!finalJeopardy.isActive ? (
                 <button
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-700 shadow-md transition-all"
+                  className="btn-gold"
                   onClick={() => {
                     playFinalJeopardy();
                     startFinalJeopardy();
@@ -503,7 +524,7 @@ export default function Control() {
               ) : (
                 <>
                   <button
-                    className="rounded-lg bg-indigo-100 px-4 py-2 text-sm font-bold text-indigo-700 hover:bg-indigo-200"
+                    className="px-4 py-2 rounded font-bold text-sm bg-[--surface-base] border border-[--gold] text-[--gold] hover:bg-[--surface-overlay]"
                     onClick={() => {
                       if (finalJeopardy.stage === "wager") {
                         playFinalJeopardy();
@@ -516,7 +537,7 @@ export default function Control() {
                      finalJeopardy.stage === "question" ? "Next: Resolution" : "Reset Stage"}
                   </button>
                   <button
-                    className="rounded-lg bg-red-100 px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-200"
+                    className="px-4 py-2 rounded font-bold text-sm border border-red-500/30 text-red-400 hover:bg-red-500/10"
                     onClick={() => { if(confirm("Cancel Final Jeopardy?")) cancelFinalJeopardy(); }}
                   >
                     Cancel
@@ -526,20 +547,20 @@ export default function Control() {
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-indigo-400">FJ Category</label>
+              <label className="studio-label text-[--text-secondary]">FJ Category</label>
               <input
-                className="w-full rounded-lg border border-indigo-200 px-3 py-2 text-sm"
+                className="studio-input w-full text-base py-2"
                 value={finalJeopardy.category}
                 onChange={(e) => setFinalJeopardyCategory(e.target.value)}
                 placeholder="Enter category..."
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-indigo-400">FJ Question</label>
+              <label className="studio-label text-[--text-secondary]">FJ Question</label>
               <textarea
-                className="w-full rounded-lg border border-indigo-200 px-3 py-2 text-sm"
+                className="studio-input w-full text-base py-2"
                 value={finalJeopardy.question}
                 onChange={(e) => setFinalJeopardyQuestion(e.target.value)}
                 placeholder="Enter question..."
@@ -549,21 +570,22 @@ export default function Control() {
           </div>
 
           {finalJeopardy.stage === "wager" && (
-            <div className="mt-6 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-              <label className="text-xs font-bold uppercase tracking-widest text-indigo-800">Team Wagers</label>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              <label className="studio-label text-[--text-secondary]">Team Wagers</label>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {teams.map((t) => (
-                  <div key={t.id} className="flex flex-col rounded-lg border border-indigo-200 bg-white p-3 shadow-sm">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="h-2 w-2 rounded-full" style={{ backgroundColor: t.color }} />
-                      <span className="text-xs font-bold text-slate-700">{t.name}</span>
-                      <span className="ml-auto text-[10px] font-mono text-slate-400"><AnimatedNumber value={t.score} /> pts</span>
+                  <div key={t.id} className="flex flex-col rounded-lg border border-[--border-strong] bg-[--surface-base] p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="h-3 w-3 rounded-full" style={{ backgroundColor: t.color }} />
+                      <span className="font-bold text-[--text-primary]">{t.name}</span>
+                      <span className="ml-auto text-xs font-mono text-[--text-secondary]"><AnimatedNumber value={t.score} /> pts</span>
                     </div>
                     <div className="relative">
-                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">$</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-[--text-secondary] pointer-events-none select-none z-10">$</span>
                       <input
                         type="number"
-                        className="w-full rounded border border-slate-200 py-1.5 pl-5 pr-2 text-sm font-bold"
+                        className="studio-input w-full"
+                        style={{ paddingLeft: '1.75rem' }}
                         value={(finalJeopardy.wagers[t.id] ?? 0) === 0 ? "" : finalJeopardy.wagers[t.id]}
                         max={Math.max(0, t.score)}
                         min={0}
@@ -573,7 +595,7 @@ export default function Control() {
                         }}
                       />
                       {finalJeopardy.wagers[t.id] > Math.max(0, t.score) && (
-                        <div className="absolute -bottom-4 left-0 text-[8px] font-bold text-rose-500 uppercase">Over Limit</div>
+                        <div className="absolute -bottom-5 left-0 text-[10px] font-bold text-red-400 uppercase">Over Limit</div>
                       )}
                     </div>
                   </div>
@@ -583,21 +605,21 @@ export default function Control() {
           )}
 
           {finalJeopardy.stage === "resolution" && (
-            <div className="mt-6 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-              <label className="text-xs font-bold uppercase tracking-widest text-emerald-800">Final Resolution</label>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              <label className="studio-label text-[--text-secondary]">Final Resolution</label>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {teams.map((t) => (
-                  <div key={t.id} className="flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div className="flex items-center gap-2 border-b px-3 py-2 bg-slate-50">
-                      <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: t.color }} />
-                      <span className="text-xs font-bold text-slate-700">{t.name}</span>
-                      <span className="ml-auto text-[10px] font-mono font-bold text-indigo-600">
+                  <div key={t.id} className="flex flex-col overflow-hidden rounded-lg border border-[--border-strong] bg-[--surface-base]">
+                    <div className="flex items-center gap-3 border-b border-[--border-subtle] px-4 py-3 bg-[--surface-overlay]">
+                      <div className="h-3 w-3 rounded-full" style={{ backgroundColor: t.color }} />
+                      <span className="font-bold text-[--text-primary]">{t.name}</span>
+                      <span className="ml-auto text-xs font-mono font-bold text-[--gold]">
                         Wager: ${finalJeopardy.wagers[t.id] ?? 0}
                       </span>
                     </div>
-                    <div className="flex divide-x">
+                    <div className="flex divide-x divide-[--border-subtle]">
                       <button
-                        className="flex-1 py-3 text-xs font-black text-emerald-600 hover:bg-emerald-50 active:bg-emerald-100 transition-all disabled:opacity-30 disabled:grayscale"
+                        className="flex-1 py-4 text-xs font-black tracking-widest text-[#10b981] hover:bg-[#10b981]/10 active:bg-[#10b981]/20 transition-all disabled:opacity-30 disabled:grayscale"
                         disabled={finalJeopardy.resolvedTeams.includes(t.id)}
                         onClick={() => {
                           resolveFinalJeopardyTeam(t.id, true);
@@ -610,7 +632,7 @@ export default function Control() {
                         CORRECT
                       </button>
                       <button
-                        className="flex-1 py-3 text-xs font-black text-rose-500 hover:bg-rose-50 active:bg-rose-100 transition-all disabled:opacity-30 disabled:grayscale"
+                        className="flex-1 py-4 text-xs font-black tracking-widest text-red-400 hover:bg-red-500/10 active:bg-red-500/20 transition-all disabled:opacity-30 disabled:grayscale"
                         disabled={finalJeopardy.resolvedTeams.includes(t.id)}
                         onClick={() => {
                           resolveFinalJeopardyTeam(t.id, false);
@@ -626,9 +648,9 @@ export default function Control() {
                   </div>
                 ))}
               </div>
-              <div className="pt-2 text-center">
+              <div className="pt-4 text-center">
                 <button
-                  className="text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors"
+                  className="text-sm font-bold text-[--text-muted] hover:text-[--text-primary] transition-colors"
                   onClick={cancelFinalJeopardy}
                 >
                   End Final Jeopardy Round
@@ -639,11 +661,11 @@ export default function Control() {
         </section>
 
         {/* Board config controls */}
-        <div className="mb-3 flex flex-wrap items-center gap-3 text-sm">
-          <label className="flex items-center gap-2">
+        <div className="mb-6 flex flex-wrap items-center gap-4 text-sm">
+          <label className="flex items-center gap-2 text-[--text-secondary]">
             Rows
             <input
-              className="w-16 rounded border px-2 py-1"
+              className="studio-input w-16"
               type="number"
               min={1}
               max={10}
@@ -651,10 +673,10 @@ export default function Control() {
               onChange={(e) => setRows(Number(e.target.value))}
             />
           </label>
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-[--text-secondary]">
             Cols
             <input
-              className="w-16 rounded border px-2 py-1"
+              className="studio-input w-16"
               type="number"
               min={1}
               max={10}
@@ -662,10 +684,10 @@ export default function Control() {
               onChange={(e) => setCols(Number(e.target.value))}
             />
           </label>
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-[--text-secondary]">
             Base
             <input
-              className="w-20 rounded border px-2 py-1"
+              className="studio-input w-24"
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
@@ -677,13 +699,14 @@ export default function Control() {
               onBlur={() => { if (isNaN(base)) setBase(100); }}
             />
           </label>
-          <button className="rounded bg-slate-100 px-3 py-1" onClick={handleApplyBoardDimensions}>
+          <button className="px-4 py-2 rounded font-bold text-sm bg-[--surface-overlay] border border-[--border-strong] text-[--text-primary]" onClick={handleApplyBoardDimensions}>
             Apply
           </button>
-          <label className="ml-auto flex items-center gap-2">
+          <label className="ml-auto flex items-center gap-2 text-[--text-secondary]">
             Edit Mode
             <input
               type="checkbox"
+              className="accent-[--gold] w-4 h-4"
               checked={editMode}
               onChange={(e) => setEditMode(e.target.checked)}
             />
@@ -692,58 +715,59 @@ export default function Control() {
 
         {/* Daily Double Wager Panel */}
         {dailyDouble.stage === "wager" && (
-          <div className="mb-4 rounded-xl border-2 border-amber-400 bg-amber-50 p-6 shadow-md animate-in fade-in zoom-in duration-300">
-            <div className="flex flex-col gap-6">
+          <div className="mb-6 rounded-xl border border-[--gold] bg-[--surface-overlay] p-6 shadow-md animate-in fade-in zoom-in duration-300">
+            <div className="flex flex-col gap-8">
               <div className="text-center">
-                <h3 className="text-lg font-black uppercase tracking-[0.4em] text-amber-600">
+                <h3 className="text-2xl font-serif text-[--gold] uppercase tracking-widest">
                   Daily Double!
                 </h3>
-                <p className="mt-1 text-sm text-amber-700">
+                <p className="mt-2 text-sm text-[--text-secondary]">
                   Select the team and their wager before revealing the question.
                 </p>
               </div>
 
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div className="space-y-3">
-                  <label className="text-xs font-bold uppercase tracking-widest text-amber-800">
+              <div className="grid gap-8 sm:grid-cols-2">
+                <div className="space-y-4">
+                  <label className="studio-label text-[--text-secondary]">
                     Which team is playing?
                   </label>
-                  <div className="grid gap-2">
+                  <div className="grid gap-3">
                     {teams.map((t) => (
                       <button
                         key={t.id}
-                        className={`flex items-center justify-between rounded-lg border px-4 py-2 transition-all ${
+                        className={`flex items-center justify-between rounded-lg border px-4 py-3 transition-all ${
                           dailyDouble.teamId === t.id
-                            ? "border-amber-500 bg-amber-200 ring-2 ring-amber-400"
-                            : "border-amber-200 bg-white hover:bg-amber-100"
+                            ? "border-[--gold] bg-[--gold] bg-opacity-10 ring-1 ring-[--gold]"
+                            : "border-[--border-strong] bg-[--surface-base] hover:bg-[--surface-overlay]"
                         }`}
                         onClick={() => setDailyDoubleTeam(t.id)}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                           <div
                             className="h-3 w-3 rounded-full"
                             style={{ backgroundColor: t.color }}
                           />
-                          <span className="font-bold">{t.name}</span>
+                          <span className="font-bold text-[--text-primary]">{t.name}</span>
                         </div>
-                        <span className="text-sm font-mono"><AnimatedNumber value={t.score} /> pts</span>
+                        <span className="text-sm font-mono text-[--text-secondary]"><AnimatedNumber value={t.score} /> pts</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <label className="text-xs font-bold uppercase tracking-widest text-amber-800">
+                <div className="space-y-4">
+                  <label className="studio-label text-[--text-secondary]">
                     What is the wager?
                   </label>
                   <div className="flex flex-col gap-4">
                     <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-amber-600">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base font-bold text-[--gold] pointer-events-none select-none z-10">
                         $
                       </span>
                       <input
                         type="number"
-                        className="w-full rounded-xl border-2 border-amber-200 bg-white py-4 pl-10 pr-4 text-3xl font-black text-amber-900 focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-500/20"
+                        className="studio-input w-full text-lg font-serif text-[--gold]"
+                        style={{ paddingLeft: '1.75rem' }}
                         value={dailyDouble.wager === 0 ? "" : dailyDouble.wager}
                         max={Math.max(teams.find(team => team.id === dailyDouble.teamId)?.score || 0, 1000)}
                         min={0}
@@ -753,14 +777,14 @@ export default function Control() {
                         }}
                       />
                       {dailyDouble.wager > Math.max(teams.find(t => t.id === dailyDouble.teamId)?.score || 0, 1000) && (
-                        <div className="absolute -bottom-5 left-0 text-[10px] font-bold text-rose-600 uppercase tracking-tighter">
+                        <div className="absolute -bottom-5 left-0 text-[10px] font-bold text-red-400 uppercase tracking-tighter">
                           Wager exceeds maximum allowed
                         </div>
                       )}
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-3">
                       <button
-                        className="rounded-lg bg-amber-200 py-2 text-xs font-bold uppercase hover:bg-amber-300"
+                        className="px-4 py-2 rounded font-bold text-xs bg-[--surface-base] border border-[--border-strong] text-[--text-primary] hover:bg-[--surface-overlay]"
                         onClick={() => {
                           const team = teams.find((t) => t.id === dailyDouble.teamId);
                           const max = Math.max(1000, team?.score || 0);
@@ -770,7 +794,7 @@ export default function Control() {
                         All In / Max
                       </button>
                       <button
-                        className="rounded-lg bg-amber-200 py-2 text-xs font-bold uppercase hover:bg-amber-300"
+                        className="px-4 py-2 rounded font-bold text-xs bg-[--surface-base] border border-[--border-strong] text-[--text-primary] hover:bg-[--surface-overlay]"
                         onClick={() => {
                           const { row, col } = dailyDouble.cellPosition!;
                           setDailyDoubleWager(board.grid[row][col].value);
@@ -783,9 +807,9 @@ export default function Control() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 pt-2">
+              <div className="flex items-center gap-3 pt-4 border-t border-[--border-subtle]">
                 <button
-                  className="flex-1 rounded-xl bg-amber-500 py-4 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-amber-500/30 hover:bg-amber-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none"
+                  className="flex-1 btn-gold py-4 text-sm font-bold shadow-lg shadow-[#e6b319]/20 disabled:opacity-50 disabled:pointer-events-none"
                   disabled={
                     !dailyDouble.teamId || 
                     dailyDouble.wager < 5 || 
@@ -799,7 +823,7 @@ export default function Control() {
                   Reveal Question
                 </button>
                 <button
-                  className="rounded-xl border-2 border-amber-300 bg-transparent px-6 py-4 text-sm font-bold uppercase tracking-widest text-amber-700 hover:bg-amber-100"
+                  className="px-6 py-4 rounded font-bold text-sm bg-[--surface-base] border border-red-500/30 text-red-400 hover:bg-red-500/10"
                   onClick={cancelDailyDouble}
                 >
                   Cancel
@@ -811,32 +835,32 @@ export default function Control() {
 
         {/* Active prompt panel */}
         {activePrompt && !editMode && (
-          <div className="mb-4 rounded-xl border border-indigo-200 bg-indigo-50 p-4 shadow-sm">
-            <div className="flex flex-col gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="text-xs font-semibold uppercase tracking-[0.25em] text-indigo-500">
+          <div className="mb-6 rounded-xl border border-[--border-strong] bg-[--surface-overlay] p-6 shadow-sm">
+            <div className="flex flex-col gap-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="studio-label text-[--gold]">
                     Active Question
                   </div>
-                  <div className="h-px flex-1 bg-indigo-100" />
+                  <div className="h-px flex-1 bg-[--border-subtle]" />
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="text-sm font-medium text-slate-500">
+                  <div className="text-sm font-medium text-[--text-secondary]">
                     {activePrompt.category} • {activePrompt.cell.value} points
                   </div>
                   <button
-                    className="text-xs font-medium text-slate-400 hover:text-slate-600"
+                    className="text-xs font-medium text-[--text-muted] hover:text-[--text-primary]"
                     onClick={() => unclaimCell(activePrompt.row, activePrompt.col)}
                   >
                     Reset Cell
                   </button>
                 </div>
-                <div className="max-w-4xl text-xl font-semibold leading-snug text-slate-900">
+                <div className="max-w-4xl text-2xl font-serif text-[--text-primary]">
                   {activePrompt.cell.question || "No question set"}
                 </div>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {teams.map((team) => {
                   const isPlayingDD = dailyDouble.stage === "question" && dailyDouble.teamId === team.id;
                   const otherTeamPlayingDD = dailyDouble.stage === "question" && dailyDouble.teamId !== team.id;
@@ -845,40 +869,40 @@ export default function Control() {
                     <div
                       key={team.id}
                       className={`flex flex-col overflow-hidden rounded-lg border transition-all ${
-                        isPlayingDD ? "border-amber-400 ring-2 ring-amber-400 shadow-md" : "border-slate-200"
-                      } ${otherTeamPlayingDD ? "opacity-40 grayscale" : "bg-white"}`}
+                        isPlayingDD ? "border-[--gold] ring-1 ring-[--gold]" : "border-[--border-strong]"
+                      } ${otherTeamPlayingDD ? "opacity-30 grayscale" : "bg-[--surface-base]"}`}
                     >
-                      <div className={`flex items-center justify-between gap-2 border-b px-3 py-1.5 ${isPlayingDD ? "bg-amber-50" : "bg-slate-50"}`}>
+                      <div className={`flex items-center justify-between gap-2 border-b border-[--border-subtle] px-3 py-2 ${isPlayingDD ? "bg-[--gold] bg-opacity-10" : "bg-[--surface-overlay]"}`}>
                         <div className="flex items-center gap-2">
                           <div
-                            className="h-2.5 w-2.5 rounded-full"
+                            className="h-2 w-2 rounded-full"
                             style={{ backgroundColor: team.color }}
                           />
-                          <span className="text-xs font-bold truncate text-slate-700">
+                          <span className="text-sm font-bold truncate text-[--text-primary]">
                             {team.name}
                           </span>
                         </div>
                         {isPlayingDD && (
-                          <span className="text-[9px] font-black uppercase text-amber-600 tracking-tighter">Daily Double</span>
+                          <span className="text-[10px] font-bold uppercase text-[--gold] tracking-widest">Daily Double</span>
                         )}
                       </div>
-                      <div className="flex divide-x border-t-0">
+                      <div className="flex divide-x divide-[--border-subtle] border-t-0">
                         <button
-                          className="flex-1 py-2 text-xs font-bold text-emerald-600 hover:bg-emerald-50 transition-colors disabled:pointer-events-none"
+                          className="flex-1 py-3 text-xs font-bold text-[#10b981] hover:bg-[#10b981]/10 transition-colors disabled:pointer-events-none"
                           disabled={otherTeamPlayingDD}
                           onClick={() => handleAward(activePrompt.row, activePrompt.col, team.id)}
                         >
                           AWARD {isPlayingDD && `+${dailyDouble.wager}`}
                         </button>
                         <button
-                          className="flex-1 py-2 text-xs font-bold text-rose-500 hover:bg-rose-50 transition-colors disabled:pointer-events-none"
+                          className="flex-1 py-3 text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors disabled:pointer-events-none"
                           disabled={otherTeamPlayingDD}
                           onClick={() => handlePenalize(activePrompt.row, activePrompt.col, team.id)}
                         >
                           {isPlayingDD ? `-${dailyDouble.wager}` : "WRONG"}
                         </button>
                         <button
-                          className="flex-1 py-2 text-[10px] font-bold text-slate-400 hover:bg-slate-50 transition-colors disabled:pointer-events-none"
+                          className="flex-1 py-3 text-[10px] font-bold text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle] transition-colors disabled:pointer-events-none"
                           disabled={otherTeamPlayingDD}
                           onClick={() => penalizeTeam(activePrompt.row, activePrompt.col, team.id, 0)}
                         >
@@ -889,7 +913,7 @@ export default function Control() {
                   );
                 })}
                 <button
-                  className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 py-3 text-xs font-bold text-slate-400 hover:border-slate-400 hover:bg-slate-50 hover:text-slate-500 transition-all disabled:opacity-30"
+                  className="flex flex-col items-center justify-center rounded-lg border border-dashed border-[--border-strong] py-3 text-xs font-bold text-[--text-muted] hover:border-[--text-secondary] hover:bg-[--surface-overlay] hover:text-[--text-primary] transition-all disabled:opacity-30"
                   disabled={dailyDouble.stage === "question"}
                   onClick={() => setCellDisabled(activePrompt.row, activePrompt.col, true)}
                 >
@@ -902,14 +926,14 @@ export default function Control() {
 
         {/* Board grid */}
         <div
-          className="relative grid gap-1"
+          className="relative grid gap-2 mt-4"
           style={{ gridTemplateColumns: `repeat(${board.cols}, minmax(0, 1fr))` }}
         >
           {/* Category headers */}
           {visibleCategories.map((cat, i) => (
             <input
               key={i}
-              className="rounded border p-2 text-center text-sm font-medium text-slate-700"
+              className="studio-input text-center text-sm font-bold uppercase tracking-widest"
               value={cat}
               onChange={(e) => setCategoryTitle(i, e.target.value)}
               aria-label={`Category ${i + 1}`}
@@ -927,14 +951,14 @@ export default function Control() {
               return (
                 <div
                   key={cell.id}
-                  className={`relative overflow-hidden rounded border p-5 text-center transition ${
+                  className={`relative overflow-hidden flex flex-col rounded border border-[--border-subtle] ${editMode ? 'p-2' : 'p-4'} text-center transition ${
                     isDisabled
-                      ? "bg-slate-100 opacity-60"
+                      ? "bg-[--surface-base] opacity-40 border-dashed"
                       : isClaimed
-                        ? "bg-emerald-50"
+                        ? "bg-[#10b981]/10 border-[#10b981]/30"
                         : isOpen
-                          ? "bg-blue-50 ring-2 ring-blue-200"
-                          : "hover:bg-slate-50"
+                          ? "bg-[--surface-overlay] ring-1 ring-[--gold] border-[--gold]"
+                          : "bg-[--surface-base] hover:bg-[--surface-overlay] cursor-pointer"
                   }`}
                   onClick={() => {
                     if (editMode) return;
@@ -943,24 +967,23 @@ export default function Control() {
                   }}
                 >
                   {editMode ? (
-                    <div className="grid gap-2">
+                    <div className="flex flex-col h-full gap-1 flex-1">
                       <input
-                        className="w-full rounded border px-2 py-2 text-center text-lg font-semibold"
+                        className="w-full bg-transparent border-b border-[--border-strong] pb-1 text-center text-xl font-serif text-[--gold] focus:outline-none focus:border-[--gold] transition-colors"
                         type="number"
                         value={cell.value}
                         onChange={(e) => setCellValue(r, c, Number(e.target.value))}
                       />
-                      <input
-                        className="w-full rounded border px-2 py-1 text-sm"
-                        type="text"
+                      <textarea
+                        className="w-full flex-1 bg-transparent text-center text-[10px] text-[--text-primary] focus:outline-none resize-none leading-snug placeholder-[--text-muted] mt-1"
                         value={cell.question ?? ""}
-                        placeholder="Question"
+                        placeholder="Question..."
                         onChange={(e) => setCellQuestion(r, c, e.target.value)}
                       />
-                      <label className="flex items-center justify-center gap-2 text-xs font-bold text-amber-600 uppercase tracking-tighter bg-amber-50 rounded py-1 border border-amber-200 cursor-pointer hover:bg-amber-100">
+                      <label className="flex items-center justify-center gap-1 text-[9px] font-bold text-[--gold] uppercase tracking-widest mt-auto cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
                         <input
                           type="checkbox"
-                          className="w-3 h-3 accent-amber-500"
+                          className="accent-[--gold] w-3 h-3"
                           checked={!!cell.isDailyDouble}
                           onChange={(e) => setCellDailyDouble(r, c, e.target.checked)}
                         />
@@ -970,13 +993,13 @@ export default function Control() {
                   ) : (
                     <div className="grid gap-1">
                       <div className="relative inline-block mx-auto">
-                        <div className="text-xl font-semibold">{cell.value}</div>
+                        <div className="text-2xl font-serif text-[--gold]">{cell.value}</div>
                         {cell.isDailyDouble && (
-                          <div className="absolute -top-1 -right-4 text-[10px] text-amber-500 font-black">★</div>
+                          <div className="absolute -top-1 -right-4 text-[10px] text-[--gold] font-black">★</div>
                         )}
                       </div>
                       {(isOpen || isClaimed || isDisabled) && (
-                        <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-[--text-muted] mt-1">
                           {isOpen
                             ? "Open"
                             : isClaimed
@@ -988,7 +1011,7 @@ export default function Control() {
                   )}
                   {owner && (
                     <span
-                      className="pointer-events-none absolute right-[-28px] top-2 rotate-45 px-8 py-0.5 text-xs shadow"
+                      className="pointer-events-none absolute right-[-28px] top-2 rotate-45 px-8 py-0.5 text-xs shadow-md"
                       style={{ background: owner.color }}
                       aria-hidden
                     />

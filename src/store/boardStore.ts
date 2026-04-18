@@ -66,7 +66,13 @@ export interface BoardState {
   board: Board;
 
   // ── State sync ──────────────────────────────────────────────────────────
-  setAll(next: { teams: Team[]; board: Board; dailyDouble?: any; finalJeopardy?: any; settings?: any }): void;
+  setAll(next: {
+    teams: Team[];
+    board: Board;
+    dailyDouble?: BoardState['dailyDouble'];
+    finalJeopardy?: BoardState['finalJeopardy'];
+    settings?: BoardState['settings'];
+  }): void;
 
   // ── Team management ─────────────────────────────────────────────────────
   addTeam(team: Team): void;

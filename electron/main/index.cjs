@@ -67,12 +67,13 @@ function createWindows() {
   controlWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    title: 'Jeopardy',
+    title: 'QuizShow — Host Control',
     icon: iconPath,
     titleBarStyle: 'hidden',
     titleBarOverlay: {
-      color: '#ffffff',
-      symbolColor: '#0f172a'
+      color: '#0c0f1a',
+      symbolColor: '#e6b319',
+      height: 40,
     },
     webPreferences: sharedPreferences,
   });
@@ -80,12 +81,13 @@ function createWindows() {
   displayWindow = new BrowserWindow({
     width: 1280,
     height: 720,
-    title: 'Jeopardy',
+    title: 'QuizShow — Audience Display',
     icon: iconPath,
     titleBarStyle: 'hidden',
     titleBarOverlay: {
-      color: '#ffffff',
-      symbolColor: '#0f172a'
+      color: '#0c0f1a',
+      symbolColor: '#e6b319',
+      height: 40,
     },
     webPreferences: sharedPreferences,
   });
@@ -98,6 +100,9 @@ function createWindows() {
     controlWindow.loadURL('app://index.html?view=control');
     displayWindow.loadURL('app://index.html?view=display');
   }
+
+  controlWindow.on('closed', () => { controlWindow = null; });
+  displayWindow.on('closed', () => { displayWindow = null; });
 }
 
 function registerIpcHandlers() {
@@ -108,7 +113,7 @@ function registerIpcHandlers() {
     latestState = state;
     // Broadcast to all renderer processes so Display stays in sync
     for (const w of BrowserWindow.getAllWindows()) {
-      w.webContents.send('state:changed', latestState);
+      if (!w.isDestroyed()) w.webContents.send('state:changed', latestState);
     }
   });
 
@@ -118,18 +123,19 @@ function registerIpcHandlers() {
   ipcMain.on('display:mode', (_e, mode) => {
     displayMode = mode;
     for (const w of BrowserWindow.getAllWindows()) {
-      w.webContents.send('display:mode', displayMode);
+      if (!w.isDestroyed()) w.webContents.send('display:mode', displayMode);
     }
   });
 
   // ── Timer ticks ────────────────────────────────────────────────────────────
   ipcMain.on('timer:tick', (_e, payload) => {
-    if (!displayWindow) return;
+    if (!displayWindow || displayWindow.isDestroyed()) return;
     displayWindow.webContents.send('timer:tick', payload);
   });
 
   // ── File I/O ──────────────────────────────────────────────────────────────
   ipcMain.handle('file:open', async () => {
+    if (!controlWindow || controlWindow.isDestroyed()) return null;
     const { canceled, filePaths } = await dialog.showOpenDialog(controlWindow, {
       title: 'Import Board JSON',
       filters: [{ name: 'JSON', extensions: ['json'] }],
@@ -141,6 +147,7 @@ function registerIpcHandlers() {
   });
 
   ipcMain.handle('file:save', async (_e, data) => {
+    if (!controlWindow || controlWindow.isDestroyed()) return false;
     const { canceled, filePath } = await dialog.showSaveDialog(controlWindow, {
       title: 'Export Board JSON',
       defaultPath: 'my-jeopardy-board.json',
@@ -149,6 +156,18 @@ function registerIpcHandlers() {
     if (canceled || !filePath) return false;
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
     return true;
+  });
+
+  // ── Window Management ──────────────────────────────────────────────────────
+  ipcMain.on('window:toggle-fullscreen', (event, target) => {
+    let win = null;
+    if (target === 'control') win = controlWindow;
+    else if (target === 'display') win = displayWindow;
+    else win = BrowserWindow.fromWebContents(event.sender);
+
+    if (win && !win.isDestroyed()) {
+      win.setFullScreen(!win.isFullScreen());
+    }
   });
 }
 

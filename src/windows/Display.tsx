@@ -105,9 +105,18 @@ export default function Display() {
       setEnded(isEnded);
     });
 
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "F11") {
+        e.preventDefault();
+        window.api?.toggleFullscreen?.('display');
+      }
+    };
+    window.addEventListener("keydown", onKey);
+
     return () => {
       offMode?.();
       offTick?.();
+      window.removeEventListener("keydown", onKey);
     };
   }, []);
 
@@ -125,8 +134,15 @@ export default function Display() {
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col h-screen overflow-hidden text-slate-100" style={{ background: "var(--surface-base)" }}>
-      <div className="h-10 drag-region flex items-center px-8 shrink-0 bg-transparent">
+      <div className="h-10 drag-region flex items-center justify-between px-8 shrink-0 bg-transparent">
         <span className="studio-label">Jeopardy Display</span>
+        <button
+          className="text-[9px] font-bold uppercase tracking-widest text-[--text-muted]/40 hover:text-[--text-muted] transition-colors"
+          onClick={() => window.api?.toggleFullscreen?.('display')}
+          title="Toggle fullscreen (F11)"
+        >
+          F11 Fullscreen
+        </button>
       </div>
       <div className="flex-1 overflow-hidden px-10 pb-10 pt-2 flex flex-col">
         {finalJeopardy.isActive ? (
@@ -267,7 +283,7 @@ function ScoreboardView({ teams, board, dailyDouble }: ScoreboardViewProps) {
     : null;
 
   return (
-    <div className="flex h-full flex-col gap-8 overflow-hidden pt-4">
+    <div className="flex h-full flex-col gap-8 overflow-x-hidden pb-2 pt-4">
       {/* Board */}
       <section className="flex min-h-0 flex-1 flex-col">
         <div className="mb-8 flex justify-center">
@@ -340,8 +356,8 @@ function ScoreboardView({ teams, board, dailyDouble }: ScoreboardViewProps) {
       </section>
 
       {/* Teams (Bottom Bar) */}
-      <section className="shrink-0 pt-4 border-t border-[--border-subtle]">
-        <div className="grid items-stretch gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <section className="shrink-0 pt-4 border-t border-[--border-subtle] overflow-visible">
+        <div className="grid items-stretch gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 overflow-visible">
           {[...teams].sort((a, b) => b.score - a.score).map((team) => (
             <TeamCard
               key={team.id}
@@ -370,38 +386,37 @@ function DailyDoubleSplash({
   const team = teams.find((t) => t.id === dailyDouble.teamId);
 
   return (
-    <div className="flex h-full flex-col items-center justify-center p-6 text-white animate-in zoom-in duration-500">
+    <div className="flex h-full flex-col items-center justify-center p-6 text-[--text-primary] animate-in zoom-in duration-700 bg-[--surface-base]">
       <div className="relative">
         {/* Decorative rays */}
-        <div className="absolute inset-[-150px] animate-[spin_30s_linear_infinite] opacity-30 pointer-events-none">
-          <div className="h-full w-full bg-[conic-gradient(from_0deg,transparent_0deg,rgba(245,158,11,0.2)_10deg,transparent_20deg,rgba(245,158,11,0.2)_30deg,transparent_40deg,rgba(245,158,11,0.2)_50deg,transparent_60deg,rgba(245,158,11,0.2)_70deg,transparent_80deg,rgba(245,158,11,0.2)_90deg,transparent_100deg,rgba(245,158,11,0.2)_110deg,transparent_120deg,rgba(245,158,11,0.2)_130deg,transparent_140deg,rgba(245,158,11,0.2)_150deg,transparent_160deg,rgba(245,158,11,0.2)_170deg,transparent_180deg,rgba(245,158,11,0.2)_190deg,transparent_200deg,rgba(245,158,11,0.2)_210deg,transparent_220deg,rgba(245,158,11,0.2)_230deg,transparent_240deg,rgba(245,158,11,0.2)_250deg,transparent_260deg,rgba(245,158,11,0.2)_270deg,transparent_280deg,rgba(245,158,11,0.2)_290deg,transparent_300deg,rgba(245,158,11,0.2)_310deg,transparent_320deg,rgba(245,158,11,0.2)_330deg,transparent_340deg,rgba(245,158,11,0.2)_350deg,transparent_360deg)]" />
-        </div>
+        <div className="absolute inset-[-150vh] animate-[spin_40s_linear_infinite] opacity-30 pointer-events-none mix-blend-screen"
+             style={{ background: 'conic-gradient(from 0deg, transparent 0deg, var(--gold-subtle) 10deg, transparent 20deg, var(--gold-subtle) 30deg, transparent 40deg, var(--gold-subtle) 50deg, transparent 60deg, var(--gold-subtle) 70deg, transparent 80deg, var(--gold-subtle) 90deg, transparent 100deg, var(--gold-subtle) 110deg, transparent 120deg, var(--gold-subtle) 130deg, transparent 140deg, var(--gold-subtle) 150deg, transparent 160deg, var(--gold-subtle) 170deg, transparent 180deg, var(--gold-subtle) 190deg, transparent 200deg, var(--gold-subtle) 210deg, transparent 220deg, var(--gold-subtle) 230deg, transparent 240deg, var(--gold-subtle) 250deg, transparent 260deg, var(--gold-subtle) 270deg, transparent 280deg, var(--gold-subtle) 290deg, transparent 300deg, var(--gold-subtle) 310deg, transparent 320deg, var(--gold-subtle) 330deg, transparent 340deg, var(--gold-subtle) 350deg, transparent 360deg)' }} />
 
         <div className="relative flex flex-col items-center text-center">
-          <div className="mb-2 text-4xl font-black uppercase tracking-[0.5em] text-amber-500 drop-shadow-[0_0_20px_rgba(245,158,11,0.8)]">
+          <div className="mb-2 text-3xl font-bold uppercase tracking-[0.6em] text-[--gold] drop-shadow-[0_0_15px_var(--gold-glow)]">
             Daily
           </div>
-          <div className="text-[18vmin] font-black uppercase leading-[0.8] tracking-[0.1em] text-white drop-shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+          <div className="text-[15vmin] font-serif uppercase leading-[0.9] tracking-wider text-[--text-primary]" style={{ textShadow: '0 10px 30px rgba(0,0,0,0.8), 0 0 40px var(--gold-glow), 0 0 80px var(--gold-subtle)' }}>
             Double
           </div>
-          <div className="mt-10 h-1.5 w-48 bg-gradient-to-r from-transparent via-amber-500 to-transparent shadow-[0_0_25px_rgba(245,158,11,1)]" />
+          <div className="mt-8 h-1 w-64 bg-gradient-to-r from-transparent via-[--gold] to-transparent shadow-[0_0_20px_var(--gold-glow)]" />
 
           {team && (
-            <div className="mt-16 flex flex-col items-center animate-in slide-in-from-bottom-10 duration-1000 delay-500">
+            <div className="mt-12 flex flex-col items-center animate-in slide-in-from-bottom-10 duration-1000 delay-300">
               <div
-                className="mb-6 flex h-24 w-24 items-center justify-center rounded-[32px] border-4 border-white/20 shadow-2xl rotate-3"
+                className="mb-4 flex h-24 w-24 items-center justify-center rounded-full border-2 border-[--border-strong] shadow-xl"
                 style={{ background: team.color }}
               >
-                <span className="text-5xl font-black text-white drop-shadow-md">
+                <span className="text-4xl font-bold text-[#0c0f1a]">
                   {team.name.charAt(0)}
                 </span>
               </div>
-              <div className="text-3xl font-black uppercase tracking-[0.3em] text-slate-300">
+              <div className="text-2xl font-bold uppercase tracking-widest text-[--text-primary]">
                 {team.name}
               </div>
-              <div className="mt-6 flex flex-col items-center gap-1">
-                <span className="text-xs uppercase tracking-[0.4em] text-amber-500/80 font-bold">Current Wager</span>
-                <div className="rounded-2xl bg-slate-900/80 border border-white/10 px-12 py-5 text-6xl font-black tabular-nums text-amber-400 shadow-2xl backdrop-blur-xl">
+              <div className="mt-4 flex flex-col items-center gap-1">
+                <span className="text-xs uppercase tracking-[0.3em] text-[--text-muted] font-bold">Current Wager</span>
+                <div className="studio-card border-[--border-strong] px-10 py-4 text-5xl font-mono font-bold text-[--gold] shadow-2xl backdrop-blur-md">
                   <AnimatedNumber value={dailyDouble.wager} prefix="$" />
                 </div>
               </div>
@@ -432,14 +447,14 @@ function FinalJeopardySplash({
         {/* Stage: Category */}
         {stage === "category" && (
           <div className="flex flex-col items-center text-center animate-in fade-in slide-in-from-bottom-12 duration-1000">
-            <div className="mb-4 text-3xl font-black uppercase tracking-[0.8em] text-indigo-400 opacity-60">
+            <div className="mb-4 text-2xl font-bold uppercase tracking-[0.8em] text-[--text-muted]">
               Final Round
             </div>
-            <div className="mb-12 text-[12vmin] font-black uppercase leading-none tracking-tighter text-white drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+            <div className="mb-10 text-[10vmin] font-serif uppercase leading-none tracking-wide text-[--gold] drop-shadow-[0_0_20px_var(--gold-glow)]">
               Category
             </div>
-            <div className="rounded-[40px] border-4 border-indigo-500/30 bg-indigo-950/40 px-20 py-16 shadow-2xl backdrop-blur-3xl">
-              <div className="text-[10vmin] font-black uppercase tracking-widest text-white drop-shadow-[0_0_30px_rgba(99,102,241,0.6)]">
+            <div className="studio-card border-[--gold] px-16 py-12 shadow-[0_0_50px_var(--gold-glow)] backdrop-blur-3xl">
+              <div className="text-[8vmin] font-black uppercase tracking-widest text-[--text-primary]">
                 {finalJeopardy.category || "Mystery Category"}
               </div>
             </div>
@@ -448,24 +463,24 @@ function FinalJeopardySplash({
 
         {/* Stage: Wager */}
         {stage === "wager" && (
-          <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-700">
-            <div className="mb-8 text-4xl font-black uppercase tracking-[0.5em] text-indigo-500">
+          <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-700 w-full">
+            <div className="mb-6 text-2xl font-bold uppercase tracking-[0.5em] text-[--gold]">
               Wagers Locked
             </div>
-            <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex flex-wrap justify-center gap-4 w-full max-w-[90vw] max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
               {teams.map((t) => (
-                <div key={t.id} className="flex flex-col rounded-3xl border border-white/10 bg-slate-900/60 p-8 shadow-xl">
-                  <div className="mb-4 flex items-center justify-center">
-                    <div className="h-16 w-16 rounded-2xl flex items-center justify-center text-3xl font-black" style={{ background: t.color }}>
-                      {t.name.charAt(0)}
+                <div key={t.id} className="studio-card flex flex-col items-center w-40 p-4 bg-[--surface-overlay]">
+                  <div className="mb-3 flex items-center justify-center">
+                    <div className="h-12 w-12 rounded-full flex items-center justify-center text-xl font-bold shadow-inner border border-[--border-strong]" style={{ background: t.color }}>
+                      <span className="text-[#0c0f1a]">{t.name.charAt(0)}</span>
                     </div>
                   </div>
-                  <div className="text-xl font-black uppercase tracking-widest text-slate-300">{t.name}</div>
-                  <div className="mt-4 text-xs font-bold uppercase tracking-[0.3em] text-slate-500">Locked In</div>
+                  <div className="text-sm font-bold uppercase tracking-widest text-[--text-primary] truncate w-full">{t.name}</div>
+                  <div className="mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[--text-muted]">Locked In</div>
                 </div>
               ))}
             </div>
-            <div className="mt-16 text-2xl font-medium text-slate-400 italic animate-pulse">
+            <div className="mt-8 text-xl font-serif text-[--text-secondary] italic animate-pulse">
               Calculating risks...
             </div>
           </div>
@@ -474,18 +489,18 @@ function FinalJeopardySplash({
         {/* Stage: Question */}
         {stage === "question" && (
           <div className="flex flex-col items-center text-center animate-in fade-in scale-in duration-1000">
-            <div className="mb-6 text-2xl font-black uppercase tracking-[0.6em] text-indigo-500">
+            <div className="mb-6 text-2xl font-bold uppercase tracking-[0.6em] text-[--gold]">
               Final Jeopardy
             </div>
-            <div className="w-full rounded-[60px] border-8 border-white/5 bg-slate-950/80 px-16 py-20 shadow-[0_0_100px_rgba(0,0,0,0.8)] backdrop-blur-2xl">
-              <div className="text-[clamp(2rem,5vw,5rem)] font-black leading-tight text-white drop-shadow-lg">
+            <div className="w-full max-w-5xl rounded-[40px] border border-[--border-strong] bg-[--surface-overlay] px-12 py-16 shadow-[0_0_80px_var(--shadow-deep)] backdrop-blur-2xl">
+              <div className="text-[clamp(1.5rem,4vw,4rem)] font-serif leading-tight text-[--text-primary] drop-shadow-md">
                 {finalJeopardy.question || "No question provided."}
               </div>
             </div>
-            <div className="mt-12 flex items-center gap-4">
-              <div className="h-1 w-24 rounded-full bg-gradient-to-r from-transparent to-indigo-500" />
-              <div className="text-xl font-black uppercase tracking-[0.4em] text-indigo-500">Good Luck</div>
-              <div className="h-1 w-24 rounded-full bg-gradient-to-l from-transparent to-indigo-500" />
+            <div className="mt-10 flex items-center gap-4">
+              <div className="h-px w-24 bg-gradient-to-r from-transparent to-[--gold]" />
+              <div className="text-sm font-bold uppercase tracking-[0.4em] text-[--gold]">Good Luck</div>
+              <div className="h-px w-24 bg-gradient-to-l from-transparent to-[--gold]" />
             </div>
           </div>
         )}
@@ -493,35 +508,37 @@ function FinalJeopardySplash({
         {/* Stage: Resolution */}
         {stage === "resolution" && (
           <>
-            <div className="pointer-events-none absolute inset-[-50vh] z-0 bg-[radial-gradient(circle_at_50%_40%,rgba(230,179,25,0.12),transparent_70%)] animate-in fade-in duration-1000" />
+            <div className="pointer-events-none absolute inset-[-100vh] z-0 bg-[radial-gradient(circle_at_50%_50%,var(--gold-subtle),transparent_60%)] animate-in fade-in duration-1000" />
+            <div className="pointer-events-none absolute inset-[-100vh] z-0 animate-[spin_60s_linear_infinite] mix-blend-screen opacity-50"
+                 style={{ background: 'conic-gradient(from 0deg, transparent 0deg, var(--gold-glow) 10deg, transparent 20deg, var(--gold-glow) 30deg, transparent 40deg, var(--gold-glow) 50deg, transparent 60deg, var(--gold-glow) 70deg, transparent 80deg, var(--gold-glow) 90deg, transparent 100deg, var(--gold-glow) 110deg, transparent 120deg, var(--gold-glow) 130deg, transparent 140deg, var(--gold-glow) 150deg, transparent 160deg, var(--gold-glow) 170deg, transparent 180deg, var(--gold-glow) 190deg, transparent 200deg, var(--gold-glow) 210deg, transparent 220deg, var(--gold-glow) 230deg, transparent 240deg, var(--gold-glow) 250deg, transparent 260deg, var(--gold-glow) 270deg, transparent 280deg, var(--gold-glow) 290deg, transparent 300deg, var(--gold-glow) 310deg, transparent 320deg, var(--gold-glow) 330deg, transparent 340deg, var(--gold-glow) 350deg, transparent 360deg)' }} />
             
             <div className="relative z-10 flex flex-col items-center text-center animate-in fade-in slide-in-from-top-12 duration-700 w-full">
-              <div className="mb-12 text-5xl font-black uppercase tracking-[0.4em] text-[--gold] drop-shadow-[0_0_20px_var(--gold-glow)]">
-                The Results
+              <div className="mb-10 text-4xl font-bold uppercase tracking-[0.4em] text-[--gold] drop-shadow-[0_0_20px_var(--gold-glow)]">
+                The Champion
               </div>
-              <div className="grid w-full grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                {[...teams].sort((a,b) => b.score - a.score).map((t, idx) => (
-                  <div key={t.id} className={`relative flex flex-col p-8 transition-all ${idx === 0 ? "studio-card--gold scale-110 z-10 bg-[--surface-overlay]" : "studio-card scale-95 opacity-80"}`}>
+              <div className="flex flex-wrap justify-center items-end gap-6 w-full max-w-[90vw]">
+                {[...teams].sort((a,b) => b.score - a.score).slice(0, 5).map((t, idx) => (
+                  <div key={t.id} className={`relative flex flex-col items-center p-6 transition-all ${idx === 0 ? "studio-card--gold scale-125 z-20 bg-[--surface-overlay] shadow-[0_0_80px_var(--gold-glow)] mx-4 mb-8" : "studio-card scale-90 opacity-90 z-10"}`}>
                     {idx === 0 && (
-                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 rounded-full bg-[--gold] px-6 py-2 text-xs font-black uppercase tracking-widest text-[#0c0f1a] shadow-lg">
-                        Champion
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-[--gold] px-6 py-1 text-[10px] font-bold uppercase tracking-widest text-[#0c0f1a] shadow-[0_0_15px_var(--gold-glow)] whitespace-nowrap">
+                        1st Place
                       </div>
                     )}
-                    <div className="mb-6 flex justify-center">
-                      <div className="h-24 w-24 rounded-full flex items-center justify-center text-5xl font-black shadow-inner" style={{ background: t.color }}>
+                    <div className="mb-4 flex justify-center">
+                      <div className="h-20 w-20 rounded-full flex items-center justify-center text-4xl font-bold shadow-inner border-2 border-[--border-strong]" style={{ background: t.color }}>
                         <span className="text-[#0c0f1a] drop-shadow-sm">{t.name.charAt(0)}</span>
                       </div>
                     </div>
-                    <div className="text-3xl font-serif font-bold text-[--text-primary]">{t.name}</div>
+                    <div className="text-xl font-serif font-bold text-[--text-primary] truncate w-full max-w-[150px]">{t.name}</div>
                     {(finalJeopardy.wagers[t.id] ?? 0) > 0 && (
-                      <div className="mt-4 text-sm font-bold uppercase tracking-widest text-[--text-muted]">
+                      <div className="mt-3 text-[10px] font-bold uppercase tracking-widest text-[--text-muted]">
                         Wager: <span className="text-[--gold] text-data"><AnimatedNumber value={finalJeopardy.wagers[t.id] ?? 0} prefix="$" /></span>
                       </div>
                     )}
-                    <div className="mt-4 text-[5rem] leading-none text-[--gold] text-data font-black">
+                    <div className={`mt-3 text-data font-black ${idx === 0 ? 'text-6xl text-[--gold]' : 'text-4xl text-[--text-primary]'}`}>
                       <AnimatedNumber value={t.score} />
                     </div>
-                    <div className="mt-2 text-xs font-bold uppercase tracking-widest text-[--text-muted]">Final Score</div>
+                    <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-[--text-muted]">Final Score</div>
                   </div>
                 ))}
               </div>

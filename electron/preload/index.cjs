@@ -26,4 +26,5 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.send('timer:tick', { remainingMs, durationMs, running, ended, displayMs }),
   importBoard: async () => ipcRenderer.invoke('file:open'),
   exportBoard: async (data) => ipcRenderer.invoke('file:save', data),
+  toggleFullscreen: (target) => ipcRenderer.send('window:toggle-fullscreen', target),
 });

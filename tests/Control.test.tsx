@@ -6,8 +6,9 @@ import { describe, it, expect } from "vitest";
 describe("Control Window", () => {
   it("should render headers and sections", () => {
     render(<Control />);
-    expect(screen.getByText(/Control Window/i)).toBeInTheDocument();
-    // Use headings to avoid ambiguity
+    // h1 in the header
+    expect(screen.getByRole("heading", { name: /Host Control/i })).toBeInTheDocument();
+    // Section headings
     expect(screen.getByRole("heading", { name: /Timer/i })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /Teams/i })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /Board/i })).toBeInTheDocument();

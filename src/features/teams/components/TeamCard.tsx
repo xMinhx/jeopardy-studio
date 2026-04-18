@@ -29,7 +29,7 @@ export function TeamCard({ team, isLeader, isCoLeader }: TeamCardProps) {
   return (
     <div
       className={`score-badge flex items-center justify-between gap-4 transition-transform duration-300 hover:-translate-y-1 ${
-        isLeading ? 'ring-2 ring-[--gold] shadow-[0_0_20px_var(--gold-glow)]' : ''
+        isLeading ? 'border-[--gold] shadow-[0_0_0_2px_var(--gold),0_0_20px_var(--gold-glow)]' : ''
       }`}
     >
       <div className="flex items-center gap-3">
@@ -50,7 +50,7 @@ export function TeamCard({ team, isLeader, isCoLeader }: TeamCardProps) {
               </span>
             )}
           </div>
-          <p className="font-sans font-bold text-lg text-[--text-primary] truncate max-w-[120px]">
+          <p className="font-sans font-bold text-lg text-[--text-primary] truncate max-w-[180px]">
             {team.name}
           </p>
         </div>

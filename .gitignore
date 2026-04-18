@@ -1,11 +1,40 @@
+# Build outputs
 node_modules/
 dist/
 release/
-tmp_print/
+
+# Editor & IDE
+.idea/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docobj
+
+# OS artifacts
 .DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+
+# Logs
 *.log
-*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env files (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# Vite/tooling cache
 /.vite
 /.cache
-/.idea/
+tmp_print/
 
+# Electron builder cache
+app-builder-binaries/
+
+# Test coverage
+coverage/

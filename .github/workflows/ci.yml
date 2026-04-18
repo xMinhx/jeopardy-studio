@@ -1,23 +1,30 @@
 name: CI
+
 on:
   push:
-    branches: [master]
+    branches: [main, master]
   pull_request:
-    branches: [master]
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  check:
-    name: Lint, Test, and Build
+  quality:
+    name: Typecheck, Lint & Test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "npm"
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -28,8 +35,64 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Test
+      - name: Run tests
         run: npm test
 
-      - name: Build Renderer
+  build:
+    name: Build Renderer
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: quality
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build renderer
         run: npm run build:renderer
+
+      - name: Upload renderer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: renderer-dist
+          path: dist/renderer
+          retention-days: 7
+
+  release:
+    name: Package Electron App (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 25
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and package
+        run: npm run build
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jeopardy-windows-installer
+          path: release/**/*.exe
+          retention-days: 30

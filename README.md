@@ -1,40 +1,102 @@
-# Jeopardy Scoreboard
+<div align="center">
 
-A polished, dual-window Jeopardy-style scoreboard desktop app built for quiz show hosts. One window for you, one window for the audience — fully in sync.
+# QuizShow
 
-![Electron](https://img.shields.io/badge/Electron-31-47848F?logo=electron&logoColor=white)
-![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss&logoColor=white)
-![License](https://img.shields.io/badge/license-MIT-green)
+**A broadcast-grade, dual-window Jeopardy scoreboard for quiz show hosts.**
 
----
+One window for you. One window for the crowd. Always in sync.
 
-## What It Does
+[![CI](https://github.com/xMinhx/jeopardy-scoreboard/actions/workflows/ci.yml/badge.svg)](https://github.com/xMinhx/jeopardy-scoreboard/actions/workflows/ci.yml)
+[![Electron](https://img.shields.io/badge/Electron-31-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-gold)](LICENSE)
 
-**Jeopardy Scoreboard** gives you a complete host toolkit:
+<br/>
 
-- **Control window** — manage teams, scores, the timer, and the board all from one place
-- **Display window** — a clean audience-facing view that updates live as you play
-- **5×5 quiz board** — customizable categories and point values, with per-cell state tracking (open, claimed, locked, disabled)
-- **Live score panel** — add/remove teams, pick colors, adjust scores instantly with +/− buttons
-- **Countdown timer** — presets from 15 s to 90 s, keyboard shortcuts (Space / R / 1–6), and audio cues
-- **Question & answer reveal** — show questions to contestants with a single click, then reveal answers when ready
-- **Edit mode** — change any cell's question, answer, or value mid-game without losing state
-- **Import / export** — save and load full game configurations as JSON files
+![Display scoreboard view](docs/adr/screenshots/display-scoreboard.png)
+
+</div>
 
 ---
 
+## What is QuizShow?
 
+QuizShow is a **desktop application** built for people who host quiz nights, classroom games, and live events. It gives you a professional, TV-style experience without any subscription or complicated setup.
+
+Launch the app and two windows open instantly:
+
+| Window | Who sees it | What it does |
+|---|---|---|
+| **Host Control** | You (host) | Manage teams, scores, timer, board, and rounds |
+| **Audience Display** | The crowd / projector | Shows the live board, score panel, active questions, and timer |
+
+Both windows stay in perfect sync through a secure Electron IPC bridge -- no network required.
+
+---
+
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/adr/screenshots/display-scoreboard.png" alt="Live scoreboard on the audience display" />
+      <sub><b>Audience Display -- live scoreboard with team scores</b></sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/adr/screenshots/control-host-panel.png" alt="Host control panel" />
+      <sub><b>Host Control panel -- timer, teams, board management</b></sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/adr/screenshots/display-question-reveal.png" alt="Question reveal on display" />
+      <sub><b>Question reveal -- category, points, and question text</b></sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/adr/screenshots/display-final-jeopardy-category.png" alt="Final Jeopardy category reveal" />
+      <sub><b>Final Jeopardy -- dramatic category reveal screen</b></sub>
+    </td>
+  </tr>
+</table>
+
+---
+
+## Features
+
+### Host Control Panel
+- **Team management** -- add, remove, rename, color-code, and reorder teams with drag-and-drop
+- **Score editor** -- award, penalize, or manually set scores with +/- buttons or direct input
+- **Countdown timer** -- presets from 15 s to 90 s, keyboard shortcuts, live audio cues
+- **Board editor** -- edit any cell's question, point value, or Daily Double status mid-game
+- **Import / Export** -- save and restore complete game configurations as JSON files
+- **Fullscreen display** -- send the audience window to fullscreen from the host panel (or press F11)
+
+### Audience Display
+- **Live game board** -- 5x5 (up to 10x10) grid with claimed/open/disabled cell states
+- **Score lower-thirds** -- team name badges with animated score updates and a "Leading" indicator
+- **Question overlay** -- full-screen question reveal with category and point value
+- **Countdown timer view** -- circular progress ring with color-alert in the final seconds
+- **Daily Double** -- dedicated splash screen with team wager display
+- **Final Jeopardy** -- multi-stage sequence: category reveal, wager collection, resolution
+
+### Game Rounds
+- **Daily Double** -- opens a wager workflow; wager is confirmed before the question reveals
+- **Final Jeopardy** -- full round with secret wagers per team, question reveal, and scored resolution
+- **Winner screen** -- top-5 podium with animated score reveal and victory sound effect
+
+---
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) 22.7 or later
+- [Node.js](https://nodejs.org/) v22 or later
 - npm (bundled with Node.js)
+- Windows 10 / 11 (for the packaged installer; dev mode works on any OS with Electron)
 
-### Install & Run
+### Install and Run
 
 ```bash
 git clone https://github.com/xMinhx/jeopardy-scoreboard.git
@@ -43,70 +105,99 @@ npm install
 npm run dev
 ```
 
-Two windows will open: the **Control** window (for the host) and the **Display** window (for the audience/projector).
+Two windows open: the **Host Control** window and the **Audience Display** window.
 
-### Build a Distributable
+### Build a Distributable Installer
 
 ```bash
 npm run build
 ```
 
-Packaged installers are output to the `release/` directory.
+The NSIS installer for Windows is written to the `release/` directory.
 
 ---
 
 ## Keyboard Shortcuts
 
+> Shortcuts work while the **Host Control** window is focused.
+
 | Key | Action |
-|-----|--------|
-| `Space` | Start / pause the timer |
+|---|---|
+| `Space` | Start or resume the timer |
 | `R` | Reset the timer |
-| `1` – `6` | Set timer preset (10 s → 60 s) |
+| `1` through `6` | Jump to a timer preset (10 s, 15 s, 20 s, 30 s, 45 s, 60 s) |
+| `F11` | Toggle fullscreen on the Host Control window |
+
+> Press **F11** in the Audience Display window to toggle fullscreen on the projector.
 
 ---
 
 ## Project Structure
 
 ```
+jeopardy-scoreboard/
 ├── electron/
-│   ├── main/         # Electron main process & window management
-│   └── preload/      # Secure IPC bridge (contextBridge)
+│   ├── main/         # Main process -- window lifecycle, IPC handlers, file I/O
+│   └── preload/      # Secure context bridge exposed as window.api
 ├── src/
-│   ├── features/     # Feature modules (teams, board, timer)
-│   ├── store/        # Zustand state (board, teams, timer)
-│   ├── hooks/        # useTimer · useTimerAudio · useAnimatedNumber
-│   ├── services/     # Default board presets
-│   ├── types/        # TypeScript interfaces & Zod schemas
-│   └── utils/        # JSON persist helpers
+│   ├── windows/      # Control.tsx (host) and Display.tsx (audience)
+│   ├── features/
+│   │   ├── board/    # Board grid, cell utilities, BoardCard component
+│   │   ├── teams/    # TeamRow, TeamCard, team factory
+│   │   └── common/  # AnimatedNumber and shared components
+│   ├── store/        # Zustand store -- all game state in one place
+│   ├── hooks/        # useTimer, useTimerAudio, useGameAudio, useAnimatedNumber
+│   ├── services/     # Default board preset loader
+│   ├── types/        # TypeScript interfaces, Zod validation schemas, window.api types
+│   └── utils/        # State persistence helpers
 ├── public/
-│   ├── assets/       # Audio files (timer track, ending chime)
-│   └── board-default.json
-└── tests/            # Vitest + React Testing Library
+│   ├── assets/       # Sound effects (timer, score up/down, Daily Double, Final Jeopardy)
+│   └── board-default.json   # Default game board loaded on first run
+├── tests/            # Vitest unit tests (store, hooks, preset loader)
+└── docs/adr/         # Architecture Decision Records
 ```
+
+---
+
+## Architecture
+
+QuizShow is built on a few deliberate choices:
+
+**Dual-window IPC sync** -- The host Control window owns all game state via Zustand. On every state change, it broadcasts a snapshot to the Display window via Electron IPC. The Display is read-only and stateless; it never writes back. This eliminates sync conflicts entirely.
+
+**Zustand with persistence** -- Game state (board, teams, scores, round progress) is persisted to `localStorage` via `zustand/middleware/persist`. Sessions survive accidental closes.
+
+**Zod for import validation** -- JSON board imports are validated against a Zod schema before they touch the store, preventing corrupt data from breaking an in-progress game.
+
+**Context-isolated preload** -- The `window.api` bridge is exposed only through `contextBridge`, keeping Node.js APIs completely out of the renderer process.
+
+See [`docs/adr/`](docs/adr/) for detailed Architecture Decision Records.
 
 ---
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feat/my-feature`
-3. Commit your changes (we follow [Conventional Commits](https://www.conventionalcommits.org/))
-4. Open a pull request
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a pull request.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+```bash
+# Run the full quality check before opening a PR
+npm run typecheck && npm run lint && npm test
+```
+
+This project follows [Conventional Commits](https://www.conventionalcommits.org/). Use prefixes like `feat:`, `fix:`, `chore:`, `docs:`.
 
 ---
 
 ## Roadmap
 
-- [ ] Buzzer system integration
-- [ ] Daily Double support
-- [ ] Final Jeopardy round
-- [ ] Multiplayer / network sync mode
-- [ ] Theming (dark / light / custom)
+- [ ] Buzzer system integration (keyboard / physical button)
+- [ ] Network sync mode for remote teams
+- [ ] Customizable themes (light, high-contrast, custom color palettes)
+- [ ] Sound effect customization (upload your own clips)
+- [ ] Configurable board sizes beyond 10x10
 
 ---
 
 ## License
 
-MIT © [Minh Truong](https://github.com/xMinhx)
+MIT (c) [Minh Truong](https://github.com/xMinhx)

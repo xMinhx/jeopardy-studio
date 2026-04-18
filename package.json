@@ -1,5 +1,5 @@
 {
-  "name": "jeopardy-helper",
+  "name": "quizshow",
   "version": "0.1.0",
   "private": true,
   "description": "Dual-window Jeopardy-style scoreboard assistant for hosts.",
