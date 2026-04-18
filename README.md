@@ -41,6 +41,18 @@ The windows communicate via Electron IPC, so no internet connection is required 
 
 ---
 
+## 💡 The Story
+
+Jeopardy Studio was born out of a practical need. While volunteering as a House President at my university, I was tasked with organizing a large-scale Jeopardy/Quiz Show event. We had a live audience and significant prizes on the line, but I couldn't find a tool that met our requirements:
+
+- **Dual-Window Support**: A clear distinction between what the host sees and what the audience sees.
+- **Premium Look**: An interface that felt like a professional studio production.
+- **Reliability**: A tool that worked offline and wouldn't crash mid-event.
+
+Frustrated by the lack of options, I decided to build it myself. What started as a tool for one university event has now grown into Jeopardy Studio.
+
+---
+
 ## Screenshots
 
 <div align="center">
