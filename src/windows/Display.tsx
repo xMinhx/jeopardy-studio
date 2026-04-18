@@ -518,6 +518,11 @@ function FinalJeopardySplash({
                     </div>
                   </div>
                   <div className="text-2xl font-black uppercase tracking-widest text-white">{t.name}</div>
+                  {(finalJeopardy.wagers[t.id] ?? 0) > 0 && (
+                    <div className="mt-2 text-sm font-bold uppercase tracking-widest text-slate-400">
+                      Wager: <AnimatedNumber value={finalJeopardy.wagers[t.id] ?? 0} prefix="$" />
+                    </div>
+                  )}
                   <div className="mt-4 text-5xl font-black tabular-nums text-slate-100">
                     <AnimatedNumber value={t.score} />
                   </div>
