@@ -68,3 +68,14 @@ body {
 .tick-bounce {
   animation: tick-bounce 0.25s ease-out;
 }
+
+/* ---------------------------------------------------
+   Electron Drag Regions
+--------------------------------------------------- */
+.drag-region {
+  -webkit-app-region: drag;
+}
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+

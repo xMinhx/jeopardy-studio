@@ -230,11 +230,15 @@ export default function Control() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="p-6 grid gap-4 text-slate-900" onClick={() => setCtxMenu(null)}>
-      <header className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Control Window</h1>
-        <div className="text-sm text-slate-500">view=control</div>
-      </header>
+    <div className="flex flex-col h-screen overflow-hidden text-slate-900">
+      <div className="h-8 drag-region flex items-center px-4 shrink-0 bg-white/50 border-b border-slate-100/50">
+        <span className="text-[10px] uppercase tracking-widest text-slate-400 font-medium">Jeopardy Control</span>
+      </div>
+      <div className="p-6 pt-2 grid gap-4 overflow-y-auto flex-1">
+        <header className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold">Control Window</h1>
+          <div className="text-sm text-slate-500">view=control</div>
+        </header>
 
       {/* ── Timer section ── */}
       <section className="rounded border p-4">
@@ -647,6 +651,7 @@ export default function Control() {
 
         </div>
       </section>
+      </div>
     </div>
   );
 }

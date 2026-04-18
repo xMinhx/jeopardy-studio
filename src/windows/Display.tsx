@@ -123,8 +123,12 @@ export default function Display() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="h-screen overflow-hidden p-6 text-slate-900">
-      <header className="mb-6 flex items-center justify-center gap-8">{/* reserved */}</header>
+    <div className="flex flex-col h-screen overflow-hidden text-slate-900 bg-slate-950">
+      <div className="h-8 drag-region flex items-center px-4 shrink-0 bg-white/5 border-b border-white/5">
+        <span className="text-[10px] uppercase tracking-widest text-slate-500 font-medium">Jeopardy Display</span>
+      </div>
+      <div className="flex-1 overflow-hidden p-6 pt-2 flex flex-col">
+        <header className="mb-6 flex items-center justify-center gap-8">{/* reserved */}</header>
       <div className="flex h-[calc(100%-3.5rem)] flex-col">
         {mode === "timer" ? (
           <TimerView
@@ -138,6 +142,7 @@ export default function Display() {
         ) : (
           <ScoreboardView teams={teams} board={board} />
         )}
+      </div>
       </div>
     </div>
   );
