@@ -566,10 +566,12 @@ export default function Control() {
                         min={0}
                         onChange={(e) => {
                           const val = e.target.value === "" ? 0 : parseInt(e.target.value, 10);
-                          const max = Math.max(0, t.score);
-                          setFinalJeopardyWager(t.id, Math.min(val, max));
+                          setFinalJeopardyWager(t.id, isNaN(val) ? 0 : val);
                         }}
                       />
+                      {finalJeopardy.wagers[t.id] > Math.max(0, t.score) && (
+                        <div className="absolute -bottom-4 left-0 text-[8px] font-bold text-rose-500 uppercase">Over Limit</div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -738,11 +740,14 @@ export default function Control() {
                         min={0}
                         onChange={(e) => {
                           const val = e.target.value === "" ? 0 : parseInt(e.target.value, 10);
-                          const team = teams.find(team => team.id === dailyDouble.teamId);
-                          const max = Math.max(team?.score || 0, 1000);
-                          setDailyDoubleWager(Math.min(val, max));
+                          setDailyDoubleWager(isNaN(val) ? 0 : val);
                         }}
                       />
+                      {dailyDouble.wager > Math.max(teams.find(t => t.id === dailyDouble.teamId)?.score || 0, 1000) && (
+                        <div className="absolute -bottom-5 left-0 text-[10px] font-bold text-rose-600 uppercase tracking-tighter">
+                          Wager exceeds maximum allowed
+                        </div>
+                      )}
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <button
@@ -772,7 +777,11 @@ export default function Control() {
               <div className="flex items-center gap-3 pt-2">
                 <button
                   className="flex-1 rounded-xl bg-amber-500 py-4 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-amber-500/30 hover:bg-amber-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none"
-                  disabled={!dailyDouble.teamId || dailyDouble.wager < 5}
+                  disabled={
+                    !dailyDouble.teamId || 
+                    dailyDouble.wager < 5 || 
+                    dailyDouble.wager > Math.max(teams.find(t => t.id === dailyDouble.teamId)?.score || 0, 1000)
+                  }
                   onClick={() => {
                     playQuestionReveal();
                     confirmWager();
