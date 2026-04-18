@@ -165,5 +165,3 @@ export function TeamRow({ team, index, isActive, onSelect }: TeamRowProps) {
     </div>
   );
 }
-  );
-}
