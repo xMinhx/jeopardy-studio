@@ -132,26 +132,36 @@ jeopardy-studio/
 Jeopardy Studio uses a master-mirror architecture built on Electron's IPC (Inter-Process Communication).
 
 ```mermaid
-graph TD
-    subgraph "Main Process (Node.js)"
-        M[Main Index]
-        M -- "state:changed" --> D
-        M -- "state:changed" --> C
-        M -. "timer:tick" .-> D
+graph LR
+    classDef main fill:#1a2138,stroke:#e6b319,stroke-width:2px,color:#f0ead6;
+    classDef renderer fill:#0c0f1a,stroke:#4e5670,stroke-width:1px,color:#9ba3bf;
+    classDef highlight fill:#e6b319,stroke:#f5c736,stroke-width:2px,color:#0c0f1a,font-weight:bold;
+
+    subgraph Main ["Main Process"]
+        direction TB
+        M[Main Index]:::main
     end
 
-    subgraph "Host Control Window (Renderer)"
-        C[Control UI]
-        C -- "state:update" --> M
-        CStore[(Zustand Store)] <--> C
-        C -- "file:open/save" --> M
+    subgraph Control ["Host Control Window"]
+        direction TB
+        C[Control UI]:::renderer
+        CStore[(Zustand Store)]:::renderer
+        C <--> CStore
     end
 
-    subgraph "Audience Display Window (Renderer)"
-        D[Display UI]
-        DStore[(Zustand Store)] <--> D
+    subgraph Display ["Audience Display Window"]
+        direction TB
+        D[Display UI]:::renderer
+        DStore[(Zustand Store)]:::renderer
+        D <--> DStore
     end
 
+    C -- "state:update" --> M
+    M -- "state:changed" --> D
+    M -- "state:changed" --> C
+    M -. "timer:tick" .-> D
+    
+    C -- "file:io" --> M
     M -- "state:get" --> CStore
     M -- "state:get" --> DStore
 ```
