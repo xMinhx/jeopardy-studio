@@ -18,7 +18,9 @@ export function TeamCard({ team, isLeader, isCoLeader }: TeamCardProps) {
   const isLeading      = isLeader || isCoLeader;
 
   const initials = team.name
-    .split(" ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
     .map((w) => w[0])
     .join("")
     .slice(0, 2)
@@ -65,7 +67,7 @@ export function TeamCard({ team, isLeader, isCoLeader }: TeamCardProps) {
               style={{
                 background: "var(--gold-subtle)",
                 border: "1px solid var(--border-strong)",
-                color: "var(--text-gold)",
+                color: "var(--gold)",
                 fontSize: "0.45rem",
                 fontWeight: 700,
                 letterSpacing: "0.15em",

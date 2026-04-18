@@ -38,4 +38,6 @@ app-builder-binaries/
 
 # Test coverage
 coverage/
+
+# Documentation
 docs/adr/jeopardy-studio/

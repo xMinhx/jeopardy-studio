@@ -14,6 +14,7 @@ import type { Board } from "@/types/board";
 import type { Team } from "@/types/team";
 
 const ALERT_EPS_MS = 300;
+const SCOREBOARD_ALERT_MS = 5000;
 
 export default function Display() {
   const { teams, board, setAll, dailyDouble, finalJeopardy } = useBoardStore();
@@ -192,7 +193,7 @@ function ScoreboardView({ teams, board, dailyDouble, timerState }: ScoreboardVie
   const activeQ      = getActiveQuestions(board, teams)[0] ?? null;
   const activeCell   = activeQ ? visibleRows.flat().find((c) => c.id === activeQ.cellId) : null;
 
-  const isAlert = timerState.ended || timerState.displayMs <= 5000;
+  const isAlert = timerState.ended || timerState.displayMs <= SCOREBOARD_ALERT_MS;
   const pct = timerState.durationMs > 0 ? Math.max(0, Math.min(1, timerState.displayMs / timerState.durationMs)) : 0;
   const deg = Math.round(pct * 360);
   const ringStyle = isAlert ? { background: "#ef4444" } : { backgroundImage: `conic-gradient(var(--gold) ${deg}deg, rgba(240,234,214,0.08) 0deg)` };
