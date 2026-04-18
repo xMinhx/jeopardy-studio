@@ -6,6 +6,7 @@
 
 One window for the host. One window for the audience. Always in sync.
 
+[![Latest Release](https://img.shields.io/github/v/release/xMinhx/jeopardy-studio?color=gold&label=latest%20version)](https://github.com/xMinhx/jeopardy-studio/releases)
 [![CI](https://github.com/xMinhx/jeopardy-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/xMinhx/jeopardy-studio/actions/workflows/ci.yml)
 [![Electron](https://img.shields.io/badge/Electron-31-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev/)
@@ -137,6 +138,28 @@ If you find this project useful, consider supporting its development:
 </a>
 
 </div>
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] **Custom Themes**: Allow users to change colors and fonts for the audience display.
+- [ ] **Soundboard**: A dedicated UI for the host to trigger custom sound effects.
+- [ ] **Remote Control**: A web-based remote for the host to control the game from a tablet/phone.
+- [ ] **Internationalization**: Support for multiple languages.
+- [ ] **Advanced Animations**: Smoother transitions for category reveals and point values.
+
+---
+
+## 🛠️ Built With
+
+- **Electron** — Desktop framework
+- **React** — UI library
+- **Zustand** — State management
+- **TypeScript** — Type safety
+- **Tailwind CSS** — Styling
+- **Vitest** — Unit and component testing
+- **Zod** — Schema validation
 
 ---
 
