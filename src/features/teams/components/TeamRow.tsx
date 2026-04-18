@@ -126,41 +126,41 @@ export function TeamRow({ team, index, isActive, onSelect }: TeamRowProps) {
       </div>
 
       {/* Quick Adjustments */}
-      <div className="grid grid-cols-2 gap-2">
-        <div className="flex flex-col gap-1">
-          <div className="flex gap-1">
-            {[100, 200, 500].map((v) => (
-              <button
-                key={`p${v}`}
-                onClick={(e) => { e.stopPropagation(); updateScore(team.id, v); }}
-                className="flex-1 py-1.5 rounded-lg bg-[--success-subtle] border border-[--success]/20 text-[--success] text-[9px] font-black hover:bg-[--success]/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-              >
-                +{v}
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-1">
-            {[100, 200, 500].map((v) => (
-              <button
-                key={`m${v}`}
-                onClick={(e) => { e.stopPropagation(); updateScore(team.id, -v); }}
-                className="flex-1 py-1.5 rounded-lg bg-[--danger-subtle] border border-[--danger]/20 text-[--danger] text-[9px] font-black hover:bg-[--danger]/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-              >
-                -{v}
-              </button>
-            ))}
-          </div>
+      <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-3 gap-1.5">
+          {[100, 200, 500].map((v) => (
+            <button
+              key={`p${v}`}
+              aria-label={`Add ${v} points`}
+              onClick={(e) => { e.stopPropagation(); updateScore(team.id, v); }}
+              className="flex flex-col items-center justify-center py-2.5 rounded-xl bg-[--success-subtle] border border-[--success]/20 text-[--success] hover:bg-[--success]/15 hover:border-[--success]/50 active:scale-95 transition-all shadow-sm"
+            >
+              <span className="text-[9px] font-black uppercase tracking-tighter opacity-60">Add</span>
+              <span className="text-sm font-black">+{v}</span>
+            </button>
+          ))}
+        </div>
+        <div className="grid grid-cols-3 gap-1.5">
+          {[100, 200, 500].map((v) => (
+            <button
+              key={`m${v}`}
+              aria-label={`Subtract ${v} points`}
+              onClick={(e) => { e.stopPropagation(); updateScore(team.id, -v); }}
+              className="flex flex-col items-center justify-center py-2.5 rounded-xl bg-[--danger-subtle] border border-[--danger]/20 text-[--danger] hover:bg-[--danger]/15 hover:border-[--danger]/50 active:scale-95 transition-all shadow-sm"
+            >
+              <span className="text-[9px] font-black uppercase tracking-tighter opacity-60">Sub</span>
+              <span className="text-sm font-black">-{v}</span>
+            </button>
+          ))}
         </div>
         
-        {/* Custom Quick Actions (Optional placeholder for more UX magic) */}
-        <div className="flex flex-col justify-between">
-           <button 
-             className="flex-1 rounded-lg border border-[--border-strong] bg-[--surface-base] text-[8px] font-black text-[--text-secondary] hover:bg-[--surface-overlay] hover:text-[--text-primary] transition-all"
-             onClick={(e) => { e.stopPropagation(); updateScore(team.id, -team.score); }}
-           >
-             RESET SCORE
-           </button>
-        </div>
+        <button 
+          aria-label="Reset team score to zero"
+          className="w-full mt-1 py-1.5 rounded-lg border border-[--border-strong] bg-[--surface-base] text-[10px] font-black tracking-widest text-[--text-muted] hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 transition-all uppercase"
+          onClick={(e) => { e.stopPropagation(); updateScore(team.id, -team.score); }}
+        >
+          Reset Team Score
+        </button>
       </div>
     </div>
   );
