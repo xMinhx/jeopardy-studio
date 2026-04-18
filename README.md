@@ -131,8 +131,10 @@ If you find this project useful, consider supporting its development:
 <div align="center">
 
 [![GitHub Sponsors](https://img.shields.io/badge/Sponsor-xMinhx-EA4AAA?style=for-the-badge&logo=github-sponsors)](https://github.com/sponsors/xMinhx)
-&nbsp;&nbsp;
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-ff8432?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white)](https://www.buymeacoffee.com/xminhx)
+<br/><br/>
+<a href="https://www.buymeacoffee.com/xminhx" target="_blank">
+  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-orange.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" >
+</a>
 
 </div>
 
