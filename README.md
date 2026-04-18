@@ -132,38 +132,48 @@ jeopardy-studio/
 Jeopardy Studio uses a master-mirror architecture built on Electron's IPC (Inter-Process Communication).
 
 ```mermaid
-graph LR
-    classDef main fill:#1a2138,stroke:#e6b319,stroke-width:2px,color:#f0ead6;
-    classDef renderer fill:#0c0f1a,stroke:#4e5670,stroke-width:1px,color:#9ba3bf;
-    classDef highlight fill:#e6b319,stroke:#f5c736,stroke-width:2px,color:#0c0f1a,font-weight:bold;
+graph TD
+    %% Theme Configuration
+    classDef main fill:#1a2138,stroke:#e6b319,stroke-width:3px,color:#f0ead6,rx:10,ry:10;
+    classDef renderer fill:#0c0f1a,stroke:#4e5670,stroke-width:1px,color:#9ba3bf,rx:5,ry:5;
+    classDef store fill:#12172a,stroke:#e6b319,stroke-width:1px,color:#e6b319,rx:20,ry:20;
+    classDef action fill:#e6b319,stroke:#f5c736,stroke-width:2px,color:#0c0f1a,font-weight:bold;
 
-    subgraph Main ["Main Process"]
+    subgraph Main ["Main Process (Node.js)"]
         direction TB
-        M[Main Index]:::main
+        M_IDX[Main Index]:::main
+        M_LATEST[(Latest State)]:::store
+        M_IDX --- M_LATEST
     end
 
-    subgraph Control ["Host Control Window"]
+    subgraph Host ["Host Control Window"]
         direction TB
-        C[Control UI]:::renderer
-        CStore[(Zustand Store)]:::renderer
-        C <--> CStore
+        C_UI[Control UI]:::renderer
+        C_ST[(Zustand Store)]:::store
+        C_UI <--> C_ST
     end
 
-    subgraph Display ["Audience Display Window"]
+    subgraph Audience ["Audience Display Window"]
         direction TB
-        D[Display UI]:::renderer
-        DStore[(Zustand Store)]:::renderer
-        D <--> DStore
+        D_UI[Display UI]:::renderer
+        D_ST[(Zustand Store)]:::store
+        D_UI <--> D_ST
     end
 
-    C -- "state:update" --> M
-    M -- "state:changed" --> D
-    M -- "state:changed" --> C
-    M -. "timer:tick" .-> D
+    %% Communication Flow
+    C_UI -- "1. state:update" --> M_IDX
+    M_IDX -- "2. state:changed" --> D_UI
+    M_IDX -- "2. state:changed" --> C_UI
     
-    C -- "file:io" --> M
-    M -- "state:get" --> CStore
-    M -- "state:get" --> DStore
+    M_IDX -. "timer:tick" .-> D_UI
+    C_UI -- "file:io" --> M_IDX
+
+    %% Initialization
+    M_IDX -- "state:get" --> C_ST
+    M_IDX -- "state:get" --> D_ST
+
+    %% Styling
+    linkStyle 0,1,2 stroke:#e6b319,stroke-width:2px;
 ```
 
 - **State Sync**: Uses a one-way IPC bridge. The Host Control owns the state; the Display window is a reactive mirror.
