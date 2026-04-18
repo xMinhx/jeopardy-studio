@@ -602,6 +602,9 @@ export default function Control() {
                         onClick={() => {
                           resolveFinalJeopardyTeam(t.id, true);
                           playScoreUp();
+                          if (finalJeopardy.resolvedTeams.length + 1 === teams.length) {
+                            setTimeout(() => playWinnerReveal(), 1000);
+                          }
                         }}
                       >
                         CORRECT
@@ -612,6 +615,9 @@ export default function Control() {
                         onClick={() => {
                           resolveFinalJeopardyTeam(t.id, false);
                           playScoreDown();
+                          if (finalJeopardy.resolvedTeams.length + 1 === teams.length) {
+                            setTimeout(() => playWinnerReveal(), 1000);
+                          }
                         }}
                       >
                         INCORRECT

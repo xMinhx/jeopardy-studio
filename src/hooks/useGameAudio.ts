@@ -41,6 +41,7 @@ export function useGameAudio() {
   const playDailyDouble = useCallback(() => playSound("/assets/daily_double_sfx.mp3"), [playSound]);
   const playQuestionReveal = useCallback(() => playSound("/assets/question_reveal_sfx.mp3"), [playSound]);
   const playFinalJeopardy = useCallback(() => playSound("/assets/final_jeopardy_sfx.mp3"), [playSound]);
+  const playWinnerReveal = useCallback(() => playSound("/assets/winner_reveal_sfx.mp3"), [playSound]);
 
   return {
     playScoreUp,
@@ -48,5 +49,6 @@ export function useGameAudio() {
     playDailyDouble,
     playQuestionReveal,
     playFinalJeopardy,
+    playWinnerReveal,
   };
 }
