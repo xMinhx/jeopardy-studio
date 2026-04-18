@@ -427,7 +427,7 @@ export default function Control() {
             + Add Team
           </button>
         </div>
-        <div className="grid gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
           {teams.map((team, idx) => (
             <TeamRow
               key={team.id}

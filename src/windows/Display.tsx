@@ -110,7 +110,12 @@ export default function Display() {
         ) : mode === "timer" ? (
           <TimerView displayMs={displayMs} durationMs={durationMs} tickRunning={tickRunning} ended={ended} alertVersion={alertVersion} timerQuestion={timerQuestion} />
         ) : (
-          <ScoreboardView teams={teams} board={board} dailyDouble={dailyDouble} />
+          <ScoreboardView 
+            teams={teams} 
+            board={board} 
+            dailyDouble={dailyDouble} 
+            timerState={{ displayMs, durationMs, tickRunning, ended, alertVersion }} 
+          />
         )}
       </div>
     </div>
@@ -172,15 +177,25 @@ function TimerView({ displayMs, durationMs, tickRunning, ended, alertVersion, ti
 // ---------------------------------------------------------------------------
 // Scoreboard View
 // ---------------------------------------------------------------------------
-interface ScoreboardViewProps { teams: Team[]; board: Board; dailyDouble: BoardState["dailyDouble"]; }
+interface ScoreboardViewProps { 
+  teams: Team[]; 
+  board: Board; 
+  dailyDouble: BoardState["dailyDouble"]; 
+  timerState: { displayMs: number; durationMs: number; tickRunning: boolean; ended: boolean; alertVersion: number; };
+}
 
-function ScoreboardView({ teams, board, dailyDouble }: ScoreboardViewProps) {
+function ScoreboardView({ teams, board, dailyDouble, timerState }: ScoreboardViewProps) {
   const leaderScore  = teams.reduce((max, t) => Math.max(max, t.score), Number.NEGATIVE_INFINITY);
   const leaderCount  = teams.filter((t) => t.score === leaderScore).length;
   const visibleCats  = board.categories.slice(0, board.cols);
   const visibleRows  = board.grid.slice(0, board.rows).map((row) => row.slice(0, board.cols));
   const activeQ      = getActiveQuestions(board, teams)[0] ?? null;
   const activeCell   = activeQ ? visibleRows.flat().find((c) => c.id === activeQ.cellId) : null;
+
+  const isAlert = timerState.ended || timerState.displayMs <= 5000;
+  const pct = timerState.durationMs > 0 ? Math.max(0, Math.min(1, timerState.displayMs / timerState.durationMs)) : 0;
+  const deg = Math.round(pct * 360);
+  const ringStyle = isAlert ? { background: "#ef4444" } : { backgroundImage: `conic-gradient(var(--gold) ${deg}deg, rgba(240,234,214,0.08) 0deg)` };
 
   return (
     <div className="flex h-full flex-col gap-6 overflow-x-hidden">
@@ -208,13 +223,30 @@ function ScoreboardView({ teams, board, dailyDouble }: ScoreboardViewProps) {
               )}
             </div>
             
-            <div className="ornate-frame rounded-sm px-14 py-12 max-w-[1000px] mx-auto text-center" style={{background:'linear-gradient(180deg, rgba(26,33,56,0.95), rgba(12,15,26,0.98))'}}>
-              <div className="ornate-corner tl"></div>
-              <div className="ornate-corner tr"></div>
-              <div className="ornate-corner bl"></div>
-              <div className="ornate-corner br"></div>
-              <div className="font-serif text-[--text-primary] leading-tight" style={{fontSize: 'clamp(2rem, 4vw, 4.5rem)', fontWeight: 500}}>
-                {activeCell.question || "No question set"}
+            <div className="relative">
+              <div className="ornate-frame rounded-sm px-14 py-12 max-w-[1000px] mx-auto text-center" style={{background:'linear-gradient(180deg, rgba(26,33,56,0.95), rgba(12,15,26,0.98))'}}>
+                <div className="ornate-corner tl"></div>
+                <div className="ornate-corner tr"></div>
+                <div className="ornate-corner bl"></div>
+                <div className="ornate-corner br"></div>
+                <div className="font-serif text-[--text-primary] leading-tight" style={{fontSize: 'clamp(2rem, 4vw, 4.5rem)', fontWeight: 500}}>
+                  {activeCell.question || "No question set"}
+                </div>
+              </div>
+
+              {/* Floating Timer Badge */}
+              <div className="absolute -top-10 -right-10 flex flex-col items-center gap-2">
+                <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-[--surface-base] shadow-[0_0_30px_rgba(0,0,0,0.5)] border border-[--border-strong]" style={isAlert ? { boxShadow: "0 0 40px rgba(239, 68, 68, 0.4)", borderColor: "#ef4444" } : {}}>
+                  <div className="absolute inset-1 rounded-full" style={ringStyle}></div>
+                  <div className="absolute inset-[3px] rounded-full bg-[--surface-base] flex items-center justify-center">
+                    <span className={`digital text-2xl font-bold ${isAlert ? "text-red-500 blink-hard-3" : "text-[--gold]"}`}>
+                      {Math.ceil(timerState.displayMs / 1000)}
+                    </span>
+                  </div>
+                </div>
+                <div className="text-[8px] font-bold tracking-widest uppercase text-[--text-muted] bg-[--surface-base] px-2 py-0.5 rounded-full border border-[--border-subtle]">
+                  <span className={timerState.tickRunning ? "text-green-400" : ""}>●</span> {timerState.tickRunning ? "TIMING" : "STANDBY"}
+                </div>
               </div>
             </div>
 
