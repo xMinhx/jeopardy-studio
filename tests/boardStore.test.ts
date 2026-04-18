@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { defaultTeams, useBoardStore } from "@/store/boardStore";
+import type { Team } from "@/types/team";
+import type { Cell } from "@/types/cell";
 
 function resetStore() {
   useBoardStore.setState({
-    teams: defaultTeams.map((team) => ({ ...team })),
+    teams: defaultTeams.map((team: Team) => ({ ...team })),
     board: {
       rows: 5,
       cols: 5,
@@ -38,14 +40,14 @@ describe("boardStore", () => {
     const api = useBoardStore.getState();
     const id = api.teams[0].id;
     useBoardStore.getState().updateScore(id, 200);
-    const updated = useBoardStore.getState().teams.find((t) => t.id === id)!;
+    const updated = useBoardStore.getState().teams.find((t: Team) => t.id === id)!;
     expect(updated.score).toBe(200);
   });
 
   it("claims, unclaims and disables cells via the proper workflow", () => {
     const id = useBoardStore.getState().teams[0].id;
     const value = useBoardStore.getState().board.grid[0][0].value;
-    const base = useBoardStore.getState().teams.find((t) => t.id === id)!.score;
+    const base = useBoardStore.getState().teams.find((t: Team) => t.id === id)!.score;
 
     // Reveal → lock → correct is the workflow that results in "claimed"
     useBoardStore.getState().revealAndLockCell(0, 0, id);
@@ -54,7 +56,7 @@ describe("boardStore", () => {
     useBoardStore.getState().claimCellCorrect(0, 0);
     expect(useBoardStore.getState().board.grid[0][0].ownerTeamId).toBe(id);
     expect(useBoardStore.getState().board.grid[0][0].state).toBe("claimed");
-    expect(useBoardStore.getState().teams.find((t) => t.id === id)!.score).toBe(
+    expect(useBoardStore.getState().teams.find((t: Team) => t.id === id)!.score).toBe(
       base + value,
     );
 
@@ -63,7 +65,7 @@ describe("boardStore", () => {
       useBoardStore.getState().board.grid[0][0].ownerTeamId,
     ).toBeUndefined();
     expect(useBoardStore.getState().board.grid[0][0].state).toBe("hidden");
-    expect(useBoardStore.getState().teams.find((t) => t.id === id)!.score).toBe(
+    expect(useBoardStore.getState().teams.find((t: Team) => t.id === id)!.score).toBe(
       base,
     );
 
@@ -84,7 +86,7 @@ describe("boardStore", () => {
     useBoardStore.getState().removeTeam(teamId);
     // Team is gone
     expect(
-      useBoardStore.getState().teams.find((t) => t.id === teamId),
+      useBoardStore.getState().teams.find((t: Team) => t.id === teamId),
     ).toBeUndefined();
     // Cell is unclaimed and enabled
     expect(
@@ -117,7 +119,7 @@ describe("boardStore", () => {
     expect(board.cols).toBe(7);
     expect(board.categories).toHaveLength(7);
     expect(board.grid).toHaveLength(3);
-    expect(board.grid.every((row) => row.length === 7)).toBe(true);
+    expect(board.grid.every((row: Cell[]) => row.length === 7)).toBe(true);
     expect(board.grid[0][0].value).toBe(200);
     expect(board.grid[2][0].value).toBe(600);
   });
@@ -133,7 +135,7 @@ describe("boardStore", () => {
     expect(board.cols).toBe(6);
     expect(board.categories).toHaveLength(6);
     expect(board.categories.includes("Final Col")).toBe(false);
-    expect(board.grid.every((row) => row.length === 6)).toBe(true);
+    expect(board.grid.every((row: Cell[]) => row.length === 6)).toBe(true);
   });
 
   it("reveals, unlocks after incorrect, and claims only on correct", () => {
@@ -144,10 +146,10 @@ describe("boardStore", () => {
     const teamB = useBoardStore.getState().teams[1].id;
     const scoreA = useBoardStore
       .getState()
-      .teams.find((t) => t.id === teamA)!.score;
+      .teams.find((t: Team) => t.id === teamA)!.score;
     const scoreB = useBoardStore
       .getState()
-      .teams.find((t) => t.id === teamB)!.score;
+      .teams.find((t: Team) => t.id === teamB)!.score;
 
     store.setCellQuestion(0, 0, "Sample question");
     store.revealAndLockCell(0, 0, teamA);
@@ -158,7 +160,7 @@ describe("boardStore", () => {
     expect(cell.lockedTeamId).toBe(teamA);
     expect(cell.ownerTeamId).toBeUndefined();
     expect(
-      useBoardStore.getState().teams.find((t) => t.id === teamA)!.score,
+      useBoardStore.getState().teams.find((t: Team) => t.id === teamA)!.score,
     ).toBe(scoreA);
 
     store.markCellIncorrect(0, 0);
@@ -176,7 +178,7 @@ describe("boardStore", () => {
     expect(cell.lockedTeamId).toBeUndefined();
     expect(cell.state).toBe("claimed");
     expect(
-      useBoardStore.getState().teams.find((t) => t.id === teamB)!.score,
+      useBoardStore.getState().teams.find((t: Team) => t.id === teamB)!.score,
     ).toBe(scoreB + cell.value);
   });
 
@@ -191,10 +193,10 @@ describe("boardStore", () => {
     const cell = useBoardStore.getState().board.grid[0][0];
     const updatedTeamA = useBoardStore
       .getState()
-      .teams.find((t) => t.id === teamA)!;
+      .teams.find((t: Team) => t.id === teamA)!;
     const updatedTeamB = useBoardStore
       .getState()
-      .teams.find((t) => t.id === teamB)!;
+      .teams.find((t: Team) => t.id === teamB)!;
 
     expect(cell.ownerTeamId).toBe(teamA);
     expect(updatedTeamA.score).toBe(cell.value);
@@ -210,7 +212,7 @@ describe("boardStore", () => {
     const cell = useBoardStore.getState().board.grid[0][0];
     const updatedTeamA = useBoardStore
       .getState()
-      .teams.find((t) => t.id === teamA)!;
+      .teams.find((t: Team) => t.id === teamA)!;
 
     expect(cell.ownerTeamId).toBeUndefined();
     expect(cell.lockedTeamId).toBeUndefined();
