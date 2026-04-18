@@ -60,6 +60,13 @@ export default function Control() {
 
   const { playScoreUp, playScoreDown, playDailyDouble, playQuestionReveal, playFinalJeopardy, playWinnerReveal } = useGameAudio();
 
+  useEffect(() => {
+    if (finalJeopardy.stage === "resolution" && finalJeopardy.resolvedTeams.length === teams.length && teams.length > 0) {
+      const t = setTimeout(() => playWinnerReveal(), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [finalJeopardy.stage, finalJeopardy.resolvedTeams.length, teams.length, playWinnerReveal]);
+
   // Timer state
   const [timer, t] = useTimer(30000);
   const {
@@ -589,9 +596,6 @@ export default function Control() {
                         onClick={() => {
                           resolveFinalJeopardyTeam(t.id, true);
                           playScoreUp();
-                          if (finalJeopardy.resolvedTeams.length + 1 === teams.length) {
-                            setTimeout(() => playWinnerReveal(), 1000);
-                          }
                         }}
                       >
                         CORRECT
@@ -602,9 +606,6 @@ export default function Control() {
                         onClick={() => {
                           resolveFinalJeopardyTeam(t.id, false);
                           playScoreDown();
-                          if (finalJeopardy.resolvedTeams.length + 1 === teams.length) {
-                            setTimeout(() => playWinnerReveal(), 1000);
-                          }
                         }}
                       >
                         INCORRECT
@@ -916,7 +917,7 @@ export default function Control() {
               return (
                 <div
                   key={cell.id}
-                  className={`relative overflow-hidden flex flex-col rounded border border-[--border-subtle] ${editMode ? 'p-2' : 'p-4'} text-center transition ${
+                  className={`relative overflow-hidden flex flex-col rounded border border-[--border-subtle] ${editMode ? 'p-3' : 'p-4'} text-center transition ${
                     isDisabled
                       ? "bg-[--surface-base] opacity-40 border-dashed"
                       : isClaimed
@@ -925,6 +926,7 @@ export default function Control() {
                           ? "bg-[--surface-overlay] ring-1 ring-[--gold] border-[--gold]"
                           : "bg-[--surface-base] hover:bg-[--surface-overlay] cursor-pointer"
                   }`}
+                  style={{ minHeight: editMode ? '160px' : 'auto' }}
                   onClick={() => {
                     if (editMode) return;
                     if (cell.state === "claimed" || cell.state === "disabled") return;
@@ -932,7 +934,7 @@ export default function Control() {
                   }}
                 >
                   {editMode ? (
-                    <div className="flex flex-col h-full gap-1 flex-1">
+                    <div className="flex flex-col h-full gap-2 flex-1">
                       <input
                         className="w-full bg-transparent border-b border-[--border-strong] pb-1 text-center text-xl font-serif text-[--gold] focus:outline-none focus:border-[--gold] transition-colors"
                         type="number"
@@ -940,7 +942,7 @@ export default function Control() {
                         onChange={(e) => setCellValue(r, c, Number(e.target.value))}
                       />
                       <textarea
-                        className="w-full flex-1 bg-transparent text-center text-[10px] text-[--text-primary] focus:outline-none resize-none leading-snug placeholder-[--text-muted] mt-1"
+                        className="w-full flex-1 bg-transparent text-center text-xs text-[--text-primary] focus:outline-none resize-none leading-snug placeholder-[--text-muted]"
                         value={cell.question ?? ""}
                         placeholder="Question..."
                         onChange={(e) => setCellQuestion(r, c, e.target.value)}

@@ -34,9 +34,16 @@ export function BoardCard({ cell, owner, isActive }: BoardCardProps) {
 
       {/* Ownership badge */}
       {owner && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 opacity-40">
-          <div className="h-2 w-2 rounded-full" style={{ background: owner.color, boxShadow: `0 0 10px ${owner.color}` }} />
-          <div className="text-[9px] font-bold tracking-widest-2 uppercase text-[--text-muted]">CLAIMED</div>
+        <div 
+          className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 opacity-90 z-10 transition-all duration-300"
+          style={{ 
+            background: `linear-gradient(to top, rgba(8,10,18,0.8), transparent 80%), radial-gradient(circle at center, ${owner.color}25, transparent)`
+          }}
+        >
+          <div className="h-3 w-3 rounded-full border border-[--surface-base]" style={{ background: owner.color, boxShadow: `0 0 12px ${owner.color}` }} />
+          <div className="text-[10px] font-bold tracking-widest uppercase truncate max-w-[90%] px-2" style={{ color: owner.color, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+            {owner.name}
+          </div>
         </div>
       )}
 

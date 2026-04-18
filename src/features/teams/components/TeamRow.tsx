@@ -1,5 +1,6 @@
 import type { Team } from "@/types/team";
 import { useBoardStore } from "@/store/boardStore";
+import { useState, useEffect } from "react";
 
 interface TeamRowProps {
   team: Team;
@@ -18,14 +19,27 @@ export function TeamRow({ team, index, isActive, onSelect }: TeamRowProps) {
   const teamsCount   = useBoardStore((s) => s.teams.length);
   const teams = useBoardStore((s) => s.teams);
 
+  const [confirmRemove, setConfirmRemove] = useState(false);
+
+  useEffect(() => {
+    if (confirmRemove) {
+      const t = setTimeout(() => setConfirmRemove(false), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [confirmRemove]);
+
   const isFirst = index === 0;
   const isLast  = index === teamsCount - 1;
   const leader = teams.reduce((a, b) => b.score > a.score ? b : a, teams[0]);
   const isLeader = team.id === leader?.id && team.score > 0;
 
   const handleRemove = () => {
-    if (teamsCount <= 1) { alert("At least one team is required."); return; }
-    if (confirm(`Remove ${team.name}? Owned cells will be unclaimed.`)) removeTeam(team.id);
+    if (teamsCount <= 1) return;
+    if (!confirmRemove) {
+      setConfirmRemove(true);
+    } else {
+      removeTeam(team.id);
+    }
   };
 
   return (
@@ -73,11 +87,11 @@ export function TeamRow({ team, index, isActive, onSelect }: TeamRowProps) {
         }
         
         <button
-          className="text-[--danger] hover:text-[#fca5a5] ml-1 opacity-50 hover:opacity-100 shrink-0"
+          className={`${confirmRemove ? 'bg-red-500 text-white px-1.5 rounded' : 'text-[--danger] hover:text-[#fca5a5] opacity-50 hover:opacity-100'} text-[8px] font-bold uppercase transition-all ml-1 shrink-0`}
           title="Remove team"
           onClick={(e) => { e.stopPropagation(); handleRemove(); }}
         >
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          {confirmRemove ? "SURE?" : <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>}
         </button>
       </div>
 
