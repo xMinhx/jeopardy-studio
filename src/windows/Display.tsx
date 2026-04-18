@@ -195,27 +195,33 @@ function ScoreboardView({ teams, board, dailyDouble }: ScoreboardViewProps) {
 
       {/* Board */}
       <section className="relative flex min-h-0 flex-1 flex-col">
-        {/* Active question overlay */}
+        {/* Active question overlay — cinematic reveal style */}
         {activeCell && activeQ && (
-          <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-2xl backdrop-blur-md"
-            style={{ background: "rgba(12,15,26,0.92)" }}>
-            <div className="max-w-5xl px-10 py-10 text-center animate-in zoom-in-95 fade-in duration-500">
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <span className="studio-label" style={{ letterSpacing: "0.3em" }}>{activeQ.category}</span>
-                <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--gold)" }} />
-                {dailyDouble.stage === "question" ? (
-                  <span className="font-serif italic text-3xl" style={{ color: "var(--gold)" }}>
-                    Daily Double — ${dailyDouble.wager.toLocaleString()}
-                  </span>
-                ) : (
-                  <span className="font-serif italic text-3xl" style={{ color: "var(--gold)" }}>
-                    {activeQ.value} points
-                  </span>
-                )}
-              </div>
-              <div className="font-serif leading-tight" style={{ fontSize: "clamp(2rem,5vw,5rem)", color: "var(--text-primary)" }}>
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center anim-scale-in" style={{background:'rgba(8,10,18,0.92)', backdropFilter:'blur(14px)'}}>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="text-[11px] font-bold tracking-widest-2 uppercase text-[--gold]">{activeQ.category}</div>
+              <div className="h-1.5 w-1.5 rounded-full bg-[--gold]"></div>
+              {dailyDouble.stage === "question" ? (
+                <div className="font-serif italic text-[--gold]" style={{fontSize: '24px'}}>DAILY DOUBLE · ${dailyDouble.wager.toLocaleString()}</div>
+              ) : (
+                <div className="font-serif italic text-[--gold]" style={{fontSize: '24px'}}>{activeCell.value} points</div>
+              )}
+            </div>
+            
+            <div className="ornate-frame rounded-sm px-14 py-12 max-w-[1000px] mx-auto text-center" style={{background:'linear-gradient(180deg, rgba(26,33,56,0.95), rgba(12,15,26,0.98))'}}>
+              <div className="ornate-corner tl"></div>
+              <div className="ornate-corner tr"></div>
+              <div className="ornate-corner bl"></div>
+              <div className="ornate-corner br"></div>
+              <div className="font-serif text-[--text-primary] leading-tight" style={{fontSize: 'clamp(2rem, 4vw, 4.5rem)', fontWeight: 500}}>
                 {activeCell.question || "No question set"}
               </div>
+            </div>
+
+            <div className="mt-10 flex items-center gap-4">
+              <div className="h-px w-20 bg-gradient-to-r from-transparent to-[--gold] opacity-50"/>
+              <div className="text-[10px] font-bold tracking-widest-2 uppercase text-[--text-muted]">Waiting for answer...</div>
+              <div className="h-px w-20 bg-gradient-to-l from-transparent to-[--gold] opacity-50"/>
             </div>
           </div>
         )}
