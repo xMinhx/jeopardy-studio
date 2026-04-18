@@ -300,12 +300,12 @@ function ScoreboardView({ teams, board, dailyDouble, timerState }: ScoreboardVie
 function DailyDoubleSplash({ teams, dailyDouble }: { teams: Team[]; dailyDouble: BoardState["dailyDouble"] }) {
   const team = teams.find((t) => t.id === dailyDouble.teamId);
   return (
-    <div className="flex h-full flex-col items-center justify-center p-6 animate-in zoom-in duration-700" style={{ background: "var(--surface-base)" }}>
-      <div className="relative flex flex-col items-center text-center overflow-hidden">
-        {/* Spinning rays */}
-        <div className="anim-spin-slow pointer-events-none absolute" style={{ inset: "-150vh", background: "conic-gradient(from 0deg, transparent 0deg, rgba(230,179,25,0.06) 10deg, transparent 20deg, rgba(230,179,25,0.06) 30deg, transparent 40deg, rgba(230,179,25,0.06) 50deg, transparent 60deg, rgba(230,179,25,0.06) 70deg, transparent 80deg, rgba(230,179,25,0.06) 90deg, transparent 100deg, rgba(230,179,25,0.06) 110deg, transparent 120deg, rgba(230,179,25,0.06) 130deg, transparent 140deg, rgba(230,179,25,0.06) 150deg, transparent 160deg, rgba(230,179,25,0.06) 170deg, transparent 180deg)" }} />
+    <div className="relative flex h-full flex-col items-center justify-center p-6 animate-in zoom-in duration-700 overflow-hidden" style={{ background: "var(--surface-base)" }}>
+      {/* Spinning rays */}
+      <div className="anim-spin-slow pointer-events-none absolute" style={{ inset: "-150vh", background: "conic-gradient(from 0deg, transparent 0deg, rgba(230,179,25,0.06) 10deg, transparent 20deg, rgba(230,179,25,0.06) 30deg, transparent 40deg, rgba(230,179,25,0.06) 50deg, transparent 60deg, rgba(230,179,25,0.06) 70deg, transparent 80deg, rgba(230,179,25,0.06) 90deg, transparent 100deg, rgba(230,179,25,0.06) 110deg, transparent 120deg, rgba(230,179,25,0.06) 130deg, transparent 140deg, rgba(230,179,25,0.06) 150deg, transparent 160deg, rgba(230,179,25,0.06) 170deg, transparent 180deg)" }} />
 
-        <div className="relative z-10">
+      <div className="relative z-10 flex flex-col items-center text-center">
+        <div className="relative">
           <div className="font-sans font-black uppercase tracking-[0.65em] mb-2" style={{ fontSize: "1.8rem", color: "var(--gold)", textShadow: "0 0 20px var(--gold-glow)" }}>
             Daily
           </div>
