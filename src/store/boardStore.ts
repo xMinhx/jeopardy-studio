@@ -274,7 +274,7 @@ export const useBoardStore = create<BoardState>()(
           if (cell.isDailyDouble) {
             // Hide any other open cells
             const cleanGrid = s.board.grid.map((r) =>
-              r.map((c) => (c.state === "open" ? { ...c, state: "hidden" } : c)),
+              r.map((c): Cell => (c.state === "open" ? { ...c, state: "hidden" } : c)),
             );
             return {
               board: { ...s.board, grid: cleanGrid },
@@ -289,7 +289,7 @@ export const useBoardStore = create<BoardState>()(
 
           // Revert any currently "open" cells back to "hidden"
           const newGrid = s.board.grid.map((r, ri) =>
-            r.map((c, ci) => {
+            r.map((c, ci): Cell => {
               if (ri === row && ci === col) return { ...c, state: "open" };
               if (c.state === "open") return { ...c, state: "hidden" };
               return c;
@@ -317,7 +317,7 @@ export const useBoardStore = create<BoardState>()(
           const { row, col } = s.dailyDouble.cellPosition;
 
           const newGrid = s.board.grid.map((r, ri) =>
-            r.map((c, ci) => {
+            r.map((c, ci): Cell => {
               if (ri === row && ci === col) return { ...c, state: "open" };
               if (c.state === "open") return { ...c, state: "hidden" };
               return c;
