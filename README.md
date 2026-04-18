@@ -12,12 +12,14 @@ One window for the host. One window for the audience. Always in sync.
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-gold)](LICENSE)
 
+</div>
+
 <br/>
 
 <div align="center">
-  <img src="docs/screenshots/display-window.png" width="800" alt="Audience Display View" />
-  <br/>
-  <img src="docs/screenshots/control-window.png" width="800" alt="Host Control View" />
+  <img src="docs/screenshots/display-window.png" width="100%" alt="Audience Display View" />
+  <br/><br/>
+  <img src="docs/screenshots/control-window.png" width="100%" alt="Host Control View" />
 </div>
 
 ---
@@ -40,28 +42,15 @@ The windows communicate via Electron IPC, so no internet connection is required 
 
 ## Screenshots
 
-<table>
-  <tr>
-    <td align="center" width="50%">
-      <img src="docs/screenshots/display-window.png" alt="Live scoreboard" />
-      <sub><b>Audience Display: Scoreboard and game board</b></sub>
-    </td>
-    <td align="center" width="50%">
-      <img src="docs/screenshots/control-window.png" alt="Host control" />
-      <sub><b>Host Control: Timer and team management</b></sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="50%">
-      <img src="docs/screenshots/board-control.png" alt="Board management" />
-      <sub><b>Board Management: Edit questions and values</b></sub>
-    </td>
-    <td align="center" width="50%">
-      <img src="docs/screenshots/edit-mode.png" alt="Edit mode" />
-      <sub><b>Edit Mode: Live board adjustments</b></sub>
-    </td>
-  </tr>
-</table>
+<div align="center">
+
+| Audience Display | Host Control |
+| :---: | :---: |
+| <img src="docs/screenshots/display-window.png" alt="Live scoreboard" /> | <img src="docs/screenshots/control-window.png" alt="Host control" /> |
+| **Board Management** | **Edit Mode** |
+| <img src="docs/screenshots/board-control.png" alt="Board management" /> | <img src="docs/screenshots/edit-mode.png" alt="Edit mode" /> |
+
+</div>
 
 ---
 
@@ -90,12 +79,6 @@ npm install
 npm run dev
 ```
 
-### Build Installer
-```bash
-npm run build
-```
-The installer will be generated in the `release/` directory.
-
 ---
 
 ## Keyboard Shortcuts (Host Window)
@@ -111,7 +94,7 @@ The installer will be generated in the `release/` directory.
 
 ## Project Structure
 
-```
+```text
 jeopardy-studio/
 ├── electron/
 │   ├── main/         # Window lifecycle and IPC handlers
@@ -146,11 +129,11 @@ jeopardy-studio/
 If you find this project useful, consider supporting its development:
 
 <div align="center">
-  <iframe src="https://github.com/sponsors/xMinhx/button" title="Sponsor xMinhx" height="32" width="114" style="border: 0; border-radius: 6px;"></iframe>
-  <br/><br/>
-  <a href="https://www.buymeacoffee.com/xminhx" target="_blank">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-orange.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" >
-  </a>
+
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-xMinhx-EA4AAA?style=for-the-badge&logo=github-sponsors)](https://github.com/sponsors/xMinhx)
+&nbsp;&nbsp;
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-ff8432?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white)](https://www.buymeacoffee.com/xminhx)
+
 </div>
 
 ---
