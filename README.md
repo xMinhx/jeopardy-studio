@@ -25,14 +25,7 @@ A polished, dual-window Jeopardy-style scoreboard desktop app built for quiz sho
 
 ---
 
-## Screenshots
 
-<p align="center">
-  <img src="public/screenshots/control.png" alt="Control Window" width="45%" />
-  <img src="public/screenshots/display.png" alt="Display Window" width="45%" />
-</p>
-
----
 
 ## Getting Started
 
