@@ -1,8 +1,8 @@
 <div align="center">
 
-# QuizShow
+# Jeopardy Studio
 
-**A broadcast-grade, dual-window Jeopardy scoreboard for quiz show hosts.**
+**A broadcast-grade, dual-window scoreboard for hosting high-end quiz show events.**
 
 One window for you. One window for the crowd. Always in sync.
 
@@ -21,9 +21,15 @@ One window for you. One window for the crowd. Always in sync.
 
 ---
 
-## What is QuizShow?
+## ⚖️ Legal Disclaimer
 
-QuizShow is a **desktop application** built for people who host quiz nights, classroom games, and live events. It gives you a professional, TV-style experience without any subscription or complicated setup.
+This project is an independent creation and is **not affiliated with, endorsed by, or sponsored by** the "Jeopardy!" game show, Sony Pictures Television, or any of its subsidiaries. All "Jeopardy!" trademarks and copyrights are the property of their respective owners. This tool is intended for private, educational, and non-commercial use only.
+
+---
+
+## What is Jeopardy Studio?
+
+Jeopardy Studio is a **premium desktop application** built for people who host quiz nights, classroom games, and live events. It provides a professional, TV-style experience without any subscription or complicated setup.
 
 Launch the app and two windows open instantly:
 
@@ -32,7 +38,17 @@ Launch the app and two windows open instantly:
 | **Host Control** | You (host) | Manage teams, scores, timer, board, and rounds |
 | **Audience Display** | The crowd / projector | Shows the live board, score panel, active questions, and timer |
 
-Both windows stay in perfect sync through a secure Electron IPC bridge -- no network required.
+Both windows stay in perfect sync through a secure Electron IPC bridge: no network required.
+
+---
+
+## 🌟 The Executive Studio Experience
+
+Designed for clarity and elegance, the **Executive Studio** aesthetic uses:
+- **Newsreader Serif**: A sophisticated typeface for questions and categories.
+- **Deep Navy & Gold**: A high-contrast, premium color palette.
+- **Micro-animations**: Smooth transitions for score updates and question reveals.
+- **Broadcast Layouts**: Standard TV-safe margins and readable typography.
 
 ---
 
@@ -42,21 +58,21 @@ Both windows stay in perfect sync through a secure Electron IPC bridge -- no net
   <tr>
     <td align="center" width="50%">
       <img src="docs/adr/screenshots/display-scoreboard.png" alt="Live scoreboard on the audience display" />
-      <sub><b>Audience Display -- live scoreboard with team scores</b></sub>
+      <sub><b>Audience Display: live scoreboard with team scores</b></sub>
     </td>
     <td align="center" width="50%">
       <img src="docs/adr/screenshots/control-host-panel.png" alt="Host control panel" />
-      <sub><b>Host Control panel -- timer, teams, board management</b></sub>
+      <sub><b>Host Control panel: timer, teams, board management</b></sub>
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
       <img src="docs/adr/screenshots/display-question-reveal.png" alt="Question reveal on display" />
-      <sub><b>Question reveal -- category, points, and question text</b></sub>
+      <sub><b>Question reveal: category, points, and question text</b></sub>
     </td>
     <td align="center" width="50%">
       <img src="docs/adr/screenshots/display-final-jeopardy-category.png" alt="Final Jeopardy category reveal" />
-      <sub><b>Final Jeopardy -- dramatic category reveal screen</b></sub>
+      <sub><b>Final Jeopardy: dramatic category reveal screen</b></sub>
     </td>
   </tr>
 </table>
@@ -66,25 +82,25 @@ Both windows stay in perfect sync through a secure Electron IPC bridge -- no net
 ## Features
 
 ### Host Control Panel
-- **Team management** -- add, remove, rename, color-code, and reorder teams with drag-and-drop
-- **Score editor** -- award, penalize, or manually set scores with +/- buttons or direct input
-- **Countdown timer** -- presets from 15 s to 90 s, keyboard shortcuts, live audio cues
-- **Board editor** -- edit any cell's question, point value, or Daily Double status mid-game
-- **Import / Export** -- save and restore complete game configurations as JSON files
-- **Fullscreen display** -- send the audience window to fullscreen from the host panel (or press F11)
+- **Team management**: add, remove, rename, color-code, and reorder teams with drag-and-drop.
+- **Score editor**: award, penalize, or manually set scores with +/- buttons or direct input.
+- **Countdown timer**: presets from 15 s to 90 s, keyboard shortcuts, live audio cues.
+- **Board editor**: edit any cell's question, point value, or Daily Double status mid-game.
+- **Import / Export**: save and restore complete game configurations as JSON files.
+- **Fullscreen display**: send the audience window to fullscreen from the host panel (or press F11).
 
 ### Audience Display
-- **Live game board** -- 5x5 (up to 10x10) grid with claimed/open/disabled cell states
-- **Score lower-thirds** -- team name badges with animated score updates and a "Leading" indicator
-- **Question overlay** -- full-screen question reveal with category and point value
-- **Countdown timer view** -- circular progress ring with color-alert in the final seconds
-- **Daily Double** -- dedicated splash screen with team wager display
-- **Final Jeopardy** -- multi-stage sequence: category reveal, wager collection, resolution
+- **Live game board**: 5x5 (up to 10x10) grid with claimed/open/disabled cell states.
+- **Score lower-thirds**: team name badges with animated score updates and a "Leading" indicator.
+- **Question overlay**: full-screen question reveal with category and point value.
+- **Countdown timer view**: circular progress ring with color-alert in the final seconds.
+- **Daily Double**: dedicated splash screen with team wager display.
+- **Final Jeopardy**: multi-stage sequence: category reveal, wager collection, resolution.
 
 ### Game Rounds
-- **Daily Double** -- opens a wager workflow; wager is confirmed before the question reveals
-- **Final Jeopardy** -- full round with secret wagers per team, question reveal, and scored resolution
-- **Winner screen** -- top-5 podium with animated score reveal and victory sound effect
+- **Daily Double**: opens a wager workflow; wager is confirmed before the question reveals.
+- **Final Jeopardy**: full round with secret wagers per team, question reveal, and scored resolution.
+- **Winner screen**: top-5 podium with animated score reveal and victory sound effect.
 
 ---
 
@@ -137,15 +153,15 @@ The NSIS installer for Windows is written to the `release/` directory.
 ```
 jeopardy-scoreboard/
 ├── electron/
-│   ├── main/         # Main process -- window lifecycle, IPC handlers, file I/O
+│   ├── main/         # Main process: window lifecycle, IPC handlers, file I/O
 │   └── preload/      # Secure context bridge exposed as window.api
 ├── src/
 │   ├── windows/      # Control.tsx (host) and Display.tsx (audience)
 │   ├── features/
 │   │   ├── board/    # Board grid, cell utilities, BoardCard component
 │   │   ├── teams/    # TeamRow, TeamCard, team factory
-│   │   └── common/  # AnimatedNumber and shared components
-│   ├── store/        # Zustand store -- all game state in one place
+│   │   └── common/   # AnimatedNumber and shared components
+│   ├── store/        # Zustand store: all game state in one place
 │   ├── hooks/        # useTimer, useTimerAudio, useGameAudio, useAnimatedNumber
 │   ├── services/     # Default board preset loader
 │   ├── types/        # TypeScript interfaces, Zod validation schemas, window.api types
@@ -153,7 +169,10 @@ jeopardy-scoreboard/
 ├── public/
 │   ├── assets/       # Sound effects (timer, score up/down, Daily Double, Final Jeopardy)
 │   └── board-default.json   # Default game board loaded on first run
-├── tests/            # Vitest unit tests (store, hooks, preset loader)
+├── tests/            # Vitest unit tests (89+ tests covering store and logic)
+│   ├── boardStore.test.ts
+│   ├── boardUtils.test.ts
+│   └── teamFactory.test.ts
 └── docs/adr/         # Architecture Decision Records
 ```
 
@@ -161,15 +180,15 @@ jeopardy-scoreboard/
 
 ## Architecture
 
-QuizShow is built on a few deliberate choices:
+Jeopardy Studio is built on a few deliberate choices:
 
-**Dual-window IPC sync** -- The host Control window owns all game state via Zustand. On every state change, it broadcasts a snapshot to the Display window via Electron IPC. The Display is read-only and stateless; it never writes back. This eliminates sync conflicts entirely.
+**Dual-window IPC sync**: The host Control window owns all game state via Zustand. On every state change, it broadcasts a snapshot to the Display window via Electron IPC. The Display is read-only and stateless; it never writes back. This eliminates sync conflicts entirely.
 
-**Zustand with persistence** -- Game state (board, teams, scores, round progress) is persisted to `localStorage` via `zustand/middleware/persist`. Sessions survive accidental closes.
+**Zustand with persistence**: Game state (board, teams, scores, round progress) is persisted to `localStorage` via `zustand/middleware/persist`. Sessions survive accidental closes.
 
-**Zod for import validation** -- JSON board imports are validated against a Zod schema before they touch the store, preventing corrupt data from breaking an in-progress game.
+**Zod for import validation**: JSON board imports are validated against a Zod schema before they touch the store, preventing corrupt data from breaking an in-progress game.
 
-**Context-isolated preload** -- The `window.api` bridge is exposed only through `contextBridge`, keeping Node.js APIs completely out of the renderer process.
+**Context-isolated preload**: The `window.api` bridge is exposed only through `contextBridge`, keeping Node.js APIs completely out of the renderer process.
 
 See [`docs/adr/`](docs/adr/) for detailed Architecture Decision Records.
 
@@ -190,11 +209,20 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 
 ## Roadmap
 
-- [ ] Buzzer system integration (keyboard / physical button)
-- [ ] Network sync mode for remote teams
-- [ ] Customizable themes (light, high-contrast, custom color palettes)
-- [ ] Sound effect customization (upload your own clips)
-- [ ] Configurable board sizes beyond 10x10
+### Current Focus: Hardware & Network
+- [ ] **Buzzer System Integration**: Support for USB HID buzzers (Raspberry Pi Pico, Joy-Cons) and keyboard mapping.
+- [ ] **Mobile Buzzer Client**: A web-based "join code" system for teams to buzz in from their phones via WebSockets.
+- [ ] **Remote Host API**: A secure REST/WebSocket API to allow remote scorekeeping from a tablet or phone.
+
+### Enhanced Gameplay
+- [ ] **Media-Rich Questions**: Support for image, video, and audio clips directly embedded in the question reveal.
+- [ ] **Dynamic Round Scaling**: Support for "Double Jeopardy" and "Triple Jeopardy" rounds with automatic point doubling.
+- [ ] **Board Template Library**: A built-in repository of curated, high-quality quiz packs.
+
+### Platform & Polish
+- [ ] **Localization**: Complete UI translation for major languages (DE, FR, ES, PT).
+- [ ] **Theme Studio**: Create and share custom CSS themes to match specific event branding.
+- [ ] **macOS / Linux Builds**: Cross-platform packaging support in CI/CD.
 
 ---
 
