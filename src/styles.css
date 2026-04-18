@@ -453,7 +453,32 @@
   font-weight: 600;
   transition: all 0.2s;
 }
+.score-badge {
+  background: var(--surface-overlay);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  min-width: 180px;
+  max-width: 240px;
+  flex: 1;
+}
 
+.gold-divider {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, var(--border-strong) 20%, var(--border-strong) 80%, transparent);
+  margin: 4px 0;
+}
+
+.text-data {
+  font-family: var(--font-sans);
+  letter-spacing: -0.02em;
+}
+
+.tracking-widest-2 {
+  letter-spacing: 0.3em;
+}
 .btn-danger:hover {
   background: rgba(248, 113, 113, 0.2);
   border-color: #f87171;
