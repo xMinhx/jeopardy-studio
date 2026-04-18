@@ -898,7 +898,7 @@ export default function Control() {
           {visibleCategories.map((cat, i) => (
             <input
               key={i}
-              className="studio-input text-center text-sm font-bold uppercase tracking-widest"
+              className="w-full studio-input text-center text-[10px] sm:text-xs font-bold uppercase tracking-widest px-1 py-2"
               value={cat}
               onChange={(e) => setCategoryTitle(i, e.target.value)}
               aria-label={`Category ${i + 1}`}

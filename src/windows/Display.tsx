@@ -248,7 +248,7 @@ function ScoreboardView({ teams, board, dailyDouble }: ScoreboardViewProps) {
       </section>
 
       {/* Teams lower-third */}
-      <section className="shrink-0 pt-4" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+      <section className="shrink-0 pt-4 px-8 pb-8" style={{ borderTop: "1px solid var(--border-subtle)" }}>
         <div className="flex flex-wrap items-stretch justify-center gap-4">
           {[...teams].sort((a, b) => b.score - a.score).map((team) => (
             <TeamCard key={team.id} team={team}

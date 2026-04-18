@@ -516,7 +516,36 @@
   10% { transform: scale(1.05); }
   20% { transform: scale(1); }
 }
-.btn-danger:hover {
-  background: rgba(248, 113, 113, 0.2);
-  border-color: #f87171;
+.btn-gold {
+  background: var(--gold-subtle);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  color: var(--gold);
+  padding: 0.5rem 1rem;
+  font-weight: 700;
+  transition: all 0.2s;
+  text-shadow: 0 0 10px var(--gold-glow);
+  box-shadow: 0 0 10px var(--gold-subtle);
+}
+
+.btn-gold:hover {
+  background: var(--gold);
+  color: var(--surface-base);
+  box-shadow: 0 0 20px var(--gold-glow);
+  text-shadow: none;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-ghost:hover {
+  color: var(--text-primary);
+  background: var(--surface-overlay);
 }
