@@ -18,7 +18,7 @@ export function BoardCard({ cell, owner, isActive }: BoardCardProps) {
 
   const teamColor = owner?.color ?? "#6366f1";
 
-  const bgAvailable = "linear-gradient(145deg, #6d86ff 0%, #8b5cf6 85%)";
+  const bgAvailable = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
   const bgDisabled = "linear-gradient(155deg,#475569,#1f2937)";
   const bgOpen = "linear-gradient(150deg,#0f172a,#1d4ed8)";
   const bgClaimed = `linear-gradient(150deg, ${teamColor}22 0%, transparent 60%), linear-gradient(155deg,#0b1220,#121a2b)`;
@@ -39,7 +39,7 @@ export function BoardCard({ cell, owner, isActive }: BoardCardProps) {
 
   return (
     <div
-      className="relative h-full overflow-hidden rounded-[26px] text-center text-white"
+      className="relative h-full overflow-hidden rounded-2xl text-center text-white"
       style={{ background: bg, boxShadow }}
     >
       {/* Subtle flare for available cells */}
@@ -90,7 +90,7 @@ export function BoardCard({ cell, owner, isActive }: BoardCardProps) {
 
       {/* Border ring */}
       <div
-        className="pointer-events-none absolute inset-0 rounded-[26px]"
+        className="pointer-events-none absolute inset-0 rounded-2xl"
         style={{
           boxShadow: isClaimed
             ? `inset 0 0 0 2px ${teamColor}, 0 4px 12px ${teamColor}33`
@@ -100,7 +100,7 @@ export function BoardCard({ cell, owner, isActive }: BoardCardProps) {
 
       {/* Dim overlay for disabled */}
       {isDisabled && (
-        <div className="pointer-events-none absolute inset-0 z-10 rounded-[26px] bg-slate-950/40" />
+        <div className="pointer-events-none absolute inset-0 z-10 rounded-2xl bg-slate-950/40" />
       )}
     </div>
   );

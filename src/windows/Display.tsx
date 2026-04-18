@@ -123,13 +123,11 @@ export default function Display() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-screen overflow-hidden text-slate-900 bg-slate-950">
-      <div className="h-8 drag-region flex items-center px-4 shrink-0 bg-white/5 border-b border-white/5">
-        <span className="text-[10px] uppercase tracking-widest text-slate-500 font-medium">Jeopardy Display</span>
+    <div className="flex flex-col h-screen overflow-hidden text-slate-100 bg-[#020617]">
+      <div className="h-10 drag-region flex items-center px-8 shrink-0 bg-transparent">
+        <span className="text-[10px] uppercase tracking-[0.6em] text-slate-600 font-bold">Jeopardy Display</span>
       </div>
-      <div className="flex-1 overflow-hidden p-6 pt-2 flex flex-col">
-        <header className="mb-6 flex items-center justify-center gap-8">{/* reserved */}</header>
-      <div className="flex h-[calc(100%-3.5rem)] flex-col">
+      <div className="flex-1 overflow-hidden px-10 pb-10 pt-2 flex flex-col">
         {mode === "timer" ? (
           <TimerView
             displayMs={displayMs}
@@ -142,7 +140,6 @@ export default function Display() {
         ) : (
           <ScoreboardView teams={teams} board={board} />
         )}
-      </div>
       </div>
     </div>
   );
@@ -201,27 +198,27 @@ function TimerView({
   const digitStyle = isAlert ? { color: "#b91c1c" } : { color: "#0f172a" };
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-8 p-6 text-slate-900">
+    <div className="flex h-full flex-col items-center justify-center gap-12 p-6 text-white">
       {timerQuestion && (
-        <div className="w-full max-w-5xl rounded-[32px] border border-slate-200 bg-white/95 px-10 py-8 text-center shadow-2xl backdrop-blur-md">
-          <div className="text-xs uppercase tracking-[0.45em] text-slate-400">
+        <div className="w-full max-w-5xl rounded-[40px] border border-white/10 bg-slate-900/90 px-12 py-10 text-center shadow-2xl backdrop-blur-xl">
+          <div className="text-xs uppercase tracking-[0.5em] text-slate-400">
             {timerQuestion.category} • {timerQuestion.value} points
           </div>
-          <div className="mt-4 text-[clamp(2rem,4vw,4rem)] font-black leading-tight text-slate-900">
+          <div className="mt-6 text-[clamp(2.5rem,5vw,5rem)] font-black leading-tight text-white drop-shadow-sm">
             {timerQuestion.question || "No question set"}
           </div>
-          <div className="mt-5 text-lg font-medium text-slate-500">
-            Open for answer
+          <div className="mt-8 text-xl font-medium text-slate-400 italic">
+            Waiting for answer...
           </div>
         </div>
       )}
 
       <div
-        className={`relative ${glowClass} rounded-full`}
-        style={{ width: "60vmin", height: "60vmin" }}
+        className={`relative ${glowClass} rounded-full bg-white/5 p-4`}
+        style={{ width: "65vmin", height: "65vmin" }}
       >
-        <div className="absolute inset-0 rounded-full" style={ringStyle} />
-        <div className="absolute inset-[18px] flex items-center justify-center rounded-full bg-white">
+        <div className="absolute inset-4 rounded-full" style={ringStyle} />
+        <div className="absolute inset-[32px] flex items-center justify-center rounded-full bg-white shadow-inner">
           <div key={digitKey} className={digitClass} style={digitStyle}>
             {show}
           </div>
@@ -266,7 +263,7 @@ function ScoreboardView({ teams, board }: ScoreboardViewProps) {
         <div className="flex items-end justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.4em] text-slate-400">Scoreboard</p>
-            <h2 className="text-3xl font-bold text-slate-900">Live standings</h2>
+            <h2 className="text-3xl font-bold text-slate-100">Live standings</h2>
           </div>
           <span className="text-xs uppercase tracking-[0.4em] text-slate-300">Display</span>
         </div>
@@ -284,12 +281,12 @@ function ScoreboardView({ teams, board }: ScoreboardViewProps) {
       </section>
 
       {/* Board */}
-      <section className="flex min-h-0 flex-1 flex-col rounded-[28px] border border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-5">
-        <div className="mb-4 text-center text-xs uppercase tracking-[0.4em] text-slate-400">
+      <section className="flex min-h-0 flex-1 flex-col rounded-[40px] border border-white/5 bg-slate-900/20 p-8 shadow-2xl">
+        <div className="mb-6 text-center text-xs uppercase tracking-[0.6em] text-slate-500 font-bold">
           Board
         </div>
 
-        <div className="relative flex min-h-0 flex-1 rounded-[24px] bg-slate-950/50 p-4">
+        <div className="relative flex min-h-0 flex-1">
           {/* Active question overlay */}
           {activeCell && activeQuestion && (
             <div className="pointer-events-none absolute inset-6 z-20 flex items-center justify-center">
@@ -318,7 +315,7 @@ function ScoreboardView({ teams, board }: ScoreboardViewProps) {
               {visibleCategories.map((cat, i) => (
                 <div
                   key={`${i}-${cat}`}
-                  className="rounded-lg bg-slate-800/80 ring-1 ring-white/10 px-3 py-1.5 text-center text-base font-semibold uppercase tracking-wide text-slate-100"
+                  className="rounded-xl bg-slate-800/40 border border-white/5 px-3 py-2 text-center text-xs font-bold uppercase tracking-widest text-slate-400"
                 >
                   {cat}
                 </div>

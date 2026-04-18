@@ -57,7 +57,7 @@ export function TeamCard({ team, isLeader, isCoLeader }: TeamCardProps) {
         {/* Name & badge */}
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <p className={`text-xs uppercase tracking-[0.3em] ${metaColor}`}>Team</p>
+            <p className={`text-[10px] uppercase tracking-[0.4em] font-bold ${metaColor}`}>Team</p>
             {(isLeader || isCoLeader) && (
               <span
                 className={`inline-flex items-center gap-1 rounded-full px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wide ${
@@ -75,7 +75,7 @@ export function TeamCard({ team, isLeader, isCoLeader }: TeamCardProps) {
 
         {/* Score */}
         <div className="text-right">
-          <p className={`text-xs uppercase tracking-[0.3em] ${labelColor}`}>Points</p>
+          <p className={`text-[10px] uppercase tracking-[0.4em] font-bold ${labelColor}`}>Points</p>
           <p className="text-4xl font-black tabular-nums">{displayScore}</p>
         </div>
       </div>
