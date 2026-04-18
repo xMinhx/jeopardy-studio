@@ -8,7 +8,7 @@ export default defineConfig(({ command }) => {
   return {
     base: isDev ? '/' : './',
     plugins: [react()],
-    server: { port: 5173, strictPort: true },
+    server: { port: 5174, strictPort: true },
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),

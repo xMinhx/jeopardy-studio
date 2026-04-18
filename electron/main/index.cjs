@@ -54,6 +54,9 @@ function registerRendererProtocol() {
 }
 
 function createWindows() {
+  const { Menu } = require('electron');
+  Menu.setApplicationMenu(null);
+
   const sharedPreferences = {
     preload: path.join(__dirname, '../preload/index.cjs'),
     contextIsolation: true,
@@ -64,16 +67,26 @@ function createWindows() {
   controlWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    title: 'Jeopardy Helper — Control',
+    title: 'Jeopardy',
     icon: iconPath,
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#ffffff',
+      symbolColor: '#0f172a'
+    },
     webPreferences: sharedPreferences,
   });
 
   displayWindow = new BrowserWindow({
     width: 1280,
     height: 720,
-    title: 'Jeopardy Helper — Display',
+    title: 'Jeopardy',
     icon: iconPath,
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#ffffff',
+      symbolColor: '#0f172a'
+    },
     webPreferences: sharedPreferences,
   });
 

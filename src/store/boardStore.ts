@@ -90,8 +90,8 @@ export interface BoardState {
   penalizeTeam(row: number, col: number, teamId: string): void;
   unclaimCell(row: number, col: number): void;
   setCellDisabled(row: number, col: number, disabled: boolean): void;
-  resetScores(): void;
-  resetBoardState(): void;
+  resetRound: () => void;
+  resetAll: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -205,10 +205,20 @@ export const useBoardStore = create<BoardState>()(
         set((s) => {
           const cell = s.board.grid[row][col];
           if (cell.state !== "hidden") return {};
+          
+          // Revert any currently "open" cells back to "hidden"
+          const newGrid = s.board.grid.map((r, ri) =>
+            r.map((c, ci) => {
+              if (ri === row && ci === col) return { ...c, state: "open" };
+              if (c.state === "open") return { ...c, state: "hidden" };
+              return c;
+            })
+          );
+          
           return {
             board: {
               ...s.board,
-              grid: updateCell(s.board.grid, row, col, { state: "open" }),
+              grid: newGrid,
             },
           };
         }),
@@ -281,13 +291,24 @@ export const useBoardStore = create<BoardState>()(
             ),
           };
         }),
-      resetScores: () =>
+      resetRound: () =>
         set((s) => ({
           teams: s.teams.map((t) => ({ ...t, score: 0 })),
+          board: {
+            ...s.board,
+            grid: s.board.grid.map((row) =>
+              row.map((cell) => ({
+                ...cell,
+                state: "hidden" as CellState,
+                ownerTeamId: undefined,
+              })),
+            ),
+          },
         })),
 
-      resetBoardState: () =>
+      resetAll: () =>
         set((s) => ({
+          teams: defaultTeams,
           board: {
             ...s.board,
             grid: s.board.grid.map((row) =>

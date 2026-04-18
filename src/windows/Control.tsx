@@ -36,8 +36,8 @@ export default function Control() {
     penalizeTeam,
     unclaimCell,
     setCellDisabled,
-    resetScores,
-    resetBoardState,
+    resetRound,
+    resetAll,
   } = useBoardStore();
 
   // Timer state
@@ -62,12 +62,6 @@ export default function Control() {
   const [rows, setRows] = useState(board.rows);
   const [cols, setCols] = useState(board.cols);
   const [base, setBase] = useState(100);
-  const [ctxMenu, setCtxMenu] = useState<{
-    x: number;
-    y: number;
-    row: number;
-    col: number;
-  } | null>(null);
 
   const pausedDisplayMsRef = useRef(timer.durationMs);
 
@@ -78,6 +72,26 @@ export default function Control() {
   }, [board.rows, board.cols]);
 
 
+
+  // ── Load preset on mount if board is empty ────────────────────────────────
+  useEffect(() => {
+    let cancelled = false;
+    const isBoardEmpty = board.grid.every((row) =>
+      row.every((cell) => !cell.question)
+    );
+
+    if (isBoardEmpty) {
+      void (async () => {
+        const preset = await loadBoardPreset();
+        if (preset && !cancelled) {
+          setAll({ teams: useBoardStore.getState().teams, board: preset });
+        }
+      })();
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, []); // Only check on mount
 
   // ── Broadcast timer ticks to Display via IPC ───────────────────────────────
   useEffect(() => {
@@ -406,20 +420,22 @@ export default function Control() {
             <button
               className="rounded bg-red-50 px-3 py-1 text-sm text-red-600 hover:bg-red-100"
               onClick={() => {
-                if (window.confirm("Reset all team scores to 0?")) resetScores();
+                if (window.confirm("Reset the current round? This will clear all scores and hide all questions. Questions and categories will be kept.")) {
+                  resetRound();
+                }
               }}
             >
-              Reset Scores
+              Reset Round
             </button>
             <button
               className="rounded bg-red-50 px-3 py-1 text-sm text-red-600 hover:bg-red-100"
               onClick={() => {
-                if (window.confirm("Reset all board cells to hidden? Questions and categories will be kept.")) {
-                  resetBoardState();
+                if (window.confirm("Full Game Reset? This will reset all teams to defaults, set scores to 0, and hide all questions. Questions and categories will be kept.")) {
+                  resetAll();
                 }
               }}
             >
-              Reset Board
+              Full Reset
             </button>
           </div>
         </div>
@@ -586,10 +602,6 @@ export default function Control() {
                     if (cell.state === "claimed" || cell.state === "disabled") return;
                     openCell(r, c);
                   }}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    setCtxMenu({ x: e.clientX, y: e.clientY, row: r, col: c });
-                  }}
                 >
                   {editMode ? (
                     <div className="grid gap-2">
@@ -633,64 +645,6 @@ export default function Control() {
             }),
           )}
 
-          {/* Context menu */}
-          {ctxMenu && (
-            <div
-              className="fixed z-50 min-w-[140px] rounded border bg-white shadow"
-              style={{ left: ctxMenu.x, top: ctxMenu.y }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {[
-                {
-                  label: "Open Cell",
-                  disabled: ["claimed", "disabled"].includes(
-                    board.grid[ctxMenu.row][ctxMenu.col].state,
-                  ),
-                  action: () => openCell(ctxMenu.row, ctxMenu.col),
-                },
-                {
-                  label: "Award Team",
-                  disabled:
-                    !activeTeamId ||
-                    ["claimed", "disabled"].includes(board.grid[ctxMenu.row][ctxMenu.col].state),
-                  action: () => awardCell(ctxMenu.row, ctxMenu.col, activeTeamId),
-                },
-                {
-                  label: "Unclaim",
-                  disabled: false,
-                  action: () => unclaimCell(ctxMenu.row, ctxMenu.col),
-                },
-                {
-                  label:
-                    board.grid[ctxMenu.row][ctxMenu.col].state === "disabled"
-                      ? "Enable"
-                      : "Disable",
-                  disabled: false,
-                  action: () =>
-                    setCellDisabled(
-                      ctxMenu.row,
-                      ctxMenu.col,
-                      board.grid[ctxMenu.row][ctxMenu.col].state !== "disabled",
-                    ),
-                },
-              ].map(({ label, disabled, action }) => (
-                <button
-                  key={label}
-                  className="block w-full px-3 py-2 text-left hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
-                  disabled={disabled}
-                  onClick={() => { action(); setCtxMenu(null); }}
-                >
-                  {label}
-                </button>
-              ))}
-              <button
-                className="block w-full px-3 py-2 text-left text-slate-500 hover:bg-slate-100"
-                onClick={() => setCtxMenu(null)}
-              >
-                Close
-              </button>
-            </div>
-          )}
         </div>
       </section>
     </div>

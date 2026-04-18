@@ -267,7 +267,7 @@ function ScoreboardView({ teams, board }: ScoreboardViewProps) {
         </div>
 
         <div className="grid items-stretch gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {teams.map((team) => (
+          {[...teams].sort((a, b) => b.score - a.score).map((team) => (
             <TeamCard
               key={team.id}
               team={team}

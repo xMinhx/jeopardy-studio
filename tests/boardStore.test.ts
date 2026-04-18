@@ -177,29 +177,39 @@ describe("boardStore", () => {
     ).toBe(scoreB + cell.value);
   });
 
-  it("resets scores correctly", () => {
+  it("resets round correctly (scores to 0 and board hidden)", () => {
     const store = useBoardStore.getState();
     const teamId = store.teams[0].id;
     store.updateScore(teamId, 500);
+    store.openCell(0, 0);
     expect(useBoardStore.getState().teams[0].score).toBe(500);
+    expect(useBoardStore.getState().board.grid[0][0].state).toBe("open");
 
-    store.resetScores();
+    store.resetRound();
     expect(useBoardStore.getState().teams[0].score).toBe(0);
+    expect(useBoardStore.getState().board.grid[0][0].state).toBe("hidden");
   });
 
-  it("resets board state correctly while keeping questions", () => {
+  it("resets all correctly (teams to default, scores 0, board hidden)", () => {
     const store = useBoardStore.getState();
     store.setCellQuestion(0, 0, "Persistent Question");
     store.openCell(0, 0);
     store.awardCell(0, 0, store.teams[0].id);
 
+    // change team name
+    store.setTeamName(store.teams[0].id, "Modified Team");
+
     expect(useBoardStore.getState().board.grid[0][0].state).toBe("claimed");
     expect(useBoardStore.getState().board.grid[0][0].question).toBe("Persistent Question");
 
-    store.resetBoardState();
+    store.resetAll();
     const cell = useBoardStore.getState().board.grid[0][0];
     expect(cell.state).toBe("hidden");
     expect(cell.ownerTeamId).toBeUndefined();
     expect(cell.question).toBe("Persistent Question");
+    
+    // teams are reset
+    expect(useBoardStore.getState().teams[0].name).toBe("Team A");
+    expect(useBoardStore.getState().teams[0].score).toBe(0);
   });
 });
