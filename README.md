@@ -16,9 +16,9 @@ One window for you. One window for the crowd. Always in sync.
 <br/>
 
 <div align="center">
-  <img src="docs/adr/screenshots/display-window.png" width="800" alt="Audience Display View" />
+  <img src="docs/screenshots/display-window.png" width="800" alt="Audience Display View" />
   <br/>
-  <img src="docs/adr/screenshots/control-window.png" width="800" alt="Host Control View" />
+  <img src="docs/screenshots/control-window.png" width="800" alt="Host Control View" />
 </div>
 
 ---
