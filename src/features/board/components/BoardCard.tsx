@@ -16,107 +16,58 @@ export function BoardCard({ cell, owner, isActive }: BoardCardProps) {
   const isOpen    = cell.state === "open";
   const isDisabled = cell.state === "disabled";
 
-  let modifierClass = "";
-  if (isClaimed)       modifierClass = "board-cell--claimed";
-  else if (isDisabled) modifierClass = "board-cell--disabled";
-  else if (isActive)   modifierClass = "board-cell--active";
-
   return (
     <div
-      className={`board-cell w-full h-full group ${modifierClass}`}
-      aria-label={`${cell.value} points — ${
-        isClaimed ? `claimed by ${owner?.name}` : isOpen ? "open" : isDisabled ? "disabled" : "available"
-      }`}
+      className={`audience-tile w-full h-full group transition-all duration-300 ${
+        isClaimed ? "audience-tile--claimed" : ""
+      } ${isDisabled ? "opacity-[0.05] grayscale" : ""} ${isActive ? "ring-2 ring-[--gold] scale-[1.02] z-10" : ""}`}
     >
       {/* Daily Double star badge */}
-      {cell.isDailyDouble && !isClaimed && !isDisabled && (
+      {cell.isDailyDouble && !isClaimed && !isDisabled && !isOpen && (
         <span
-          className="absolute left-2 top-2 z-20 flex items-center gap-1 rounded-full px-2 py-0.5"
-          style={{
-            background: "rgba(230, 179, 25, 0.15)",
-            border: "1px solid rgba(230, 179, 25, 0.45)",
-          }}
+          className="absolute right-3 top-2.5 z-20"
           title="Daily Double"
         >
-          <span style={{ color: "var(--gold)", fontSize: "0.6rem", fontWeight: 900 }}>★</span>
-          <span
-            style={{
-              color: "var(--gold)",
-              fontSize: "0.5rem",
-              fontWeight: 800,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-            }}
-          >
-            DD
-          </span>
+          <span className="text-[--gold-bright] text-[10px] animate-pulse">★</span>
         </span>
       )}
 
       {/* Ownership badge */}
       {owner && (
-        <span
-          className="absolute right-2 top-2 z-20 flex items-center gap-1.5 rounded-full backdrop-blur-sm px-2 py-1"
-          style={{
-            background: "rgba(0,0,0,0.65)",
-            fontSize: "0.6rem",
-            fontWeight: 700,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "#fff",
-          }}
-          title={owner.name}
-        >
-          <span
-            className="inline-block h-2 w-2 rounded-full shrink-0"
-            style={{ background: owner.color }}
-          />
-          <span className="max-w-[72px] truncate">{owner.name}</span>
-        </span>
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 opacity-40">
+          <div className="h-2 w-2 rounded-full" style={{ background: owner.color, boxShadow: `0 0 10px ${owner.color}` }} />
+          <div className="text-[9px] font-bold tracking-widest-2 uppercase text-[--text-muted]">CLAIMED</div>
+        </div>
       )}
 
       {/* Point value */}
-      <div className="relative z-10 flex h-full flex-col items-center justify-center gap-1.5 select-none">
-        <span
-          className={`font-serif font-bold drop-shadow-lg transition-all duration-300 ${
-            isClaimed ? "opacity-40" : ""
-          }`}
-          style={{
-            color: isClaimed ? "var(--success)" : "var(--gold)",
-            fontSize: "clamp(1.25rem, 3.5vmin, 2.75rem)",
-            lineHeight: 1,
-            textShadow: isClaimed
-              ? "none"
-              : "0 0 30px rgba(230,179,25,0.35), 0 2px 8px rgba(0,0,0,0.5)",
-          }}
-        >
-          {cell.value}
-        </span>
-
-        {isOpen && (
+      {!isClaimed && !isDisabled && (
+        <div className="relative z-10 flex h-full flex-col items-center justify-center select-none">
           <span
+            className="font-serif font-bold text-[--gold] transition-all duration-500"
             style={{
-              fontSize: "0.5rem",
-              fontWeight: 700,
-              letterSpacing: "0.25em",
-              textTransform: "uppercase",
-              color: "var(--gold)",
-              opacity: 0.75,
+              fontSize: "clamp(1.5rem, 3.5vw, 2.8rem)",
+              textShadow: "0 2px 10px rgba(0,0,0,0.6), 0 0 20px rgba(230,179,25,0.2)",
+              transform: isOpen ? "scale(1.1)" : "scale(1)"
             }}
           >
-            Open
+            ${cell.value}
           </span>
-        )}
-      </div>
+          {isOpen && (
+            <div className="mt-1 flex items-center gap-2">
+              <div className="h-0.5 w-1.5 rounded-full bg-[--gold] animate-pulse" />
+              <div className="text-[8px] font-bold tracking-widest-2 uppercase text-[--gold] opacity-80">OPEN</div>
+              <div className="h-0.5 w-1.5 rounded-full bg-[--gold] animate-pulse" />
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* Bottom shimmer on hover */}
-      {!isClaimed && !isDisabled && (
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          style={{
-            background: "linear-gradient(90deg, transparent, var(--gold), transparent)",
-          }}
-        />
+      {/* Disabled state */}
+      {isDisabled && (
+        <div className="absolute inset-0 flex items-center justify-center opacity-20">
+          <div className="h-1 w-8 rounded-full bg-[--text-muted]" />
+        </div>
       )}
     </div>
   );
