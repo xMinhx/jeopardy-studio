@@ -275,29 +275,35 @@ export default function Control() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-screen overflow-hidden text-[--text-primary]" style={{ background: "var(--surface-base)" }}>
-      <div className="h-10 drag-region flex items-center px-6 shrink-0 border-b border-[--border-subtle] bg-[--surface-panel]">
-        <span className="studio-label">Jeopardy Studio</span>
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: "var(--surface-base)", color: "var(--text-primary)" }}>
+      {/* Titlebar */}
+      <div className="h-9 drag-region shrink-0 flex items-center justify-between px-6" style={{ background: "var(--surface-panel)", borderBottom: "1px solid var(--border-subtle)" }}>
+        <div className="flex items-center gap-2">
+          <span style={{ color: "var(--gold)", fontSize: "0.55rem", fontWeight: 900, letterSpacing: "0.25em" }}>◈</span>
+          <span className="studio-label">Jeopardy Studio</span>
+          <span className="studio-label" style={{ color: "var(--border-strong)" }}>—</span>
+          <span className="studio-label">Host Control</span>
+        </div>
+        <button
+          className="no-drag studio-label hover:text-[--text-secondary] transition-colors"
+          onClick={() => window.api?.toggleFullscreen?.('control')}
+          title="Toggle fullscreen (F11)"
+        >
+          F11
+        </button>
       </div>
-      <div className="px-8 py-4 grid gap-6 overflow-y-auto flex-1">
-        <header className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl font-serif text-[--gold]">Host Control</h1>
-          <div className="flex items-center gap-4">
-            <button
-              className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[--text-muted] hover:text-[--gold] transition-colors group"
-              onClick={() => window.api?.toggleFullscreen?.('control')}
-              title="Toggle fullscreen (F11)"
-            >
-              [ Fullscreen ]
-              <span className="opacity-0 group-hover:opacity-60 transition-opacity text-[9px] normal-case tracking-normal font-normal">F11</span>
-            </button>
-            <div className="studio-label">view=control</div>
+      <div className="px-6 py-5 grid gap-5 overflow-y-auto flex-1 custom-scrollbar">
+        <header className="flex items-center justify-between">
+          <h1 className="font-serif text-3xl" style={{ color: "var(--gold)", textShadow: "0 0 30px var(--gold-glow)" }}>Host Control</h1>
+          <div className="flex items-center gap-3">
+            <button className="btn-neutral text-xs py-1.5 px-3" onClick={() => window.api?.toggleFullscreen?.('display')}>Fullscreen Display</button>
+            <span className="studio-label">view=control</span>
           </div>
         </header>
 
       {/* ── Timer section ── */}
-      <section className="studio-card p-6">
-        <h2 className="text-xl font-serif mb-4 text-[--text-primary]">Timer</h2>
+      <section className="studio-card p-5">
+        <h2 className="section-title mb-4">Timer</h2>
         <div className="mb-4 flex flex-wrap items-center gap-4">
           {/* Duration input */}
           <div className="flex items-center gap-3">
@@ -321,7 +327,7 @@ export default function Control() {
           </div>
 
           {/* Play/Pause/Reset */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               className="btn-gold"
               onClick={() => {
@@ -331,36 +337,31 @@ export default function Control() {
               }}
               disabled={timer.running && timer.remainingMs > 0}
             >
-              Start
+              ▶ Start
             </button>
             <button
-              className="px-4 py-2 rounded font-bold text-sm bg-[--surface-overlay] border border-[--border-strong] text-[--text-primary] disabled:opacity-50"
+              className="btn-neutral"
               disabled={pauseButtonDisabled}
               title={pauseTooltip}
               onClick={() => {
                 if (!pauseButtonDisabled) {
-                  if (timer.running) {
-                    handlePause();
-                  } else {
-                    handleResume();
-                  }
+                  if (timer.running) handlePause(); else handleResume();
                 }
               }}
             >
-              {timer.running ? "Pause" : "Resume"}
+              {timer.running ? "⏸ Pause" : "▶ Resume"}
             </button>
-            <button className="px-4 py-2 rounded font-bold text-sm bg-[--surface-overlay] border border-[--border-strong] text-[--text-primary]" onClick={handleReset}>
-              Reset
-            </button>
+            <button className="btn-neutral" onClick={handleReset}>↺ Reset</button>
           </div>
 
           {/* Presets */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-[--text-secondary]">Presets:</span>
+          <div className="flex items-center gap-1.5">
+            <span className="studio-label mr-1">Presets</span>
             {TIMER_PRESETS_SEC.map((s) => (
               <button
                 key={s}
-                className="px-2 py-1 rounded text-xs font-bold bg-[--surface-overlay] border border-[--border-subtle] text-[--text-secondary] hover:text-[--text-primary] hover:border-[--border-strong]"
+                className="btn-icon"
+                style={{ width: "auto", padding: "0.25rem 0.6rem", fontSize: "0.7rem", height: "1.75rem" }}
                 onClick={() => { t.setDuration(s * 1000); setDurationInput(String(s)); }}
               >
                 {s}s
@@ -410,31 +411,16 @@ export default function Control() {
         </div>
 
         {/* Display mode toggles */}
-        <div className="mt-6 flex items-center gap-3">
-          <button
-            className="px-4 py-2 rounded font-bold text-sm bg-[--surface-overlay] border border-[--border-strong] text-[--text-primary] hover:bg-[--surface-highlight]"
-            onClick={() => window.api?.showTimer?.()}
-          >
-            Show Timer Window
-          </button>
-          <button
-            className="px-4 py-2 rounded font-bold text-sm bg-[--surface-overlay] border border-[--border-strong] text-[--text-primary] hover:bg-[--surface-highlight]"
-            onClick={() => window.api?.showScoreboard?.()}
-          >
-            Show Scoreboard
-          </button>
-          <button
-            className="px-4 py-2 rounded font-bold text-sm bg-[--surface-overlay] border border-[--border-strong] text-[--gold] hover:bg-[--gold] hover:bg-opacity-10 transition-colors"
-            onClick={() => window.api?.toggleFullscreen?.('display')}
-          >
-            Fullscreen Display
-          </button>
+        <div className="mt-5 flex items-center gap-2">
+          <button className="btn-neutral text-xs" onClick={() => window.api?.showTimer?.()}>Show Timer</button>
+          <button className="btn-neutral text-xs" onClick={() => window.api?.showScoreboard?.()}>Show Scoreboard</button>
+          <button className="btn-ghost text-xs" onClick={() => window.api?.toggleFullscreen?.('display')}>⛶ Fullscreen Display</button>
         </div>
       </section>
 
       {/* ── Teams section ── */}
-      <section className="studio-card p-6">
-        <h2 className="text-xl font-serif mb-4 text-[--text-primary]">Teams</h2>
+      <section className="studio-card p-5">
+        <h2 className="section-title mb-4">Teams</h2>
         <div className="mb-4 flex items-center justify-between text-sm text-[--text-secondary]">
           <div>Click a team to select it as the active team</div>
           <button className="btn-gold" onClick={handleAddTeam}>
@@ -455,12 +441,11 @@ export default function Control() {
       </section>
 
       {/* ── Board section ── */}
-      <section className="studio-card p-6">
+      <section className="studio-card p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-serif text-[--text-primary]">Board</h2>
-          <div className="flex gap-3">
-            <button
-              className="px-4 py-2 rounded font-bold text-sm bg-[--surface-overlay] border border-[--border-strong] text-[--text-primary] hover:bg-[--border-subtle]"
+          <h2 className="section-title">Board</h2>
+          <div className="flex gap-2">
+            <button className="btn-neutral text-xs py-1.5"
               onClick={async () => {
                 try {
                   const raw = await window.api?.importBoard?.();
@@ -471,45 +456,25 @@ export default function Control() {
                   alert(`Invalid board file: ${err instanceof Error ? err.message : String(err)}`);
                 }
               }}
-            >
-              Import JSON
-            </button>
-            <button
-              className="px-4 py-2 rounded font-bold text-sm bg-[--surface-overlay] border border-[--border-strong] text-[--text-primary] hover:bg-[--border-subtle]"
-              onClick={() => {
-                void window.api?.exportBoard?.({ teams, board });
-              }}
-            >
-              Export JSON
-            </button>
-            <div className="h-6 w-[1px] bg-[--border-strong] mx-2" />
-            <button
-              className="px-4 py-2 rounded font-bold text-sm border border-red-500/30 text-red-400 hover:bg-red-500/10"
-              onClick={() => {
-                if (window.confirm("Reset the current round? This will clear all scores and hide all questions. Questions and categories will be kept.")) {
-                  resetRound();
-                }
-              }}
-            >
-              Reset Round
-            </button>
-            <button
-              className="px-4 py-2 rounded font-bold text-sm border border-red-500/30 text-red-400 hover:bg-red-500/10"
-              onClick={() => {
-                if (window.confirm("Full Game Reset? This will reset all teams to defaults, set scores to 0, and hide all questions. Questions and categories will be kept.")) {
-                  resetAll();
-                }
-              }}
-            >
-              Full Reset
-            </button>
+            >↑ Import</button>
+            <button className="btn-neutral text-xs py-1.5" onClick={() => void window.api?.exportBoard?.({ teams, board })}>↓ Export</button>
+            <div className="h-6 w-px mx-1" style={{ background: "var(--border-strong)" }} />
+            <button className="btn-danger text-xs py-1.5"
+              onClick={() => { if (window.confirm("Reset the current round? Scores cleared, questions hidden.")) resetRound(); }}
+            >Reset Round</button>
+            <button className="btn-danger text-xs py-1.5"
+              onClick={() => { if (window.confirm("Full Game Reset? All scores and states cleared.")) resetAll(); }}
+            >Full Reset</button>
           </div>
         </div>
         
         {/* Final Jeopardy Control Section */}
-        <section className="mb-8 rounded-xl border border-[--gold] bg-[--surface-overlay] p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-serif text-[--gold]">Final Jeopardy</h3>
+        <section className="mb-6 rounded-xl border p-5" style={{ borderColor: "var(--border-gold)", background: "var(--surface-overlay)", boxShadow: "0 0 24px var(--gold-subtle)" }}>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              <span style={{ color: "var(--gold)", fontSize: "0.7rem" }}>★</span>
+              <h3 className="font-serif text-lg" style={{ color: "var(--gold)" }}>Final Jeopardy</h3>
+            </div>
             <div className="flex gap-3">
               {!finalJeopardy.isActive ? (
                 <button
