@@ -10,4 +10,5 @@ export interface Cell {
   question: string;
   state: CellState;
   ownerTeamId?: string;
+  isDailyDouble?: boolean;
 }

@@ -10,8 +10,8 @@ const rendererDistPath = path.normalize(path.join(__dirname, '../../dist/rendere
 
 /** @type {string} */
 const iconPath = app.isPackaged
-  ? path.join(__dirname, '../../dist/renderer/assets/icon.ico')
-  : path.join(__dirname, '../../public/assets/icon.ico');
+  ? path.join(__dirname, '../../dist/renderer/assets/icon.png')
+  : path.join(__dirname, '../../public/assets/icon.png');
 
 protocol.registerSchemesAsPrivileged([
   {

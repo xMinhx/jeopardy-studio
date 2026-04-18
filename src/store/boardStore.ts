@@ -66,7 +66,7 @@ export interface BoardState {
   board: Board;
 
   // ── State sync ──────────────────────────────────────────────────────────
-  setAll(next: { teams: Team[]; board: Board }): void;
+  setAll(next: { teams: Team[]; board: Board; dailyDouble?: any }): void;
 
   // ── Team management ─────────────────────────────────────────────────────
   addTeam(team: Team): void;
@@ -90,8 +90,42 @@ export interface BoardState {
   penalizeTeam(row: number, col: number, teamId: string): void;
   unclaimCell(row: number, col: number): void;
   setCellDisabled(row: number, col: number, disabled: boolean): void;
+  setCellDailyDouble(row: number, col: number, isDailyDouble: boolean): void;
   resetRound: () => void;
   resetAll: () => void;
+
+  // ── Settings ────────────────────────────────────────────────────────────
+  settings: {
+    volume: number;
+  };
+  setVolume(volume: number): void;
+
+  // ── Daily Double State ──────────────────────────────────────────────────
+  dailyDouble: {
+    stage: "none" | "wager" | "question";
+    teamId: string | null;
+    wager: number;
+    cellPosition: { row: number; col: number } | null;
+  };
+  setDailyDoubleWager(wager: number): void;
+  setDailyDoubleTeam(teamId: string | null): void;
+  confirmWager(): void;
+  cancelDailyDouble(): void;
+
+  // ── Final Jeopardy State ────────────────────────────────────────────────
+  finalJeopardy: {
+    isActive: boolean;
+    stage: "none" | "category" | "wager" | "question" | "resolution";
+    category: string;
+    question: string;
+    wagers: Record<string, number>;
+  };
+  startFinalJeopardy(): void;
+  setFinalJeopardyCategory(category: string): void;
+  setFinalJeopardyQuestion(question: string): void;
+  setFinalJeopardyWager(teamId: string, amount: number): void;
+  advanceFinalJeopardy(): void;
+  cancelFinalJeopardy(): void;
 }
 
 // ---------------------------------------------------------------------------
@@ -103,8 +137,31 @@ export const useBoardStore = create<BoardState>()(
     (set) => ({
       teams: defaultTeams,
       board: DEFAULT_BOARD,
+      dailyDouble: {
+        stage: "none",
+        teamId: null,
+        wager: 0,
+        cellPosition: null,
+      },
+      finalJeopardy: {
+        isActive: false,
+        stage: "none",
+        category: "",
+        question: "",
+        wagers: {},
+      },
+      settings: {
+        volume: 0.7,
+      },
 
-      setAll: (next) => set({ teams: next.teams, board: next.board }),
+      setAll: (next) =>
+        set((s) => ({
+          teams: next.teams,
+          board: next.board,
+          dailyDouble: next.dailyDouble ?? s.dailyDouble,
+          finalJeopardy: next.finalJeopardy ?? s.finalJeopardy,
+          settings: next.settings ?? s.settings,
+        })),
 
       // ── Teams ────────────────────────────────────────────────────────────────
 
@@ -186,6 +243,14 @@ export const useBoardStore = create<BoardState>()(
           },
         })),
 
+      setCellDailyDouble: (row, col, isDailyDouble) =>
+        set((s) => ({
+          board: {
+            ...s.board,
+            grid: updateCell(s.board.grid, row, col, { isDailyDouble }),
+          },
+        })),
+
       rebuildBoard: (rows, cols, base) =>
         set((s) => ({
           board: {
@@ -205,28 +270,130 @@ export const useBoardStore = create<BoardState>()(
         set((s) => {
           const cell = s.board.grid[row][col];
           if (cell.state !== "hidden") return {};
-          
+
+          if (cell.isDailyDouble) {
+            // Hide any other open cells
+            const cleanGrid = s.board.grid.map((r) =>
+              r.map((c) => (c.state === "open" ? { ...c, state: "hidden" } : c)),
+            );
+            return {
+              board: { ...s.board, grid: cleanGrid },
+              dailyDouble: {
+                stage: "wager",
+                teamId: null,
+                wager: cell.value, // Default wager to card value
+                cellPosition: { row, col },
+              },
+            };
+          }
+
           // Revert any currently "open" cells back to "hidden"
           const newGrid = s.board.grid.map((r, ri) =>
             r.map((c, ci) => {
               if (ri === row && ci === col) return { ...c, state: "open" };
               if (c.state === "open") return { ...c, state: "hidden" };
               return c;
-            })
+            }),
           );
-          
+
           return {
             board: {
               ...s.board,
               grid: newGrid,
             },
+            dailyDouble: { stage: "none", teamId: null, wager: 0, cellPosition: null },
           };
+        }),
+
+      setDailyDoubleWager: (wager) =>
+        set((s) => ({ dailyDouble: { ...s.dailyDouble, wager } })),
+
+      setDailyDoubleTeam: (teamId) =>
+        set((s) => ({ dailyDouble: { ...s.dailyDouble, teamId } })),
+
+      confirmWager: () =>
+        set((s) => {
+          if (!s.dailyDouble.cellPosition) return {};
+          const { row, col } = s.dailyDouble.cellPosition;
+
+          const newGrid = s.board.grid.map((r, ri) =>
+            r.map((c, ci) => {
+              if (ri === row && ci === col) return { ...c, state: "open" };
+              if (c.state === "open") return { ...c, state: "hidden" };
+              return c;
+            }),
+          );
+
+          return {
+            board: { ...s.board, grid: newGrid },
+            dailyDouble: { ...s.dailyDouble, stage: "question" },
+          };
+        }),
+
+      cancelDailyDouble: () =>
+        set({
+          dailyDouble: { stage: "none", teamId: null, wager: 0, cellPosition: null },
+        }),
+
+      // ── Settings ────────────────────────────────────────────────────────────
+      setVolume: (volume) =>
+        set((s) => ({ settings: { ...s.settings, volume } })),
+
+      // ── Final Jeopardy ─────────────────────────────────────────────────────
+      startFinalJeopardy: () =>
+        set((s) => ({
+          finalJeopardy: { ...s.finalJeopardy, isActive: true, stage: "category" },
+        })),
+
+      setFinalJeopardyCategory: (category) =>
+        set((s) => ({ finalJeopardy: { ...s.finalJeopardy, category } })),
+
+      setFinalJeopardyQuestion: (question) =>
+        set((s) => ({ finalJeopardy: { ...s.finalJeopardy, question } })),
+
+      setFinalJeopardyWager: (teamId, amount) =>
+        set((s) => ({
+          finalJeopardy: {
+            ...s.finalJeopardy,
+            wagers: { ...s.finalJeopardy.wagers, [teamId]: amount },
+          },
+        })),
+
+      advanceFinalJeopardy: () =>
+        set((s) => {
+          const stages: BoardState["finalJeopardy"]["stage"][] = [
+            "none",
+            "category",
+            "wager",
+            "question",
+            "resolution",
+          ];
+          const currentIdx = stages.indexOf(s.finalJeopardy.stage);
+          const nextIdx = (currentIdx + 1) % stages.length;
+          return {
+            finalJeopardy: { ...s.finalJeopardy, stage: stages[nextIdx] },
+          };
+        }),
+
+      cancelFinalJeopardy: () =>
+        set({
+          finalJeopardy: {
+            isActive: false,
+            stage: "none",
+            category: "",
+            question: "",
+            wagers: {},
+          },
         }),
 
       awardCell: (row, col, teamId) =>
         set((s) => {
           const cell = s.board.grid[row][col];
           if (cell.state === "claimed" || cell.state === "disabled") return {};
+
+          const isDD = s.dailyDouble.stage === "question";
+          const points = isDD ? s.dailyDouble.wager : cell.value;
+
           return {
             board: {
               ...s.board,
@@ -236,18 +403,21 @@ export const useBoardStore = create<BoardState>()(
               }),
             },
             teams: s.teams.map((t) =>
-              t.id === teamId ? { ...t, score: t.score + cell.value } : t,
+              t.id === teamId ? { ...t, score: t.score + points } : t,
             ),
+            dailyDouble: { stage: "none", teamId: null, wager: 0, cellPosition: null },
           };
         }),
 
       penalizeTeam: (row, col, teamId) =>
         set((s) => {
           const cell = s.board.grid[row][col];
-          // We don't change cell state here, just dock points
+          const isDD = s.dailyDouble.stage === "question";
+          const points = isDD ? s.dailyDouble.wager : cell.value;
+
           return {
             teams: s.teams.map((t) =>
-              t.id === teamId ? { ...t, score: t.score - cell.value } : t,
+              t.id === teamId ? { ...t, score: t.score - points } : t,
             ),
           };
         }),
@@ -304,6 +474,12 @@ export const useBoardStore = create<BoardState>()(
               })),
             ),
           },
+          dailyDouble: {
+            stage: "none",
+            teamId: null,
+            wager: 0,
+            cellPosition: null,
+          },
         })),
 
       resetAll: () =>
@@ -318,6 +494,19 @@ export const useBoardStore = create<BoardState>()(
                 ownerTeamId: undefined,
               })),
             ),
+          },
+          dailyDouble: {
+            stage: "none",
+            teamId: null,
+            wager: 0,
+            cellPosition: null,
+          },
+          finalJeopardy: {
+            isActive: false,
+            stage: "none",
+            category: "",
+            question: "",
+            wagers: {},
           },
         })),
     }),
