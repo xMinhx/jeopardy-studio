@@ -209,20 +209,9 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 
 ## Roadmap
 
-### Current Focus: Hardware & Network
-- [ ] **Buzzer System Integration**: Support for USB HID buzzers (Raspberry Pi Pico, Joy-Cons) and keyboard mapping.
-- [ ] **Mobile Buzzer Client**: A web-based "join code" system for teams to buzz in from their phones via WebSockets.
-- [ ] **Remote Host API**: A secure REST/WebSocket API to allow remote scorekeeping from a tablet or phone.
-
-### Enhanced Gameplay
-- [ ] **Media-Rich Questions**: Support for image, video, and audio clips directly embedded in the question reveal.
-- [ ] **Dynamic Round Scaling**: Support for "Double Jeopardy" and "Triple Jeopardy" rounds with automatic point doubling.
-- [ ] **Board Template Library**: A built-in repository of curated, high-quality quiz packs.
-
-### Platform & Polish
-- [ ] **Localization**: Complete UI translation for major languages (DE, FR, ES, PT).
-- [ ] **Theme Studio**: Create and share custom CSS themes to match specific event branding.
-- [ ] **macOS / Linux Builds**: Cross-platform packaging support in CI/CD.
+- [ ] **Responsiveness**: Improved support for various projector resolutions and small-screen displays.
+- [ ] **Buzzer support**: Integration with keyboard and USB hardware buzzers.
+- [ ] **Media support**: Ability to include images and video clips in questions.
 
 ---
 
