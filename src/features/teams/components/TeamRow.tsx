@@ -13,7 +13,6 @@ export function TeamRow({ team, index, isActive, onSelect }: TeamRowProps) {
   const updateScore  = useBoardStore((s) => s.updateScore);
   const setTeamName  = useBoardStore((s) => s.setTeamName);
   const setTeamColor = useBoardStore((s) => s.setTeamColor);
-  const moveTeam     = useBoardStore((s) => s.moveTeam);
   const moveTeamTo   = useBoardStore((s) => s.moveTeamTo);
   const removeTeam   = useBoardStore((s) => s.removeTeam);
   const teamsCount   = useBoardStore((s) => s.teams.length);
@@ -28,8 +27,6 @@ export function TeamRow({ team, index, isActive, onSelect }: TeamRowProps) {
     }
   }, [confirmRemove]);
 
-  const isFirst = index === 0;
-  const isLast  = index === teamsCount - 1;
   const leader = teams.reduce((a, b) => b.score > a.score ? b : a, teams[0]);
   const isLeader = team.id === leader?.id && team.score > 0;
 
@@ -44,8 +41,10 @@ export function TeamRow({ team, index, isActive, onSelect }: TeamRowProps) {
 
   return (
     <div
-      className={`glass-flat rounded-lg p-2 cursor-pointer transition-all ${
-        isActive ? 'ring-1 ring-[--gold] border-[--gold]' : 'hover:border-[rgba(230,179,25,0.2)]'
+      className={`relative flex flex-col gap-3 p-3.5 rounded-xl border transition-all duration-200 group ${
+        isActive 
+          ? 'border-[--gold] bg-[--surface-overlay] shadow-[0_0_20px_rgba(230,179,25,0.08)] ring-1 ring-[--gold]/30' 
+          : 'border-[--border-strong] bg-[--surface-base] hover:border-[--border-subtle]'
       }`}
       draggable
       onDragStart={(e) => { e.dataTransfer.setData("text/plain", team.id); e.dataTransfer.effectAllowed = "move"; }}
@@ -53,84 +52,118 @@ export function TeamRow({ team, index, isActive, onSelect }: TeamRowProps) {
       onDrop={(e) => { e.preventDefault(); const id = e.dataTransfer.getData("text/plain"); if (id) moveTeamTo(id, index); }}
       onClick={() => onSelect(team.id)}
     >
-      <div className="flex items-center gap-1 mb-1 min-w-0">
-        <span
-          className="cursor-grab select-none text-[--text-muted] hover:text-[--text-secondary] transition-colors shrink-0"
-          style={{ fontSize: "0.6rem" }} title="Drag to reorder"
+      {/* Leader Ribbon */}
+      {isLeader && (
+        <div className="absolute -right-1.5 -top-1.5 z-20 flex items-center gap-1 rounded-bl-lg rounded-tr-xl bg-gradient-to-br from-[--gold-bright] to-[--gold] px-2 py-1 text-[8px] font-black text-black shadow-lg">
+          ★ LEADING
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <div 
+          className="cursor-grab p-1 text-[--text-muted] hover:text-[--text-primary] transition-colors"
+          title="Drag to reorder"
           onClick={e => e.stopPropagation()}
         >
-          ⠿
-        </span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+            <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>
+            <circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>
+          </svg>
+        </div>
+
+        <div className="relative h-4 w-4 shrink-0 rounded-full border border-[--border-strong] shadow-sm overflow-hidden" style={{ background: team.color }}>
+          <input
+            type="color"
+            className="absolute inset-[-100%] cursor-pointer opacity-0"
+            value={team.color}
+            onChange={(e) => { e.stopPropagation(); setTeamColor(team.id, e.target.value); }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
 
         <input
-          type="color"
-          className="h-2.5 w-2.5 rounded-full cursor-pointer border-0 p-0 overflow-hidden shrink-0"
-          style={{ background: team.color, boxShadow: `0 0 6px ${team.color}` }}
-          value={team.color}
-          onChange={(e) => { e.stopPropagation(); setTeamColor(team.id, e.target.value); }}
-          title="Team color"
-          onClick={(e) => e.stopPropagation()}
-        />
-
-        <input
-          className="bg-transparent text-[10px] font-bold tracking-widest uppercase text-[--text-primary] truncate flex-1 min-w-0 focus:outline-none"
+          className="min-w-0 flex-1 bg-transparent text-xs font-black tracking-widest uppercase text-[--text-primary] focus:outline-none"
           value={team.name}
           onChange={(e) => { e.stopPropagation(); setTeamName(team.id, e.target.value); }}
           onClick={(e) => e.stopPropagation()}
-          placeholder="Team name"
+          placeholder="TEAM NAME"
         />
 
-        {isLeader &&
-          <div className="leading-badge text-[7px] font-black tracking-widest uppercase text-[--gold] border border-[--border-strong] bg-[--gold-subtle] px-1 py-0.5 rounded ml-1 shrink-0">
-            ★ LEAD
-          </div>
-        }
-        
         <button
-          className={`${confirmRemove ? 'bg-red-500 text-white px-1.5 rounded' : 'text-[--danger] hover:text-[#fca5a5] opacity-50 hover:opacity-100'} text-[8px] font-bold uppercase transition-all ml-1 shrink-0`}
-          title="Remove team"
+          className={`flex h-6 w-6 items-center justify-center rounded-lg transition-all ${
+            confirmRemove ? 'bg-red-500 text-white' : 'text-[--text-muted] hover:bg-red-500/10 hover:text-red-400'
+          }`}
           onClick={(e) => { e.stopPropagation(); handleRemove(); }}
         >
-          {confirmRemove ? "SURE?" : <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>}
+          {confirmRemove ? <span className="text-[7px] font-black">SURE?</span> : (
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          )}
         </button>
       </div>
 
-      <div className="flex items-baseline gap-1.5 mb-1.5">
-        <input
-          type="number"
-          className="bg-transparent font-serif tabular-nums text-[--text-primary] focus:outline-none"
-          style={{ fontSize: 18, lineHeight: 1, width: "100%" }}
-          value={team.score}
-          onChange={(e) => {
-            e.stopPropagation();
-            const n = Number(e.target.value);
-            if (!isNaN(n)) updateScore(team.id, n - team.score);
-          }}
-          onClick={(e) => e.stopPropagation()}
-        />
-        <div className="text-[8px] font-bold tracking-widest uppercase text-[--text-muted]">PTS</div>
+      {/* Score Display */}
+      <div className="flex items-center justify-between rounded-lg bg-[rgba(0,0,0,0.2)] px-3 py-2 border border-[--border-strong]/50">
+        <div className="flex flex-col">
+          <span className="text-[8px] font-black tracking-widest text-[--text-muted] uppercase">Current Score</span>
+          <div className="flex items-baseline gap-1">
+            <input
+              type="number"
+              className="w-24 bg-transparent font-serif text-2xl font-bold tabular-nums text-[--text-primary] focus:outline-none"
+              value={team.score}
+              onChange={(e) => {
+                e.stopPropagation();
+                const n = Number(e.target.value);
+                if (!isNaN(n)) updateScore(team.id, n - team.score);
+              }}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+        <div className="text-right">
+          <span className="text-xs font-black italic text-[--gold] opacity-80">PTX</span>
+        </div>
       </div>
 
-      <div className="flex items-center gap-0.5">
-        {[100, 200, 500].map((v) => (
-          <button
-            key={`p${v}`}
-            onClick={(e) => { e.stopPropagation(); updateScore(team.id, v); }}
-            className="flex-1 text-[8px] font-bold tabular py-1 rounded bg-[rgba(52,211,153,0.06)] border border-[rgba(52,211,153,0.15)] text-[--success] hover:bg-[rgba(52,211,153,0.15)] transition-colors"
-          >
-            +{v}
-          </button>
-        ))}
-        {[100, 200, 500].map((v) => (
-          <button
-            key={`m${v}`}
-            onClick={(e) => { e.stopPropagation(); updateScore(team.id, -v); }}
-            className="flex-1 text-[8px] font-bold tabular py-1 rounded bg-[rgba(248,113,113,0.06)] border border-[rgba(248,113,113,0.15)] text-[--danger] hover:bg-[rgba(248,113,113,0.15)] transition-colors"
-          >
-            -{v}
-          </button>
-        ))}
+      {/* Quick Adjustments */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="flex flex-col gap-1">
+          <div className="flex gap-1">
+            {[100, 200, 500].map((v) => (
+              <button
+                key={`p${v}`}
+                onClick={(e) => { e.stopPropagation(); updateScore(team.id, v); }}
+                className="flex-1 py-1.5 rounded-lg bg-[--success-subtle] border border-[--success]/20 text-[--success] text-[9px] font-black hover:bg-[--success]/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              >
+                +{v}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-1">
+            {[100, 200, 500].map((v) => (
+              <button
+                key={`m${v}`}
+                onClick={(e) => { e.stopPropagation(); updateScore(team.id, -v); }}
+                className="flex-1 py-1.5 rounded-lg bg-[--danger-subtle] border border-[--danger]/20 text-[--danger] text-[9px] font-black hover:bg-[--danger]/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              >
+                -{v}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Custom Quick Actions (Optional placeholder for more UX magic) */}
+        <div className="flex flex-col justify-between">
+           <button 
+             className="flex-1 rounded-lg border border-[--border-strong] bg-[--surface-base] text-[8px] font-black text-[--text-secondary] hover:bg-[--surface-overlay] hover:text-[--text-primary] transition-all"
+             onClick={(e) => { e.stopPropagation(); updateScore(team.id, -team.score); }}
+           >
+             RESET SCORE
+           </button>
+        </div>
       </div>
     </div>
+  );
+}
   );
 }
