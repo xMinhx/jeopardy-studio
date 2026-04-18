@@ -487,7 +487,7 @@ export default function Control() {
                 <button
                   className="btn-gold"
                   onClick={() => {
-                    playFinalJeopardy();
+                    playQuestionReveal();
                     startFinalJeopardy();
                   }}
                 >
