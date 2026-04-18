@@ -135,7 +135,7 @@ export default function Display() {
   return (
     <div className="flex flex-col h-screen overflow-hidden text-slate-100" style={{ background: "var(--surface-base)" }}>
       <div className="h-10 drag-region flex items-center justify-between px-8 shrink-0 bg-transparent">
-        <span className="studio-label">Jeopardy Display</span>
+        <span className="studio-label">Jeopardy Studio</span>
         <button
           className="text-[9px] font-bold uppercase tracking-widest text-[--text-muted]/40 hover:text-[--text-muted] transition-colors"
           onClick={() => window.api?.toggleFullscreen?.('display')}

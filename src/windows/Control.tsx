@@ -277,7 +277,7 @@ export default function Control() {
   return (
     <div className="flex flex-col h-screen overflow-hidden text-[--text-primary]" style={{ background: "var(--surface-base)" }}>
       <div className="h-10 drag-region flex items-center px-6 shrink-0 border-b border-[--border-subtle] bg-[--surface-panel]">
-        <span className="studio-label">Jeopardy Control</span>
+        <span className="studio-label">Jeopardy Studio</span>
       </div>
       <div className="px-8 py-4 grid gap-6 overflow-y-auto flex-1">
         <header className="flex items-center justify-between mb-2">

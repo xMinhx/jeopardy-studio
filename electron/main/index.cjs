@@ -67,7 +67,7 @@ function createWindows() {
   controlWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    title: 'QuizShow — Host Control',
+    title: 'Jeopardy Studio — Host Control',
     icon: iconPath,
     titleBarStyle: 'hidden',
     titleBarOverlay: {
@@ -81,7 +81,7 @@ function createWindows() {
   displayWindow = new BrowserWindow({
     width: 1280,
     height: 720,
-    title: 'QuizShow — Audience Display',
+    title: 'Jeopardy Studio — Audience Display',
     icon: iconPath,
     titleBarStyle: 'hidden',
     titleBarOverlay: {

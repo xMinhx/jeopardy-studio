@@ -14,9 +14,9 @@ describe("Control Window", () => {
     expect(screen.getByRole("heading", { name: /Board/i })).toBeInTheDocument();
   });
 
-  it("should show Start button for the timer", () => {
+  it("should show header and start button", () => {
     render(<Control />);
-    const startButton = screen.getByRole("button", { name: /Start/i });
-    expect(startButton).toBeInTheDocument();
+    expect(screen.getByText(/Jeopardy Studio/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Start/i })).toBeInTheDocument();
   });
 });
