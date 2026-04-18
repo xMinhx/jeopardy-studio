@@ -15,8 +15,10 @@ One window for you. One window for the crowd. Always in sync.
 
 <br/>
 
-![Display scoreboard view](docs/adr/screenshots/display-scoreboard.png)
-
+<div align="center">
+  <img src="docs/adr/screenshots/display-window.png" width="800" alt="Audience Display View" />
+  <br/>
+  <img src="docs/adr/screenshots/control-window.png" width="800" alt="Host Control View" />
 </div>
 
 ---
