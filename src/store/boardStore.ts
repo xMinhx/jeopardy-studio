@@ -539,6 +539,18 @@ export const useBoardStore = create<BoardState>()(
     }),
     {
       name: "jeopardy-scoreboard-storage",
+      merge: (persisted: unknown, current) => {
+        const p = persisted as Partial<typeof current>;
+        return {
+          ...current,
+          ...p,
+          finalJeopardy: {
+            ...current.finalJeopardy,
+            ...(p.finalJeopardy ?? {}),
+            resolvedTeams: p.finalJeopardy?.resolvedTeams ?? [],
+          },
+        };
+      },
     },
   ),
 );
