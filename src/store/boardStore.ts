@@ -343,6 +343,13 @@ export const useBoardStore = create<BoardState>()(
       startFinalJeopardy: () =>
         set((s) => ({
           finalJeopardy: { ...s.finalJeopardy, isActive: true, stage: "category" },
+          board: {
+            ...s.board,
+            grid: s.board.grid.map((row) =>
+              row.map((cell): Cell => (cell.state === "open" ? { ...cell, state: "hidden" } : cell)),
+            ),
+          },
+          dailyDouble: { stage: "none", teamId: null, wager: 0, cellPosition: null },
         })),
 
       setFinalJeopardyCategory: (category) =>
