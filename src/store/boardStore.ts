@@ -90,6 +90,8 @@ export interface BoardState {
   penalizeTeam(row: number, col: number, teamId: string): void;
   unclaimCell(row: number, col: number): void;
   setCellDisabled(row: number, col: number, disabled: boolean): void;
+  resetScores(): void;
+  resetBoardState(): void;
 }
 
 // ---------------------------------------------------------------------------
@@ -279,6 +281,24 @@ export const useBoardStore = create<BoardState>()(
             ),
           };
         }),
+      resetScores: () =>
+        set((s) => ({
+          teams: s.teams.map((t) => ({ ...t, score: 0 })),
+        })),
+
+      resetBoardState: () =>
+        set((s) => ({
+          board: {
+            ...s.board,
+            grid: s.board.grid.map((row) =>
+              row.map((cell) => ({
+                ...cell,
+                state: "hidden" as CellState,
+                ownerTeamId: undefined,
+              })),
+            ),
+          },
+        })),
     }),
     {
       name: "jeopardy-scoreboard-storage",

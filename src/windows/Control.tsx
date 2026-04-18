@@ -36,6 +36,8 @@ export default function Control() {
     penalizeTeam,
     unclaimCell,
     setCellDisabled,
+    resetScores,
+    resetBoardState,
   } = useBoardStore();
 
   // Timer state
@@ -75,17 +77,7 @@ export default function Control() {
     setCols((current) => (current !== board.cols ? board.cols : current));
   }, [board.rows, board.cols]);
 
-  // ── Load preset on mount ───────────────────────────────────────────────────
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      const preset = await loadBoardPreset();
-      if (preset && !cancelled) {
-        setAll({ teams: useBoardStore.getState().teams, board: preset });
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [setAll]);
+
 
   // ── Broadcast timer ticks to Display via IPC ───────────────────────────────
   useEffect(() => {
@@ -409,6 +401,25 @@ export default function Control() {
               }}
             >
               Export JSON
+            </button>
+            <div className="h-4 w-[1px] bg-slate-200 mx-1" />
+            <button
+              className="rounded bg-red-50 px-3 py-1 text-sm text-red-600 hover:bg-red-100"
+              onClick={() => {
+                if (window.confirm("Reset all team scores to 0?")) resetScores();
+              }}
+            >
+              Reset Scores
+            </button>
+            <button
+              className="rounded bg-red-50 px-3 py-1 text-sm text-red-600 hover:bg-red-100"
+              onClick={() => {
+                if (window.confirm("Reset all board cells to hidden? Questions and categories will be kept.")) {
+                  resetBoardState();
+                }
+              }}
+            >
+              Reset Board
             </button>
           </div>
         </div>

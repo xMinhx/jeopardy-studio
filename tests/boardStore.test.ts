@@ -176,4 +176,30 @@ describe("boardStore", () => {
       useBoardStore.getState().teams.find((t: Team) => t.id === teamB)!.score,
     ).toBe(scoreB + cell.value);
   });
+
+  it("resets scores correctly", () => {
+    const store = useBoardStore.getState();
+    const teamId = store.teams[0].id;
+    store.updateScore(teamId, 500);
+    expect(useBoardStore.getState().teams[0].score).toBe(500);
+
+    store.resetScores();
+    expect(useBoardStore.getState().teams[0].score).toBe(0);
+  });
+
+  it("resets board state correctly while keeping questions", () => {
+    const store = useBoardStore.getState();
+    store.setCellQuestion(0, 0, "Persistent Question");
+    store.openCell(0, 0);
+    store.awardCell(0, 0, store.teams[0].id);
+
+    expect(useBoardStore.getState().board.grid[0][0].state).toBe("claimed");
+    expect(useBoardStore.getState().board.grid[0][0].question).toBe("Persistent Question");
+
+    store.resetBoardState();
+    const cell = useBoardStore.getState().board.grid[0][0];
+    expect(cell.state).toBe("hidden");
+    expect(cell.ownerTeamId).toBeUndefined();
+    expect(cell.question).toBe("Persistent Question");
+  });
 });
