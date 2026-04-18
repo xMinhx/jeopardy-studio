@@ -210,8 +210,6 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 ## Roadmap
 
 - [ ] **Responsiveness**: Improved support for various projector resolutions and small-screen displays.
-- [ ] **Buzzer support**: Integration with keyboard and USB hardware buzzers.
-- [ ] **Media support**: Ability to include images and video clips in questions.
 
 ---
 
