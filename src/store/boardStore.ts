@@ -31,10 +31,7 @@ const DEFAULT_BOARD: Board = {
 /** Remove all references to `teamId` from a single cell, returning the updated cell. */
 function clearTeamFromCell(cell: Cell, teamId: string): Cell {
   if (cell.ownerTeamId === teamId) {
-    return { ...cell, ownerTeamId: undefined, lockedTeamId: undefined, state: "hidden" };
-  }
-  if (cell.lockedTeamId === teamId) {
-    return { ...cell, lockedTeamId: undefined, state: "open" };
+    return { ...cell, ownerTeamId: undefined, state: "hidden" };
   }
   return cell;
 }
@@ -87,10 +84,10 @@ export interface BoardState {
   setCellQuestion(row: number, col: number, question: string): void;
   rebuildBoard(rows: number, cols: number, base: number): void;
 
-  // ── Cell workflow: hidden → locked → claimed | open → claimed ────────────
-  revealAndLockCell(row: number, col: number, teamId: string): void;
-  markCellIncorrect(row: number, col: number): void;
-  claimCellCorrect(row: number, col: number): void;
+  // ── Cell workflow: hidden → open → claimed | disabled ──────────
+  openCell(row: number, col: number): void;
+  awardCell(row: number, col: number, teamId: string): void;
+  penalizeTeam(row: number, col: number, teamId: string): void;
   unclaimCell(row: number, col: number): void;
   setCellDisabled(row: number, col: number, disabled: boolean): void;
 }
@@ -202,52 +199,43 @@ export const useBoardStore = create<BoardState>()(
 
       // ── Cell workflow ────────────────────────────────────────────────────────
 
-      revealAndLockCell: (row, col, teamId) =>
+      openCell: (row, col) =>
         set((s) => {
           const cell = s.board.grid[row][col];
-          if (cell.state === "disabled" || cell.state === "claimed") return {};
+          if (cell.state !== "hidden") return {};
           return {
             board: {
               ...s.board,
-              grid: updateCell(s.board.grid, row, col, {
-                state: "locked",
-                lockedTeamId: teamId,
-              }),
+              grid: updateCell(s.board.grid, row, col, { state: "open" }),
             },
           };
         }),
 
-      markCellIncorrect: (row, col) =>
+      awardCell: (row, col, teamId) =>
         set((s) => {
           const cell = s.board.grid[row][col];
-          if (cell.state !== "locked") return {};
-          return {
-            board: {
-              ...s.board,
-              grid: updateCell(s.board.grid, row, col, {
-                state: "open",
-                lockedTeamId: undefined,
-              }),
-            },
-          };
-        }),
-
-      claimCellCorrect: (row, col) =>
-        set((s) => {
-          const cell = s.board.grid[row][col];
-          const teamId = cell.lockedTeamId;
-          if (cell.state !== "locked" || !teamId) return {};
+          if (cell.state === "claimed" || cell.state === "disabled") return {};
           return {
             board: {
               ...s.board,
               grid: updateCell(s.board.grid, row, col, {
                 state: "claimed",
                 ownerTeamId: teamId,
-                lockedTeamId: undefined,
               }),
             },
             teams: s.teams.map((t) =>
               t.id === teamId ? { ...t, score: t.score + cell.value } : t,
+            ),
+          };
+        }),
+
+      penalizeTeam: (row, col, teamId) =>
+        set((s) => {
+          const cell = s.board.grid[row][col];
+          // We don't change cell state here, just dock points
+          return {
+            teams: s.teams.map((t) =>
+              t.id === teamId ? { ...t, score: t.score - cell.value } : t,
             ),
           };
         }),
@@ -262,7 +250,6 @@ export const useBoardStore = create<BoardState>()(
               grid: updateCell(s.board.grid, row, col, {
                 state: "hidden",
                 ownerTeamId: undefined,
-                lockedTeamId: undefined,
               }),
             },
             teams: s.teams.map((t) =>
@@ -283,7 +270,6 @@ export const useBoardStore = create<BoardState>()(
               grid: updateCell(s.board.grid, row, col, {
                 state: disabled ? "disabled" : "hidden",
                 ownerTeamId: undefined,
-                lockedTeamId: undefined,
               }),
             },
             teams: s.teams.map((t) =>

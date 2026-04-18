@@ -1,6 +1,5 @@
 export type CellState =
   | "hidden"
-  | "locked"
   | "open"
   | "claimed"
   | "disabled";
@@ -10,6 +9,5 @@ export interface Cell {
   value: number;
   question: string;
   state: CellState;
-  lockedTeamId?: string;
   ownerTeamId?: string;
 }

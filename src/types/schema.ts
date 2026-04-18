@@ -13,20 +13,26 @@ export const CellSchema = z
     id: z.string(),
     value: z.number().int().positive(),
     question: z.string().default(""),
-    state: z
-      .enum(["hidden", "locked", "open", "claimed", "disabled"])
-      .optional(),
-    lockedTeamId: z.string().optional(),
+    state: z.enum(["hidden", "open", "claimed", "disabled"]).optional(),
     ownerTeamId: z.string().optional(),
-    // Legacy field: kept for backwards-compatible JSON imports.
+    // Legacy fields: kept for backwards-compatible JSON imports.
     disabled: z.boolean().optional(),
+    lockedTeamId: z.string().optional(),
   })
-  .transform(({ disabled, state, ownerTeamId, ...cell }) => ({
-    ...cell,
-    ownerTeamId,
-    state:
-      state ?? (disabled ? "disabled" : ownerTeamId ? "claimed" : "hidden"),
-  }));
+  .transform(({ disabled, state, ownerTeamId, lockedTeamId, ...cell }) => {
+    let finalState = state;
+    if (!finalState) {
+      if (disabled) finalState = "disabled";
+      else if (ownerTeamId) finalState = "claimed";
+      else if (lockedTeamId) finalState = "open";
+      else finalState = "hidden";
+    }
+    return {
+      ...cell,
+      ownerTeamId,
+      state: finalState as "hidden" | "open" | "claimed" | "disabled",
+    };
+  });
 
 export const BoardSchema = z.object({
   rows: z.number().int().positive(),

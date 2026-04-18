@@ -71,17 +71,28 @@ export function TeamRow({ team, index, isActive, onSelect }: TeamRowProps) {
 
       <div className="flex items-center gap-2">
         <button
-          className="rounded bg-slate-100 px-3 py-1.5"
+          className="h-8 w-8 rounded bg-slate-100 font-bold hover:bg-slate-200"
           onClick={(e) => { e.stopPropagation(); updateScore(team.id, -100); }}
+          title="Subtract 100"
         >
-          -100
+          -
         </button>
-        <div className="w-20 text-right text-base tabular-nums">{team.score}</div>
+        <input
+          type="number"
+          className="w-20 rounded border px-2 py-1 text-right text-sm font-medium tabular-nums focus:ring-1 focus:ring-emerald-500"
+          value={team.score}
+          onChange={(e) => {
+            const next = Number(e.target.value);
+            if (!isNaN(next)) updateScore(team.id, next - team.score);
+          }}
+          onClick={(e) => e.stopPropagation()}
+        />
         <button
-          className="rounded bg-slate-100 px-3 py-1.5"
+          className="h-8 w-8 rounded bg-slate-100 font-bold hover:bg-slate-200"
           onClick={(e) => { e.stopPropagation(); updateScore(team.id, 100); }}
+          title="Add 100"
         >
-          +100
+          +
         </button>
 
         <div className="ml-1 flex items-center gap-1">

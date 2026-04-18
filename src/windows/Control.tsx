@@ -31,9 +31,9 @@ export default function Control() {
     setCellValue,
     setCellQuestion,
     rebuildBoard,
-    revealAndLockCell,
-    markCellIncorrect,
-    claimCellCorrect,
+    openCell,
+    awardCell,
+    penalizeTeam,
     unclaimCell,
     setCellDisabled,
   } = useBoardStore();
@@ -467,44 +467,67 @@ export default function Control() {
 
         {/* Active prompt panel */}
         {activePrompt && !editMode && (
-          <div className="mb-4 rounded-xl border border-indigo-200 bg-indigo-50 p-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="mb-4 rounded-xl border border-indigo-200 bg-indigo-50 p-4 shadow-sm">
+            <div className="flex flex-col gap-4">
               <div className="space-y-2">
-                <div className="text-xs font-semibold uppercase tracking-[0.25em] text-indigo-500">
-                  {activePrompt.cell.state === "locked" ? "Active Question" : "Open Question"}
+                <div className="flex items-center gap-2">
+                  <div className="text-xs font-semibold uppercase tracking-[0.25em] text-indigo-500">
+                    Active Question
+                  </div>
+                  <div className="h-px flex-1 bg-indigo-100" />
                 </div>
-                <div className="text-sm text-slate-600">
-                  {activePrompt.category} • {activePrompt.cell.value} points
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-medium text-slate-500">
+                    {activePrompt.category} • {activePrompt.cell.value} points
+                  </div>
+                  <button
+                    className="text-xs font-medium text-slate-400 hover:text-slate-600"
+                    onClick={() => unclaimCell(activePrompt.row, activePrompt.col)}
+                  >
+                    Reset Cell
+                  </button>
                 </div>
-                <div className="max-w-3xl text-lg font-semibold leading-relaxed text-slate-900">
+                <div className="max-w-4xl text-xl font-semibold leading-snug text-slate-900">
                   {activePrompt.cell.question || "No question set"}
                 </div>
-                <div className="text-sm text-slate-600">
-                  {activePrompt.lockedTeamName
-                    ? `Locked to ${activePrompt.lockedTeamName}`
-                    : "Open for another team to answer"}
-                </div>
               </div>
-              <div className="flex flex-wrap gap-2">
+
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {teams.map((team) => (
+                  <div
+                    key={team.id}
+                    className="flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white"
+                  >
+                    <div className="flex items-center gap-2 border-b px-3 py-1.5 bg-slate-50">
+                      <div
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: team.color }}
+                      />
+                      <span className="text-xs font-bold truncate text-slate-700">
+                        {team.name}
+                      </span>
+                    </div>
+                    <div className="flex divide-x border-t-0">
+                      <button
+                        className="flex-1 py-2 text-xs font-bold text-emerald-600 hover:bg-emerald-50 transition-colors"
+                        onClick={() => awardCell(activePrompt.row, activePrompt.col, team.id)}
+                      >
+                        AWARD
+                      </button>
+                      <button
+                        className="flex-1 py-2 text-xs font-bold text-rose-500 hover:bg-rose-50 transition-colors"
+                        onClick={() => penalizeTeam(activePrompt.row, activePrompt.col, team.id)}
+                      >
+                        PENALIZE
+                      </button>
+                    </div>
+                  </div>
+                ))}
                 <button
-                  className="rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={() => claimCellCorrect(activePrompt.row, activePrompt.col)}
-                  disabled={activePrompt.cell.state !== "locked"}
+                  className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 py-3 text-xs font-bold text-slate-400 hover:border-slate-400 hover:bg-slate-50 hover:text-slate-500 transition-all"
+                  onClick={() => setCellDisabled(activePrompt.row, activePrompt.col, true)}
                 >
-                  Mark Correct
-                </button>
-                <button
-                  className="rounded bg-amber-500 px-3 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={() => markCellIncorrect(activePrompt.row, activePrompt.col)}
-                  disabled={activePrompt.cell.state !== "locked"}
-                >
-                  Mark Incorrect
-                </button>
-                <button
-                  className="rounded bg-slate-200 px-3 py-2 text-sm font-medium text-slate-800"
-                  onClick={() => unclaimCell(activePrompt.row, activePrompt.col)}
-                >
-                  Reset Cell
+                  NOBODY GOT IT
                 </button>
               </div>
             </div>
@@ -531,8 +554,6 @@ export default function Control() {
           {visibleRows.map((row, r) =>
             row.map((cell, c) => {
               const owner = teams.find((t) => t.id === cell.ownerTeamId);
-              const lockedTeam = teams.find((t) => t.id === cell.lockedTeamId);
-              const isLocked = cell.state === "locked";
               const isOpen = cell.state === "open";
               const isClaimed = cell.state === "claimed";
               const isDisabled = cell.state === "disabled";
@@ -545,16 +566,14 @@ export default function Control() {
                       ? "bg-slate-100 opacity-60"
                       : isClaimed
                         ? "bg-emerald-50"
-                        : isLocked
-                          ? "bg-amber-50 ring-2 ring-amber-300"
-                          : isOpen
-                            ? "bg-blue-50 ring-2 ring-blue-200"
-                            : "hover:bg-slate-50"
+                        : isOpen
+                          ? "bg-blue-50 ring-2 ring-blue-200"
+                          : "hover:bg-slate-50"
                   }`}
                   onClick={() => {
-                    if (editMode || !activeTeamId) return;
+                    if (editMode) return;
                     if (cell.state === "claimed" || cell.state === "disabled") return;
-                    revealAndLockCell(r, c, activeTeamId);
+                    openCell(r, c);
                   }}
                   onContextMenu={(e) => {
                     e.preventDefault();
@@ -580,15 +599,13 @@ export default function Control() {
                   ) : (
                     <div className="grid gap-1">
                       <div className="text-xl font-semibold">{cell.value}</div>
-                      {(isLocked || isOpen || isClaimed || isDisabled) && (
+                      {(isOpen || isClaimed || isDisabled) && (
                         <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                          {isLocked
-                            ? `Locked: ${lockedTeam?.name ?? "Team"}`
-                            : isOpen
-                              ? "Open"
-                              : isClaimed
-                                ? (owner?.name ?? "Claimed")
-                                : "Disabled"}
+                          {isOpen
+                            ? "Open"
+                            : isClaimed
+                              ? (owner?.name ?? "Claimed")
+                              : "Disabled"}
                         </div>
                       )}
                     </div>
@@ -614,23 +631,18 @@ export default function Control() {
             >
               {[
                 {
-                  label: "Reveal + Lock",
+                  label: "Open Cell",
+                  disabled: ["claimed", "disabled"].includes(
+                    board.grid[ctxMenu.row][ctxMenu.col].state,
+                  ),
+                  action: () => openCell(ctxMenu.row, ctxMenu.col),
+                },
+                {
+                  label: "Award Team",
                   disabled:
                     !activeTeamId ||
                     ["claimed", "disabled"].includes(board.grid[ctxMenu.row][ctxMenu.col].state),
-                  action: () => {
-                    if (activeTeamId) revealAndLockCell(ctxMenu.row, ctxMenu.col, activeTeamId);
-                  },
-                },
-                {
-                  label: "Mark Correct",
-                  disabled: board.grid[ctxMenu.row][ctxMenu.col].state !== "locked",
-                  action: () => claimCellCorrect(ctxMenu.row, ctxMenu.col),
-                },
-                {
-                  label: "Mark Incorrect",
-                  disabled: board.grid[ctxMenu.row][ctxMenu.col].state !== "locked",
-                  action: () => markCellIncorrect(ctxMenu.row, ctxMenu.col),
+                  action: () => awardCell(ctxMenu.row, ctxMenu.col, activeTeamId),
                 },
                 {
                   label: "Unclaim",

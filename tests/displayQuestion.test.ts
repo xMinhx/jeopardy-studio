@@ -11,7 +11,7 @@ describe("resolveTimerQuestion", () => {
     { id: "B", name: "Team B", color: "#00f", score: 0 },
   ];
 
-  it("captures the currently active locked question", () => {
+  it("captures the currently active open question", () => {
     const next = resolveTimerQuestion(
       null,
       {
@@ -24,8 +24,7 @@ describe("resolveTimerQuestion", () => {
               id: "1A",
               value: 100,
               question: "What is gravity?",
-              state: "locked",
-              lockedTeamId: "A",
+              state: "open",
             },
           ],
         ],
@@ -38,7 +37,6 @@ describe("resolveTimerQuestion", () => {
       category: "Science",
       value: 100,
       question: "What is gravity?",
-      lockedTeamName: "Team A",
     });
   });
 
@@ -48,7 +46,6 @@ describe("resolveTimerQuestion", () => {
       category: "Science",
       value: 100,
       question: "What is gravity?",
-      lockedTeamName: "Team A",
     };
 
     const next = resolveTimerQuestion(
@@ -101,8 +98,7 @@ describe("resolveTimerQuestion", () => {
               id: "1B",
               value: 200,
               question: "Who built the pyramids?",
-              state: "locked",
-              lockedTeamId: "B",
+              state: "open",
             },
           ],
         ],
@@ -116,7 +112,6 @@ describe("resolveTimerQuestion", () => {
       category: "History",
       value: 200,
       question: "Who built the pyramids?",
-      lockedTeamName: "Team B",
     });
   });
 });

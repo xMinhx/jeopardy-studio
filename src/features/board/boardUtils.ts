@@ -10,7 +10,6 @@ export interface ActiveQuestionSnapshot {
   category: string;
   value: number;
   question: string;
-  lockedTeamName?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -19,7 +18,7 @@ export interface ActiveQuestionSnapshot {
 
 /**
  * Return all cells in a board that are currently in an interactive state
- * ("locked" or "open"), with enriched display data.
+ * ("open"), with enriched display data.
  */
 export function getActiveQuestions(
   board: Board,
@@ -34,13 +33,12 @@ export function getActiveQuestions(
     for (let col = 0; col < board.cols; col++) {
       const cell = gridRow[col];
       if (!cell) continue;
-      if (cell.state === "locked" || cell.state === "open") {
+      if (cell.state === "open") {
         result.push({
           cellId: cell.id,
           category: visibleCats[col] ?? `Cat ${col + 1}`,
           value: cell.value,
           question: cell.question,
-          lockedTeamName: teams.find((t) => t.id === cell.lockedTeamId)?.name,
         });
       }
     }
@@ -50,14 +48,14 @@ export function getActiveQuestions(
 }
 
 /**
- * Return the IDs of all currently active (locked/open) cells.
+ * Return the IDs of all currently active (open) cells.
  * Useful for tracking which questions are new since the last render.
  */
 export function getActiveQuestionIds(board: Board): string[] {
   return board.grid
     .slice(0, board.rows)
     .flatMap((row) => row.slice(0, board.cols))
-    .filter((cell) => cell.state === "locked" || cell.state === "open")
+    .filter((cell) => cell.state === "open")
     .map((cell) => cell.id);
 }
 

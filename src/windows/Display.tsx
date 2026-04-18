@@ -206,9 +206,7 @@ function TimerView({
             {timerQuestion.question || "No question set"}
           </div>
           <div className="mt-5 text-lg font-medium text-slate-500">
-            {timerQuestion.lockedTeamName
-              ? `Locked in: ${timerQuestion.lockedTeamName}`
-              : "Open for another team to answer"}
+            Open for answer
           </div>
         </div>
       )}
@@ -298,9 +296,7 @@ function ScoreboardView({ teams, board }: ScoreboardViewProps) {
                   {activeCell.question || "No question set"}
                 </div>
                 <div className="mt-5 text-lg font-medium text-slate-300">
-                  {activeQuestion.lockedTeamName
-                    ? `Locked in: ${activeQuestion.lockedTeamName}`
-                    : "Open for another team to answer"}
+                  Open for answer
                 </div>
               </div>
             </div>
@@ -337,7 +333,6 @@ function ScoreboardView({ teams, board }: ScoreboardViewProps) {
                   key={cell.id}
                   cell={cell}
                   owner={teams.find((t) => t.id === cell.ownerTeamId)}
-                  lockedTeam={teams.find((t) => t.id === cell.lockedTeamId)}
                   isActive={activeCell?.id === cell.id}
                 />
               ))}

@@ -49,11 +49,11 @@ describe("boardStore", () => {
     const value = useBoardStore.getState().board.grid[0][0].value;
     const base = useBoardStore.getState().teams.find((t: Team) => t.id === id)!.score;
 
-    // Reveal → lock → correct is the workflow that results in "claimed"
-    useBoardStore.getState().revealAndLockCell(0, 0, id);
-    expect(useBoardStore.getState().board.grid[0][0].state).toBe("locked");
+    // hidden → open → awarded
+    useBoardStore.getState().openCell(0, 0);
+    expect(useBoardStore.getState().board.grid[0][0].state).toBe("open");
 
-    useBoardStore.getState().claimCellCorrect(0, 0);
+    useBoardStore.getState().awardCell(0, 0, id);
     expect(useBoardStore.getState().board.grid[0][0].ownerTeamId).toBe(id);
     expect(useBoardStore.getState().board.grid[0][0].state).toBe("claimed");
     expect(useBoardStore.getState().teams.find((t: Team) => t.id === id)!.score).toBe(
@@ -78,8 +78,8 @@ describe("boardStore", () => {
     const teamId = store.teams[0].id;
 
     // Use the proper workflow to claim a cell
-    useBoardStore.getState().revealAndLockCell(0, 1, teamId);
-    useBoardStore.getState().claimCellCorrect(0, 1);
+    useBoardStore.getState().openCell(0, 1);
+    useBoardStore.getState().awardCell(0, 1, teamId);
     expect(useBoardStore.getState().board.grid[0][1].ownerTeamId).toBe(teamId);
 
     // Remove the team
@@ -138,7 +138,7 @@ describe("boardStore", () => {
     expect(board.grid.every((row: Cell[]) => row.length === 6)).toBe(true);
   });
 
-  it("reveals, unlocks after incorrect, and claims only on correct", () => {
+  it("reveals, penalizes, and awards teams flexibly", () => {
     const store = useBoardStore.getState();
     store.rebuildBoard(2, 2, 100);
 
@@ -152,71 +152,28 @@ describe("boardStore", () => {
       .teams.find((t: Team) => t.id === teamB)!.score;
 
     store.setCellQuestion(0, 0, "Sample question");
-    store.revealAndLockCell(0, 0, teamA);
+    store.openCell(0, 0);
 
     let cell = useBoardStore.getState().board.grid[0][0];
-    expect(cell.state).toBe("locked");
+    expect(cell.state).toBe("open");
     expect(cell.question).toBe("Sample question");
-    expect(cell.lockedTeamId).toBe(teamA);
     expect(cell.ownerTeamId).toBeUndefined();
+
+    // Penalize team A
+    store.penalizeTeam(0, 0, teamA);
     expect(
       useBoardStore.getState().teams.find((t: Team) => t.id === teamA)!.score,
-    ).toBe(scoreA);
+    ).toBe(scoreA - cell.value);
+    // Cell should still be open
+    expect(useBoardStore.getState().board.grid[0][0].state).toBe("open");
 
-    store.markCellIncorrect(0, 0);
-    cell = useBoardStore.getState().board.grid[0][0];
-    expect(cell.state).toBe("open");
-    expect(cell.lockedTeamId).toBeUndefined();
-    expect(cell.ownerTeamId).toBeUndefined();
-
-    store.revealAndLockCell(0, 0, teamB);
-    expect(useBoardStore.getState().board.grid[0][0].lockedTeamId).toBe(teamB);
-
-    store.claimCellCorrect(0, 0);
+    // Award team B
+    store.awardCell(0, 0, teamB);
     cell = useBoardStore.getState().board.grid[0][0];
     expect(cell.ownerTeamId).toBe(teamB);
-    expect(cell.lockedTeamId).toBeUndefined();
     expect(cell.state).toBe("claimed");
     expect(
       useBoardStore.getState().teams.find((t: Team) => t.id === teamB)!.score,
     ).toBe(scoreB + cell.value);
-  });
-
-  it("scores the locked team instead of the currently selected team", () => {
-    const store = useBoardStore.getState();
-    const teamA = store.teams[0].id;
-    const teamB = store.teams[1].id;
-
-    store.revealAndLockCell(0, 0, teamA);
-    store.claimCellCorrect(0, 0);
-
-    const cell = useBoardStore.getState().board.grid[0][0];
-    const updatedTeamA = useBoardStore
-      .getState()
-      .teams.find((t: Team) => t.id === teamA)!;
-    const updatedTeamB = useBoardStore
-      .getState()
-      .teams.find((t: Team) => t.id === teamB)!;
-
-    expect(cell.ownerTeamId).toBe(teamA);
-    expect(updatedTeamA.score).toBe(cell.value);
-    expect(updatedTeamB.score).toBe(0);
-  });
-
-  it("does not score a cell when no team is locked", () => {
-    const store = useBoardStore.getState();
-    const teamA = store.teams[0].id;
-
-    store.claimCellCorrect(0, 0);
-
-    const cell = useBoardStore.getState().board.grid[0][0];
-    const updatedTeamA = useBoardStore
-      .getState()
-      .teams.find((t: Team) => t.id === teamA)!;
-
-    expect(cell.ownerTeamId).toBeUndefined();
-    expect(cell.lockedTeamId).toBeUndefined();
-    expect(cell.state).toBe("hidden");
-    expect(updatedTeamA.score).toBe(0);
   });
 });
