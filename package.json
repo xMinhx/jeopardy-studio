@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "vitest --run",
+    "test": "vitest --config vite.config.ts --run",
     "test:watch": "vitest"
   },
   "dependencies": {

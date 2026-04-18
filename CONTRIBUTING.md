@@ -34,15 +34,11 @@ By participating in this project, you agree to abide by our Code of Conduct. (Se
 
 ## Style Guidelines
 
-- **TypeScript**: Use strict mode.
-- **Formatting**: 2-space indent (run `npm run format`).
-- **Naming**: `PascalCase` for React components/classes; `camelCase` for variables/functions.
-- **Tailwind**: Use semantic class groups; prefer shared UI components.
+- Follow existing code patterns and keep components modular.
+- Use TypeScript for all new code.
+- Ensure the test suite passes (`npm test`).
+- Ensure the code lints (`npm run lint`).
 
-## Testing Guidelines
-
-- Aim for 80%+ coverage on core logic (stores, reducers, IPC).
-- Use `vitest` and `@testing-library/react`.
 
 ---
 
