@@ -132,18 +132,15 @@ jeopardy-studio/
 Jeopardy Studio uses a master-mirror architecture built on Electron's IPC (Inter-Process Communication).
 
 ```mermaid
-graph TD
+graph LR
     %% Theme Configuration
-    classDef main fill:#1a2138,stroke:#e6b319,stroke-width:3px,color:#f0ead6,rx:10,ry:10;
+    classDef main fill:#1a2138,stroke:#e6b319,stroke-width:2px,color:#f0ead6,rx:10,ry:10;
     classDef renderer fill:#0c0f1a,stroke:#4e5670,stroke-width:1px,color:#9ba3bf,rx:5,ry:5;
     classDef store fill:#12172a,stroke:#e6b319,stroke-width:1px,color:#e6b319,rx:20,ry:20;
-    classDef action fill:#e6b319,stroke:#f5c736,stroke-width:2px,color:#0c0f1a,font-weight:bold;
 
     subgraph Main ["Main Process (Node.js)"]
         direction TB
         M_IDX[Main Index]:::main
-        M_LATEST[(Latest State)]:::store
-        M_IDX --- M_LATEST
     end
 
     subgraph Host ["Host Control Window"]
@@ -161,19 +158,14 @@ graph TD
     end
 
     %% Communication Flow
-    C_UI -- "1. state:update" --> M_IDX
-    M_IDX -- "2. state:changed" --> D_UI
-    M_IDX -- "2. state:changed" --> C_UI
+    C_UI -- "state:update" --> M_IDX
+    M_IDX -- "state:changed" --> D_UI
+    M_IDX -- "state:changed" --> C_UI
     
     M_IDX -. "timer:tick" .-> D_UI
     C_UI -- "file:io" --> M_IDX
-
-    %% Initialization
     M_IDX -- "state:get" --> C_ST
     M_IDX -- "state:get" --> D_ST
-
-    %% Styling
-    linkStyle 0,1,2 stroke:#e6b319,stroke-width:2px;
 ```
 
 - **State Sync**: Uses a one-way IPC bridge. The Host Control owns the state; the Display window is a reactive mirror.
