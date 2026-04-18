@@ -124,9 +124,9 @@ export default function Display() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-screen overflow-hidden text-slate-100 bg-[#020617]">
+    <div className="flex flex-col h-screen overflow-hidden text-slate-100" style={{ background: "var(--surface-base)" }}>
       <div className="h-10 drag-region flex items-center px-8 shrink-0 bg-transparent">
-        <span className="text-[10px] uppercase tracking-[0.6em] text-slate-600 font-bold">Jeopardy Display</span>
+        <span className="studio-label">Jeopardy Display</span>
       </div>
       <div className="flex-1 overflow-hidden px-10 pb-10 pt-2 flex flex-col">
         {finalJeopardy.isActive ? (
@@ -267,56 +267,33 @@ function ScoreboardView({ teams, board, dailyDouble }: ScoreboardViewProps) {
     : null;
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-hidden">
-      {/* Teams */}
-      <section className="shrink-0 space-y-3">
-        <div className="flex items-end justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.4em] text-slate-400">Scoreboard</p>
-            <h2 className="text-3xl font-bold text-slate-100">Live standings</h2>
-          </div>
-          <span className="text-xs uppercase tracking-[0.4em] text-slate-300">Display</span>
-        </div>
-
-        <div className="grid items-stretch gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {[...teams].sort((a, b) => b.score - a.score).map((team) => (
-            <TeamCard
-              key={team.id}
-              team={team}
-              isLeader={leaderScore > 0 && team.score === leaderScore && leaderCount === 1}
-              isCoLeader={leaderScore > 0 && team.score === leaderScore && leaderCount > 1}
-            />
-          ))}
-        </div>
-      </section>
-
+    <div className="flex h-full flex-col gap-8 overflow-hidden pt-4">
       {/* Board */}
-      <section className="flex min-h-0 flex-1 flex-col rounded-[40px] border border-white/5 bg-slate-900/20 p-8 shadow-2xl">
-        <div className="mb-6 text-center text-xs uppercase tracking-[0.6em] text-slate-500 font-bold">
-          Board
+      <section className="flex min-h-0 flex-1 flex-col">
+        <div className="mb-8 flex justify-center">
+          <h1 className="text-display text-4xl text-[--text-primary] border-b-2 border-[--gold] pb-2">
+            QUIZSHOW
+          </h1>
         </div>
 
         <div className="relative flex min-h-0 flex-1">
           {/* Active question overlay */}
           {activeCell && activeQuestion && (
-            <div className="pointer-events-none absolute inset-6 z-20 flex items-center justify-center">
-              <div className="max-w-5xl rounded-[32px] border border-white/20 bg-slate-950/96 px-10 py-8 text-center text-white shadow-2xl backdrop-blur-md">
-                <div className="flex items-center justify-center gap-4 text-xs uppercase tracking-[0.45em] font-bold">
-                  <span className="text-slate-500">{activeQuestion.category}</span>
-                  <span className="h-1 w-1 rounded-full bg-slate-700" />
+            <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-[--surface-overlay] bg-opacity-95 backdrop-blur-md rounded-2xl">
+              <div className="max-w-5xl px-10 py-8 text-center">
+                <div className="flex items-center justify-center gap-4 studio-label mb-4">
+                  <span>{activeQuestion.category}</span>
+                  <span className="h-1 w-1 rounded-full bg-[--gold]" />
                   {dailyDouble.stage === "question" ? (
-                    <span className="text-amber-500">
+                    <span className="text-[--gold]">
                       DAILY DOUBLE: ${dailyDouble.wager.toLocaleString()}
                     </span>
                   ) : (
-                    <span className="text-slate-400">{activeQuestion.value} points</span>
+                    <span className="font-serif italic text-[--gold] text-4xl capitalize">{activeQuestion.value} points</span>
                   )}
                 </div>
-                <div className="mt-4 text-[clamp(2rem,4vw,4rem)] font-black leading-tight text-white">
+                <div className="mt-8 font-serif text-5xl font-normal text-[--text-primary] leading-tight">
                   {activeCell.question || "No question set"}
-                </div>
-                <div className="mt-5 text-lg font-medium text-slate-300">
-                  Open for answer
                 </div>
               </div>
             </div>
@@ -327,13 +304,14 @@ function ScoreboardView({ teams, board, dailyDouble }: ScoreboardViewProps) {
           >
             {/* Column headers */}
             <div
-              className="grid gap-3"
+              className="grid gap-3 mb-2"
               style={{ gridTemplateColumns: `repeat(${board.cols}, minmax(0, 1fr))` }}
             >
               {visibleCategories.map((cat, i) => (
                 <div
                   key={`${i}-${cat}`}
-                  className="rounded-xl bg-slate-800/40 border border-white/5 px-3 py-2 text-center text-xs font-bold uppercase tracking-widest text-slate-400"
+                  className="px-3 py-2 text-center text-sm font-sans font-bold uppercase tracking-widest text-[--text-secondary] border-b"
+                  style={{ borderColor: 'var(--border-strong)' }}
                 >
                   {cat}
                 </div>
@@ -358,6 +336,20 @@ function ScoreboardView({ teams, board, dailyDouble }: ScoreboardViewProps) {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Teams (Bottom Bar) */}
+      <section className="shrink-0 pt-4 border-t border-[--border-subtle]">
+        <div className="grid items-stretch gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {[...teams].sort((a, b) => b.score - a.score).map((team) => (
+            <TeamCard
+              key={team.id}
+              team={team}
+              isLeader={leaderScore > 0 && team.score === leaderScore && leaderCount === 1}
+              isCoLeader={leaderScore > 0 && team.score === leaderScore && leaderCount > 1}
+            />
+          ))}
         </div>
       </section>
     </div>
@@ -500,37 +492,41 @@ function FinalJeopardySplash({
 
         {/* Stage: Resolution */}
         {stage === "resolution" && (
-          <div className="flex flex-col items-center text-center animate-in fade-in slide-in-from-top-12 duration-700">
-            <div className="mb-12 text-5xl font-black uppercase tracking-[0.4em] text-emerald-500 drop-shadow-[0_0_20px_rgba(16,185,129,0.4)]">
-              The Results
-            </div>
-            <div className="grid w-full grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {[...teams].sort((a,b) => b.score - a.score).map((t, idx) => (
-                <div key={t.id} className={`relative flex flex-col rounded-[40px] border p-8 shadow-2xl transition-all ${idx === 0 ? "border-amber-500/50 bg-amber-500/5 scale-110 z-10" : "border-white/10 bg-slate-900/40"}`}>
-                  {idx === 0 && (
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-6 py-2 text-xs font-black uppercase tracking-widest text-slate-950 shadow-lg">
-                      Champion
+          <>
+            <div className="pointer-events-none absolute inset-[-50vh] z-0 bg-[radial-gradient(circle_at_50%_40%,rgba(230,179,25,0.12),transparent_70%)] animate-in fade-in duration-1000" />
+            
+            <div className="relative z-10 flex flex-col items-center text-center animate-in fade-in slide-in-from-top-12 duration-700 w-full">
+              <div className="mb-12 text-5xl font-black uppercase tracking-[0.4em] text-[--gold] drop-shadow-[0_0_20px_var(--gold-glow)]">
+                The Results
+              </div>
+              <div className="grid w-full grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                {[...teams].sort((a,b) => b.score - a.score).map((t, idx) => (
+                  <div key={t.id} className={`relative flex flex-col p-8 transition-all ${idx === 0 ? "studio-card--gold scale-110 z-10 bg-[--surface-overlay]" : "studio-card scale-95 opacity-80"}`}>
+                    {idx === 0 && (
+                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 rounded-full bg-[--gold] px-6 py-2 text-xs font-black uppercase tracking-widest text-[#0c0f1a] shadow-lg">
+                        Champion
+                      </div>
+                    )}
+                    <div className="mb-6 flex justify-center">
+                      <div className="h-24 w-24 rounded-full flex items-center justify-center text-5xl font-black shadow-inner" style={{ background: t.color }}>
+                        <span className="text-[#0c0f1a] drop-shadow-sm">{t.name.charAt(0)}</span>
+                      </div>
                     </div>
-                  )}
-                  <div className="mb-6 flex justify-center">
-                    <div className="h-24 w-24 rounded-[32px] flex items-center justify-center text-5xl font-black shadow-2xl" style={{ background: t.color }}>
-                      {t.name.charAt(0)}
+                    <div className="text-3xl font-serif font-bold text-[--text-primary]">{t.name}</div>
+                    {(finalJeopardy.wagers[t.id] ?? 0) > 0 && (
+                      <div className="mt-4 text-sm font-bold uppercase tracking-widest text-[--text-muted]">
+                        Wager: <span className="text-[--gold] text-data"><AnimatedNumber value={finalJeopardy.wagers[t.id] ?? 0} prefix="$" /></span>
+                      </div>
+                    )}
+                    <div className="mt-4 text-[5rem] leading-none text-[--gold] text-data font-black">
+                      <AnimatedNumber value={t.score} />
                     </div>
+                    <div className="mt-2 text-xs font-bold uppercase tracking-widest text-[--text-muted]">Final Score</div>
                   </div>
-                  <div className="text-2xl font-black uppercase tracking-widest text-white">{t.name}</div>
-                  {(finalJeopardy.wagers[t.id] ?? 0) > 0 && (
-                    <div className="mt-2 text-sm font-bold uppercase tracking-widest text-slate-400">
-                      Wager: <AnimatedNumber value={finalJeopardy.wagers[t.id] ?? 0} prefix="$" />
-                    </div>
-                  )}
-                  <div className="mt-4 text-5xl font-black tabular-nums text-slate-100">
-                    <AnimatedNumber value={t.score} />
-                  </div>
-                  <div className="mt-2 text-xs font-bold uppercase tracking-widest text-slate-500">Final Score</div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

@@ -16,92 +16,35 @@ export function BoardCard({ cell, owner, isActive }: BoardCardProps) {
   const isOpen = cell.state === "open";
   const isDisabled = cell.state === "disabled";
 
-  const teamColor = owner?.color ?? "#6366f1";
-
-  const bgAvailable = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
-  const bgDisabled = "linear-gradient(155deg,#475569,#1f2937)";
-  const bgOpen = "linear-gradient(150deg,#0f172a,#1d4ed8)";
-  const bgClaimed = `linear-gradient(150deg, ${teamColor}22 0%, transparent 60%), linear-gradient(155deg,#0b1220,#121a2b)`;
-
-  const bg = isClaimed
-    ? bgClaimed
-    : isDisabled
-      ? bgDisabled
-      : isOpen
-        ? bgOpen
-        : bgAvailable;
-
-  const boxShadow = isClaimed
-    ? `0 12px 28px ${teamColor}33`
-    : isActive
-      ? "0 0 0 3px rgba(255,255,255,0.35), 0 12px 28px rgba(0,0,0,0.35)"
-      : "0 12px 28px rgba(0,0,0,0.25)";
+  let modifierClass = "";
+  if (isClaimed) modifierClass = "board-cell--claimed";
+  else if (isDisabled) modifierClass = "board-cell--disabled";
 
   return (
-    <div
-      className="relative h-full overflow-hidden rounded-2xl text-center text-white"
-      style={{ background: bg, boxShadow }}
-    >
-      {/* Subtle flare for available cells */}
-      {!isDisabled && !isOpen && (
-        <div
-          className="absolute inset-0 z-0 opacity-10"
-          style={{
-            background:
-              "radial-gradient(60% 60% at 30% 20%, rgba(255,255,255,0.9), transparent 60%)",
-          }}
-        />
+    <div className={`board-cell w-full h-full ${modifierClass} ${isActive ? 'ring-2 ring-[--gold] shadow-[0_0_20px_var(--gold-glow)]' : ''}`}>
+      {/* Ownership badge */}
+      {owner && (
+        <span
+          className="absolute right-2 top-2 z-20 flex items-center gap-1.5 rounded-full bg-black/60 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-white backdrop-blur-sm"
+          title={owner.name}
+        >
+          <span className="h-2 w-2 rounded-full" style={{ background: owner.color }} />
+          <span className="max-w-[80px] truncate">{owner.name}</span>
+        </span>
       )}
 
-      {/* Safe-area frame */}
-      <div className="absolute inset-[14px] rounded-[20px]">
-        {/* Ownership badge */}
-        {owner && (
-          <span
-            className="absolute right-1.5 top-1.5 z-20 inline-flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-[6px] text-[11px] font-medium text-white ring-1 ring-white/15 backdrop-blur-sm"
-            title={owner.name}
-          >
-            <span
-              className="h-2.5 w-2.5 shrink-0 rounded-full"
-              style={{ background: teamColor }}
-            />
-            <span className="max-w-[120px] truncate">{owner.name}</span>
+      {/* Value + state label */}
+      <div className="relative z-10 flex h-full flex-col items-center justify-center gap-1">
+        <span className="text-[--gold] font-serif text-4xl font-bold drop-shadow-md">
+          {cell.value}
+        </span>
+        
+        {isOpen && (
+          <span className="text-[9px] uppercase tracking-[0.2em] text-[--gold] opacity-80">
+            Open
           </span>
         )}
-
-        {/* Value + state label */}
-        <div className="relative z-10 flex h-full flex-col items-center justify-center gap-1">
-          <span className="text-5xl font-extrabold leading-[0.95] text-white/95 drop-shadow-[0_8px_18px_rgba(15,23,42,0.55)]">
-            {cell.value}
-          </span>
-
-          {isOpen && (
-            <span className="mt-0.5 text-[10px] uppercase tracking-wide text-white/70">
-              Open
-            </span>
-          )}
-          {isDisabled && (
-            <span className="mt-0.5 text-[10px] uppercase tracking-wide text-white/60">
-              Disabled
-            </span>
-          )}
-        </div>
       </div>
-
-      {/* Border ring */}
-      <div
-        className="pointer-events-none absolute inset-0 rounded-2xl"
-        style={{
-          boxShadow: isClaimed
-            ? `inset 0 0 0 2px ${teamColor}, 0 4px 12px ${teamColor}33`
-            : "inset 0 0 0 1px rgba(255,255,255,0.10)",
-        }}
-      />
-
-      {/* Dim overlay for disabled */}
-      {isDisabled && (
-        <div className="pointer-events-none absolute inset-0 z-10 rounded-2xl bg-slate-950/40" />
-      )}
     </div>
   );
 }
