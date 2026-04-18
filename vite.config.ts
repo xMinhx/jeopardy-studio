@@ -20,6 +20,11 @@ export default defineConfig(({ command }) => {
       environment: 'jsdom',
       setupFiles: './tests/setup.ts',
       include: ['tests/**/*.test.{ts,tsx}'],
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'json', 'html'],
+        exclude: ['electron/**', 'node_modules/**', 'tests/**', 'src/types/**', 'dist/**', 'release/**'],
+      },
     },
   };
 });

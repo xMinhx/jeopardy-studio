@@ -278,7 +278,6 @@ describe("boardStore -- cell workflow", () => {
 
   it("unclaimCell reverts cell to hidden and deducts score", () => {
     const id = teamId(0);
-    const value = get().board.grid[0][0].value;
     get().openCell(0, 0);
     get().awardCell(0, 0, id);
     get().unclaimCell(0, 0);
@@ -305,7 +304,6 @@ describe("boardStore -- cell workflow", () => {
 
   it("setCellDisabled hides cell and reverts claimed score", () => {
     const id = teamId(0);
-    const value = get().board.grid[0][0].value;
     get().openCell(0, 0);
     get().awardCell(0, 0, id);
     get().setCellDisabled(0, 0, true);

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export type SoundKey = "ding" | "bell" | "beep";
 
@@ -132,5 +132,10 @@ export function useTimer(initialMs = 30000): [TimerState, TimerApi] {
     [],
   );
 
-  return [state, { start, pause, resume, reset, setDuration, setVolume, setSound, toggleMute }];
+  const api = useMemo(
+    () => ({ start, pause, resume, reset, setDuration, setVolume, setSound, toggleMute }),
+    [start, pause, resume, reset, setDuration, setVolume, setSound, toggleMute],
+  );
+
+  return [state, api];
 }

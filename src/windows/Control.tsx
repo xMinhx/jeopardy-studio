@@ -9,6 +9,7 @@ import { getActiveQuestions } from "@/features/board/boardUtils";
 import { useGameAudio } from "@/hooks/useGameAudio";
 import { PersistedStateSchema } from "@/types/schema";
 import { AnimatedNumber } from "@/features/common/components/AnimatedNumber";
+import { StudioModal } from "@/features/common/components/StudioModal";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -54,6 +55,7 @@ export default function Control() {
     setFinalJeopardyQuestion,
      setFinalJeopardyWager,
     advanceFinalJeopardy,
+    revertFinalJeopardy,
     resolveFinalJeopardyTeam,
     cancelFinalJeopardy,
   } = useBoardStore();
@@ -83,6 +85,61 @@ export default function Control() {
   const [cols, setCols] = useState(board.cols);
   const [base, setBase] = useState(100);
 
+  // Modal State
+  const [modal, setModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: "alert" | "confirm";
+    onConfirm: () => void;
+    onCancel: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "alert",
+    onConfirm: () => {},
+    onCancel: () => {},
+  });
+
+  const studioConfirm = useCallback((title: string, message: string) => {
+    return new Promise<boolean>((resolve) => {
+      setModal({
+        isOpen: true,
+        title,
+        message,
+        type: "confirm",
+        onConfirm: () => {
+          setModal(prev => ({ ...prev, isOpen: false }));
+          resolve(true);
+        },
+        onCancel: () => {
+          setModal(prev => ({ ...prev, isOpen: false }));
+          resolve(false);
+        }
+      });
+    });
+  }, []);
+
+  const studioAlert = useCallback((title: string, message: string) => {
+    return new Promise<void>((resolve) => {
+      setModal({
+        isOpen: true,
+        title,
+        message,
+        type: "alert",
+        onConfirm: () => {
+          setModal(prev => ({ ...prev, isOpen: false }));
+          resolve();
+        },
+        onCancel: () => {
+          setModal(prev => ({ ...prev, isOpen: false }));
+          resolve();
+        }
+      });
+    });
+  }, []);
+
   const pausedDisplayMsRef = useRef(timer.durationMs);
 
   // ── Sync board dimensions when rebuilt ────────────────────────────────────
@@ -90,8 +147,6 @@ export default function Control() {
     setRows((current) => (current !== board.rows ? board.rows : current));
     setCols((current) => (current !== board.cols ? board.cols : current));
   }, [board.rows, board.cols]);
-
-
 
   // ── Load preset on mount if board is empty ────────────────────────────────
   useEffect(() => {
@@ -111,7 +166,7 @@ export default function Control() {
     return () => {
       cancelled = true;
     };
-  }, []); // Only check on mount
+  }, [board.grid, setAll]); // Added missing dependencies
 
   // ── Broadcast timer ticks to Display via IPC ───────────────────────────────
   useEffect(() => {
@@ -130,7 +185,7 @@ export default function Control() {
   useEffect(() => {
     void setAudioVolume(timer.muted ? 0 : settings.volume);
     t.setVolume(settings.volume);
-  }, [setAudioVolume, settings.volume, timer.muted]);
+  }, [setAudioVolume, settings.volume, timer.muted, t]); // Added missing dependency 't'
 
   // ── Broadcast board + team state to Display window ────────────────────────
   const snapshot = useMemo(() => ({ teams, board, dailyDouble, finalJeopardy, settings }), [teams, board, dailyDouble, finalJeopardy, settings]);
@@ -219,20 +274,6 @@ export default function Control() {
   const visibleCategories = board.categories.slice(0, board.cols);
   const visibleRows = board.grid.slice(0, board.rows).map((row) => row.slice(0, board.cols));
 
-  const activePrompt = useMemo(() => {
-    const active = getActiveQuestions(board, teams);
-    if (active.length === 0) return null;
-    const q = active[0];
-    // Find grid coordinates for the cell
-    for (let r = 0; r < visibleRows.length; r++) {
-      for (let c = 0; c < visibleRows[r].length; c++) {
-        if (visibleRows[r][c].id === q.cellId) {
-          return { row: r, col: c, cell: visibleRows[r][c], ...q };
-        }
-      }
-    }
-    return null;
-  }, [board, teams, visibleRows]);
 
   // ── Handlers ───────────────────────────────────────────────────────────────
 
@@ -453,17 +494,17 @@ export default function Control() {
                   const parsed = PersistedStateSchema.parse(raw);
                   setAll(parsed);
                 } catch (err) {
-                  alert(`Invalid board file: ${err instanceof Error ? err.message : String(err)}`);
+                  void studioAlert("Import Error", `Invalid board file: ${err instanceof Error ? err.message : String(err)}`);
                 }
               }}
             >↑ Import</button>
             <button className="btn-neutral text-xs py-1.5" onClick={() => void window.api?.exportBoard?.({ teams, board })}>↓ Export</button>
             <div className="h-6 w-px mx-1" style={{ background: "var(--border-strong)" }} />
             <button className="btn-danger text-xs py-1.5"
-              onClick={() => { if (window.confirm("Reset the current round? Scores cleared, questions hidden.")) resetRound(); }}
+              onClick={async () => { if (await studioConfirm("Reset Round?", "Are you sure you want to reset the current round? All cell states will be hidden, but scores will be preserved.")) resetRound(); }}
             >Reset Round</button>
             <button className="btn-danger text-xs py-1.5"
-              onClick={() => { if (window.confirm("Full Game Reset? All scores and states cleared.")) resetAll(); }}
+              onClick={async () => { if (await studioConfirm("Full Game Reset?", "This will clear all scores, teams, and reset the board. This action cannot be undone.")) resetAll(); }}
             >Full Reset</button>
           </div>
         </div>
@@ -489,21 +530,32 @@ export default function Control() {
               ) : (
                 <>
                   <button
-                    className="px-4 py-2 rounded font-bold text-sm bg-[--surface-base] border border-[--gold] text-[--gold] hover:bg-[--surface-overlay]"
+                    className="px-4 py-2 rounded font-bold text-sm bg-[--surface-base] border border-[--gold] text-[--gold] hover:bg-[--surface-overlay] transition-all"
                     onClick={() => {
                       if (finalJeopardy.stage === "wager") {
                         playFinalJeopardy();
                       }
-                      advanceFinalJeopardy();
+                      if (finalJeopardy.stage === "resolution") {
+                        cancelFinalJeopardy();
+                      } else {
+                        advanceFinalJeopardy();
+                      }
                     }}
                   >
                     {finalJeopardy.stage === "category" ? "Next: Wagers" :
                      finalJeopardy.stage === "wager" ? "Next: Reveal Question" :
-                     finalJeopardy.stage === "question" ? "Next: Resolution" : "Reset Stage"}
+                     finalJeopardy.stage === "question" ? "Next: Resolution" : "Finish Game"}
                   </button>
                   <button
-                    className="px-4 py-2 rounded font-bold text-sm border border-red-500/30 text-red-400 hover:bg-red-500/10"
-                    onClick={() => { if(confirm("Cancel Final Jeopardy?")) cancelFinalJeopardy(); }}
+                    className="px-4 py-2 rounded font-bold text-sm bg-[--surface-base] border border-[--border-subtle] text-[--text-secondary] hover:bg-[--surface-overlay] transition-all disabled:opacity-30"
+                    disabled={finalJeopardy.stage === "category"}
+                    onClick={() => revertFinalJeopardy()}
+                  >
+                    Back
+                  </button>
+                  <button
+                    className="px-4 py-2 rounded font-bold text-sm border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all"
+                    onClick={async () => { if(await studioConfirm("Cancel Final Jeopardy?", "Are you sure you want to stop the Final Jeopardy round? Current progress will be lost.")) cancelFinalJeopardy(); }}
                   >
                     Cancel
                   </button>
@@ -798,198 +850,152 @@ export default function Control() {
           </div>
         )}
 
-        {/* Active prompt panel */}
-        {activePrompt && !editMode && (
-          <div className="mb-6 rounded-xl border border-[--border-strong] bg-[--surface-overlay] p-6 shadow-sm">
-            <div className="flex flex-col gap-6">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="studio-label text-[--gold]">
-                    Active Question
-                  </div>
-                  <div className="h-px flex-1 bg-[--border-subtle]" />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-medium text-[--text-secondary]">
-                    {activePrompt.category} • {activePrompt.cell.value} points
-                  </div>
-                  <button
-                    className="text-xs font-medium text-[--text-muted] hover:text-[--text-primary]"
-                    onClick={() => unclaimCell(activePrompt.row, activePrompt.col)}
-                  >
-                    Reset Cell
-                  </button>
-                </div>
-                <div className="max-w-4xl text-2xl font-serif text-[--text-primary]">
-                  {activePrompt.cell.question || "No question set"}
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {teams.map((team) => {
-                  const isPlayingDD = dailyDouble.stage === "question" && dailyDouble.teamId === team.id;
-                  const otherTeamPlayingDD = dailyDouble.stage === "question" && dailyDouble.teamId !== team.id;
-                  
-                  return (
-                    <div
-                      key={team.id}
-                      className={`flex flex-col overflow-hidden rounded-lg border transition-all ${
-                        isPlayingDD ? "border-[--gold] ring-1 ring-[--gold]" : "border-[--border-strong]"
-                      } ${otherTeamPlayingDD ? "opacity-30 grayscale" : "bg-[--surface-base]"}`}
-                    >
-                      <div className={`flex items-center justify-between gap-2 border-b border-[--border-subtle] px-3 py-2 ${isPlayingDD ? "bg-[--gold] bg-opacity-10" : "bg-[--surface-overlay]"}`}>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="h-2 w-2 rounded-full"
-                            style={{ backgroundColor: team.color }}
-                          />
-                          <span className="text-sm font-bold truncate text-[--text-primary]">
-                            {team.name}
-                          </span>
-                        </div>
-                        {isPlayingDD && (
-                          <span className="text-[10px] font-bold uppercase text-[--gold] tracking-widest">Daily Double</span>
-                        )}
-                      </div>
-                      <div className="flex divide-x divide-[--border-subtle] border-t-0">
-                        <button
-                          className="flex-1 py-3 text-xs font-bold text-[#10b981] hover:bg-[#10b981]/10 transition-colors disabled:pointer-events-none"
-                          disabled={otherTeamPlayingDD}
-                          onClick={() => handleAward(activePrompt.row, activePrompt.col, team.id)}
-                        >
-                          AWARD {isPlayingDD && `+${dailyDouble.wager}`}
-                        </button>
-                        <button
-                          className="flex-1 py-3 text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors disabled:pointer-events-none"
-                          disabled={otherTeamPlayingDD}
-                          onClick={() => handlePenalize(activePrompt.row, activePrompt.col, team.id)}
-                        >
-                          {isPlayingDD ? `-${dailyDouble.wager}` : "WRONG"}
-                        </button>
-                        <button
-                          className="flex-1 py-3 text-[10px] font-bold text-[--text-muted] hover:text-[--text-primary] hover:bg-[--border-subtle] transition-colors disabled:pointer-events-none"
-                          disabled={otherTeamPlayingDD}
-                          onClick={() => penalizeTeam(activePrompt.row, activePrompt.col, team.id, 0)}
-                        >
-                          0 PTS
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-                <button
-                  className="flex flex-col items-center justify-center rounded-lg border border-dashed border-[--border-strong] py-3 text-xs font-bold text-[--text-muted] hover:border-[--text-secondary] hover:bg-[--surface-overlay] hover:text-[--text-primary] transition-all disabled:opacity-30"
-                  disabled={dailyDouble.stage === "question"}
-                  onClick={() => setCellDisabled(activePrompt.row, activePrompt.col, true)}
-                >
-                  NOBODY GOT IT
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Board grid */}
-        <div
-          className="relative grid gap-2 mt-4"
-          style={{ gridTemplateColumns: `repeat(${board.cols}, minmax(0, 1fr))` }}
-        >
-          {/* Category headers */}
-          {visibleCategories.map((cat, i) => (
-            <input
-              key={i}
-              className="w-full studio-input text-center text-[10px] sm:text-xs font-bold uppercase tracking-widest px-1 py-2"
-              value={cat}
-              onChange={(e) => setCategoryTitle(i, e.target.value)}
-              aria-label={`Category ${i + 1}`}
-            />
-          ))}
+        <div className="mt-8 grid gap-4 custom-scrollbar overflow-x-auto pb-4" style={{ gridTemplateColumns: `repeat(${board.cols}, minmax(180px, 1fr))` }}>
+          {visibleCategories.map((cat, colIdx) => (
+            <div key={colIdx} className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2 mb-2">
+                <span className="studio-label text-[--text-muted] uppercase tracking-widest text-[10px] text-center">Category {colIdx + 1}</span>
+                {editMode ? (
+                  <input
+                    className="studio-input text-center font-serif text-sm py-3"
+                    value={cat}
+                    onChange={(e) => setCategoryTitle(colIdx, e.target.value)}
+                  />
+                ) : (
+                  <div className="studio-card py-3 px-2 text-center font-serif text-sm border-[--gold] border-opacity-30" style={{ background: "var(--surface-overlay)" }}>{cat}</div>
+                )}
+              </div>
+              
+              {board.grid.map((row, rowIdx) => {
+                const cell = row[colIdx];
+                if (!cell) return null;
+                const isAwarded = cell.state === 'claimed';
+                const owner = teams.find(t => t.id === cell.ownerTeamId);
 
-          {/* Cells */}
-          {visibleRows.map((row, r) =>
-            row.map((cell, c) => {
-              const owner = teams.find((t) => t.id === cell.ownerTeamId);
-              const isOpen = cell.state === "open";
-              const isClaimed = cell.state === "claimed";
-              const isDisabled = cell.state === "disabled";
-
-              return (
-                <div
-                  key={cell.id}
-                  className={`relative overflow-hidden flex flex-col rounded border border-[--border-subtle] ${editMode ? 'p-3' : 'p-4'} text-center transition ${
-                    isDisabled
-                      ? "bg-[--surface-base] opacity-40 border-dashed"
-                      : isClaimed
-                        ? "bg-[#10b981]/10 border-[#10b981]/30"
-                        : isOpen
-                          ? "bg-[--surface-overlay] ring-1 ring-[--gold] border-[--gold]"
-                          : "bg-[--surface-base] hover:bg-[--surface-overlay] cursor-pointer"
-                  }`}
-                  style={{ minHeight: editMode ? '160px' : 'auto' }}
-                  onClick={() => {
-                    if (editMode) return;
-                    if (cell.state === "claimed" || cell.state === "disabled") return;
-                    handleOpenCell(r, c);
-                  }}
-                >
-                  {editMode ? (
-                    <div className="flex flex-col h-full gap-2 flex-1">
-                      <input
-                        className="w-full bg-transparent border-b border-[--border-strong] pb-1 text-center text-xl font-serif text-[--gold] focus:outline-none focus:border-[--gold] transition-colors"
-                        type="number"
-                        value={cell.value}
-                        onChange={(e) => setCellValue(r, c, Number(e.target.value))}
-                      />
-                      <textarea
-                        className="w-full flex-1 bg-transparent text-center text-xs text-[--text-primary] focus:outline-none resize-none leading-snug placeholder-[--text-muted]"
-                        value={cell.question ?? ""}
-                        placeholder="Question..."
-                        onChange={(e) => setCellQuestion(r, c, e.target.value)}
-                      />
-                      <label className="flex items-center justify-center gap-1 text-[9px] font-bold text-[--gold] uppercase tracking-widest mt-auto cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
-                        <input
-                          type="checkbox"
-                          className="accent-[--gold] w-3 h-3"
-                          checked={!!cell.isDailyDouble}
-                          onChange={(e) => setCellDailyDouble(r, c, e.target.checked)}
-                        />
-                        Daily Double
-                      </label>
-                    </div>
-                  ) : (
-                    <div className="grid gap-1">
-                      <div className="relative inline-block mx-auto">
-                        <div className="text-2xl font-serif text-[--gold]">{cell.value}</div>
+                return (
+                  <div key={cell.id} className="relative group">
+                    <div 
+                      className={`studio-card p-3 min-h-[140px] flex flex-col transition-all duration-300 ${
+                        cell.state === 'open' ? 'ring-2 ring-[--gold] ring-offset-4 ring-offset-[--surface-base] scale-[1.02]' : 
+                        cell.state === 'claimed' ? 'border-[--gold] bg-opacity-40' : 
+                        cell.state === 'disabled' ? 'opacity-20 grayscale cursor-not-allowed' : 'hover:border-[--gold]'
+                      }`}
+                      style={{ 
+                        background: cell.state === 'claimed' && owner ? `${owner.color}15` : "var(--surface-overlay)",
+                        borderColor: cell.state === 'claimed' && owner ? owner.color : undefined
+                      }}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <span className={`font-mono text-xs font-bold ${cell.state === 'open' ? 'text-[--gold]' : 'text-[--text-muted]'}`}>
+                          {cell.id}
+                        </span>
                         {cell.isDailyDouble && (
-                          <div className="absolute -top-1 -right-4 text-[10px] text-[--gold] font-black">★</div>
+                          <span className="text-[10px] font-black tracking-tighter text-[--gold] px-1.5 py-0.5 rounded border border-[--gold]">DAILY DOUBLE</span>
                         )}
                       </div>
-                      {(isOpen || isClaimed || isDisabled) && (
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-[--text-muted] mt-1">
-                          {isOpen
-                            ? "Open"
-                            : isClaimed
-                              ? (owner?.name ?? "Claimed")
-                              : "Disabled"}
+
+                      {editMode ? (
+                        <div className="flex flex-col gap-3 flex-1">
+                          <div className="relative">
+                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-bold text-[--text-muted]">$</span>
+                            <input
+                              className="studio-input w-full text-xs py-1.5 pl-5"
+                              type="number"
+                              value={cell.value}
+                              onChange={(e) => setCellValue(rowIdx, colIdx, Number(e.target.value))}
+                            />
+                          </div>
+                          <textarea
+                            className="studio-input w-full text-xs flex-1 resize-none"
+                            placeholder="Question..."
+                            value={cell.question}
+                            onChange={(e) => setCellQuestion(rowIdx, colIdx, e.target.value)}
+                          />
+                          <div className="flex items-center gap-4 pt-1">
+                            <label className="flex items-center gap-1.5 text-[10px] text-[--text-secondary] cursor-pointer">
+                              <input type="checkbox" checked={cell.isDailyDouble} onChange={(e) => setCellDailyDouble(rowIdx, colIdx, e.target.checked)} className="accent-[--gold]" />
+                              DD
+                            </label>
+                            <label className="flex items-center gap-1.5 text-[10px] text-[--text-secondary] cursor-pointer">
+                              <input type="checkbox" checked={cell.state === 'disabled'} onChange={(e) => setCellDisabled(rowIdx, colIdx, e.target.checked)} className="accent-[--danger]" />
+                              Disable
+                            </label>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col flex-1">
+                          <div className="text-xl font-serif text-[--gold] mb-2">${cell.value}</div>
+                          <div className="text-xs text-[--text-secondary] line-clamp-3 italic mb-4">
+                            {cell.question || "No question set"}
+                          </div>
+                          
+                          <div className="mt-auto flex flex-col gap-2">
+                            {cell.state === 'hidden' && (
+                              <button className="btn-gold w-full py-2 text-xs" onClick={() => handleOpenCell(rowIdx, colIdx)}>Reveal</button>
+                            )}
+                            
+                            {cell.state === 'open' && (
+                              <div className="flex flex-col gap-3 animate-in fade-in duration-300">
+                                <div className="text-[10px] font-bold text-[--text-secondary] uppercase tracking-wider mb-1 border-b border-[--border-subtle] pb-1">Award Points</div>
+                                <div className="flex flex-col gap-1.5 max-h-[160px] overflow-y-auto pr-1 custom-scrollbar">
+                                  {teams.map((team) => (
+                                    <div key={team.id} className="flex gap-1 group">
+                                      <button 
+                                        className="flex-1 bg-[--surface-panel] hover:bg-[--gold] hover:text-black border border-[--border-subtle] rounded px-2 py-1.5 text-[10px] font-bold transition-all flex items-center gap-2"
+                                        onClick={() => handleAward(rowIdx, colIdx, team.id)}
+                                      >
+                                        <div className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: team.color }} />
+                                        <span className="truncate">{team.name}</span>
+                                      </button>
+                                      <button 
+                                        className="w-8 bg-[--surface-panel] hover:bg-[--danger] border border-[--border-subtle] rounded px-1 py-1.5 text-[10px] font-black transition-all"
+                                        onClick={() => handlePenalize(rowIdx, colIdx, team.id)}
+                                        title={`Penalize ${team.name}`}
+                                      >
+                                        -
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="flex gap-1 mt-1">
+                                  <button className="flex-1 btn-neutral py-1.5 text-[9px] uppercase tracking-widest font-bold" onClick={() => unclaimCell(rowIdx, colIdx)}>Back</button>
+                                  <button className="flex-1 btn-danger py-1.5 text-[9px] uppercase tracking-widest font-bold" onClick={() => setCellDisabled(rowIdx, colIdx, true)}>Burn</button>
+                                </div>
+                              </div>
+                            )}
+
+                            {isAwarded && owner && (
+                              <div className="flex flex-col gap-2">
+                                <div className="flex items-center gap-2 px-2 py-1.5 rounded bg-[--surface-base] border border-[--border-subtle]">
+                                  <div className="h-2 w-2 rounded-full" style={{ backgroundColor: owner.color }} />
+                                  <span className="text-[10px] font-bold truncate">{owner.name}</span>
+                                </div>
+                                <button className="btn-neutral w-full py-1 text-[9px] uppercase tracking-widest font-bold" onClick={() => unclaimCell(rowIdx, colIdx)}>Revert</button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
-                  )}
-                  {owner && (
-                    <span
-                      className="pointer-events-none absolute right-[-28px] top-2 rotate-45 px-8 py-0.5 text-xs shadow-md"
-                      style={{ background: owner.color }}
-                      aria-hidden
-                    />
-                  )}
-                </div>
-              );
-            }),
-          )}
-
+                  </div>
+                );
+              })}
+            </div>
+          ))}
         </div>
       </section>
       </div>
+      
+      <StudioModal 
+        isOpen={modal.isOpen}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+        onConfirm={modal.onConfirm}
+        onCancel={modal.onCancel}
+        confirmText={modal.type === "confirm" ? "Confirm" : "OK"}
+      />
     </div>
   );
 }

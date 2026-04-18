@@ -132,6 +132,7 @@ export interface BoardState {
   setFinalJeopardyQuestion(question: string): void;
   setFinalJeopardyWager(teamId: string, amount: number): void;
   advanceFinalJeopardy(): void;
+  revertFinalJeopardy(): void;
   resolveFinalJeopardyTeam(teamId: string, isCorrect: boolean): void;
   cancelFinalJeopardy(): void;
 }
@@ -386,6 +387,18 @@ export const useBoardStore = create<BoardState>()(
           ];
           const currentIdx = stages.indexOf(s.finalJeopardy.stage);
           const nextIdx = (currentIdx + 1) % stages.length;
+          return {
+            finalJeopardy: { ...s.finalJeopardy, stage: stages[nextIdx] },
+          };
+        }),
+
+      revertFinalJeopardy: () =>
+        set((s) => {
+          const stages: BoardState["finalJeopardy"]["stage"][] = [
+            "none", "category", "wager", "question", "resolution",
+          ];
+          const currentIdx = stages.indexOf(s.finalJeopardy.stage);
+          const nextIdx = Math.max(1, currentIdx - 1); // Stay at category at minimum
           return {
             finalJeopardy: { ...s.finalJeopardy, stage: stages[nextIdx] },
           };

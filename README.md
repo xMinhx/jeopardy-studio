@@ -43,13 +43,9 @@ The windows communicate via Electron IPC, so no internet connection is required 
 
 ## 💡 The Story
 
-Jeopardy Studio was born out of a practical need. While volunteering as a House President at my university, I was tasked with organizing a large-scale Jeopardy/Quiz Show event. We had a live audience and significant prizes on the line, but I couldn't find a tool that met our requirements:
+Jeopardy Studio started as a solution to a very specific problem. While serving as a House President at my university, I volunteered to host a Jeopardy-style quiz night for our students. With prizes on the line and a live audience watching, I needed a tool that looked great and wouldn't crash halfway through.
 
-- **Dual-Window Support**: A clear distinction between what the host sees and what the audience sees.
-- **Premium Look**: An interface that felt like a professional studio production.
-- **Reliability**: A tool that worked offline and wouldn't crash mid-event.
-
-Frustrated by the lack of options, I decided to build it myself. What started as a tool for one university event has now grown into Jeopardy Studio.
+I spent hours looking for a tool that supported dual-monitor setups (one for me, one for the projector) with a clean aesthetic, but wasn't able to find anything that fit my needs. So, I decided to code my own. What started as a quick project for a university event has since been refined into Jeopardy Studio.
 
 ---
 
@@ -80,9 +76,11 @@ Frustrated by the lack of options, I decided to build it myself. What started as
 
 ## Getting Started
 
-### Prerequisites
-- [Node.js](https://nodejs.org/) v22+
-- Windows 10/11 (for packaging; dev mode works on Linux/macOS)
+### Technical Requirements
+- **Display Resolution**: 1920x1080 (Full HD) is currently the only natively supported resolution.
+- **UI Scaling**: Ensure Windows Display Settings are set to **100% Scaling** for optimal alignment.
+- **Node.js**: v22+
+- **OS**: Windows 10/11 (for packaging; dev mode works on Linux/macOS)
 
 ### Install and Run
 ```bash
@@ -131,6 +129,33 @@ jeopardy-studio/
 
 ## Architecture
 
+Jeopardy Studio uses a master-mirror architecture built on Electron's IPC (Inter-Process Communication).
+
+```mermaid
+graph TD
+    subgraph "Main Process (Node.js)"
+        M[Main Index]
+        M -- "state:changed" --> D
+        M -- "state:changed" --> C
+        M -. "timer:tick" .-> D
+    end
+
+    subgraph "Host Control Window (Renderer)"
+        C[Control UI]
+        C -- "state:update" --> M
+        CStore[(Zustand Store)] <--> C
+        C -- "file:open/save" --> M
+    end
+
+    subgraph "Audience Display Window (Renderer)"
+        D[Display UI]
+        DStore[(Zustand Store)] <--> D
+    end
+
+    M -- "state:get" --> CStore
+    M -- "state:get" --> DStore
+```
+
 - **State Sync**: Uses a one-way IPC bridge. The Host Control owns the state; the Display window is a reactive mirror.
 - **Persistence**: Game state is saved to local storage so sessions survive crashes.
 - **Validation**: Zod is used to validate JSON board imports.
@@ -156,8 +181,7 @@ If you find this project useful, consider supporting its development:
 ## 🗺️ Roadmap
 
 - [ ] **Custom Themes**: Allow users to change colors and fonts for the audience display.
-- [ ] **Soundboard**: A dedicated UI for the host to trigger custom sound effects.
-- [ ] **Remote Control**: A web-based remote for the host to control the game from a tablet/phone.
+- [ ] **Responsive Design**: Optimization for different screen sizes and aspect ratios.
 - [ ] **Internationalization**: Support for multiple languages.
 - [ ] **Advanced Animations**: Smoother transitions for category reveals and point values.
 

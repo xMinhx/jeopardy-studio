@@ -2,13 +2,16 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   quality:
@@ -68,9 +71,12 @@ jobs:
           retention-days: 7
 
   release:
-    name: Package Electron App (Windows)
-    runs-on: windows-latest
-    timeout-minutes: 25
+    name: Package Electron App (${{ matrix.os }})
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     needs: build
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
 
@@ -88,13 +94,18 @@ jobs:
         run: npm ci
 
       - name: Build and package
-        run: npm run build
+        run: npm run build -- --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload release artifact
         uses: actions/upload-artifact@v4
         with:
-          name: jeopardy-windows-installer
-          path: release/**/*.exe
+          name: jeopardy-studio-${{ matrix.os }}
+          path: |
+            release/*.exe
+            release/*.dmg
+            release/*.AppImage
+            release/*.deb
+            release/*.zip
           retention-days: 30

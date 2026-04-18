@@ -342,11 +342,11 @@ function DailyDoubleSplash({ teams, dailyDouble }: { teams: Team[]; dailyDouble:
 function FinalJeopardySplash({ teams, finalJeopardy }: { teams: Team[]; finalJeopardy: BoardState["finalJeopardy"] }) {
   const stage = finalJeopardy.stage;
   return (
-    <div className="flex h-full flex-col items-center justify-center p-6 animate-in zoom-in duration-500">
+    <div className="flex h-full flex-col items-center justify-start pt-20 p-6 animate-in zoom-in duration-500">
       <div className="relative w-full max-w-6xl">
 
         {stage === "category" && (
-          <div className="flex flex-col items-center text-center category-reveal">
+          <div className="flex flex-col items-center text-center category-reveal mt-12">
             <div className="mb-3 font-sans font-black uppercase tracking-[0.8em]" style={{ fontSize: "1.1rem", color: "var(--text-muted)" }}>Final Round</div>
             <div className="mb-8 font-serif font-bold uppercase leading-none tracking-wide" style={{ fontSize: "10vmin", color: "var(--gold)", textShadow: "0 0 30px var(--gold-glow)" }}>
               Category
@@ -360,7 +360,7 @@ function FinalJeopardySplash({ teams, finalJeopardy }: { teams: Team[]; finalJeo
         )}
 
         {stage === "wager" && (
-          <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-700 w-full">
+          <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-700 w-full mt-10">
             <div className="mb-6 font-sans font-black uppercase tracking-[0.5em] text-2xl" style={{ color: "var(--gold)" }}>Wagers Locked</div>
             <div className="flex flex-wrap justify-center gap-4 w-full">
               {teams.map((t) => (
@@ -378,7 +378,7 @@ function FinalJeopardySplash({ teams, finalJeopardy }: { teams: Team[]; finalJeo
         )}
 
         {stage === "question" && (
-          <div className="flex flex-col items-center text-center animate-in fade-in scale-in duration-1000">
+          <div className="flex flex-col items-center text-center animate-in fade-in scale-in duration-1000 mt-8">
             <div className="mb-6 font-sans font-black uppercase tracking-[0.6em] text-2xl" style={{ color: "var(--gold)" }}>Final Jeopardy</div>
             <div className="w-full max-w-5xl rounded-[40px] border px-12 py-16 text-center" style={{ borderColor: "var(--border-subtle)", background: "var(--surface-overlay)", boxShadow: "var(--shadow-deep)" }}>
               <div className="font-serif leading-tight" style={{ fontSize: "clamp(1.5rem,4vw,4rem)", color: "var(--text-primary)" }}>
@@ -397,8 +397,8 @@ function FinalJeopardySplash({ teams, finalJeopardy }: { teams: Team[]; finalJeo
           <>
             <div className="pointer-events-none absolute inset-[-100vh] z-0 animate-in fade-in duration-1000" style={{ background: "radial-gradient(circle at 50% 50%, var(--gold-subtle), transparent 60%)" }} />
             <div className="relative z-10 flex flex-col items-center text-center animate-in fade-in slide-in-from-top-12 duration-700 w-full">
-              <div className="mb-10 font-black uppercase tracking-[0.4em] text-4xl" style={{ color: "var(--gold)", textShadow: "0 0 24px var(--gold-glow)" }}>The Champion</div>
-              <div className="flex flex-wrap justify-center items-end gap-6 w-full max-w-[90vw]">
+              <div className="mb-8 font-black uppercase tracking-[0.4em] text-5xl" style={{ color: "var(--gold)", textShadow: "0 0 24px var(--gold-glow)" }}>The Champion</div>
+              <div className="flex flex-wrap justify-center items-end gap-6 w-full max-w-[90vw] mt-24">
                 {[...teams].sort((a, b) => b.score - a.score).slice(0, 5).map((t, idx) => (
                   <div key={t.id} className={`relative flex flex-col items-center p-6 transition-all ${idx === 0 ? "studio-card studio-card--gold scale-125 z-20 mx-4 mb-8" : "studio-card scale-90 opacity-90 z-10"}`}
                     style={idx === 0 ? { boxShadow: "0 0 80px var(--gold-glow)" } : {}}>

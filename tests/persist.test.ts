@@ -25,14 +25,14 @@ describe("persist", () => {
   } as const;
 
   it("exports and imports valid state", () => {
-    const json = exportState(sample as any);
+    const json = exportState(sample as unknown as Parameters<typeof exportState>[0]);
     const parsed = importState(json);
     expect(parsed.teams[0].name).toBe("Team A");
     expect(parsed.board.grid[1][0].state).toBe("disabled");
   });
 
   it("rejects invalid state", () => {
-    const broken = { ...sample, teams: [{ id: "x" }] } as any;
+    const broken = { ...sample, teams: [{ id: "x" }] } as unknown as Parameters<typeof exportState>[0];
     expect(() => exportState(broken)).toThrow();
   });
 });

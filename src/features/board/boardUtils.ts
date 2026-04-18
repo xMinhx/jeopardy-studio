@@ -22,7 +22,6 @@ export interface ActiveQuestionSnapshot {
  */
 export function getActiveQuestions(
   board: Board,
-  teams: Team[],
 ): ActiveQuestionSnapshot[] {
   const result: ActiveQuestionSnapshot[] = [];
   const visibleCats = board.categories.slice(0, board.cols);
@@ -74,7 +73,7 @@ export function resolveTimerQuestion(
   teams: Team[],
   previousActiveCellIds: Iterable<string> = [],
 ): ActiveQuestionSnapshot | null {
-  const active = getActiveQuestions(board, teams);
+  const active = getActiveQuestions(board);
   if (active.length === 0) return current;
 
   const prevIds = new Set(previousActiveCellIds);
