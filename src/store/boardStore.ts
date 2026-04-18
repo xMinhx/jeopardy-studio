@@ -66,7 +66,7 @@ export interface BoardState {
   board: Board;
 
   // ── State sync ──────────────────────────────────────────────────────────
-  setAll(next: { teams: Team[]; board: Board; dailyDouble?: any }): void;
+  setAll(next: { teams: Team[]; board: Board; dailyDouble?: any; finalJeopardy?: any; settings?: any }): void;
 
   // ── Team management ─────────────────────────────────────────────────────
   addTeam(team: Team): void;
@@ -467,9 +467,9 @@ export const useBoardStore = create<BoardState>()(
           board: {
             ...s.board,
             grid: s.board.grid.map((row) =>
-              row.map((cell) => ({
+              row.map((cell): Cell => ({
                 ...cell,
-                state: "hidden" as CellState,
+                state: "hidden",
                 ownerTeamId: undefined,
               })),
             ),
@@ -488,9 +488,9 @@ export const useBoardStore = create<BoardState>()(
           board: {
             ...s.board,
             grid: s.board.grid.map((row) =>
-              row.map((cell) => ({
+              row.map((cell): Cell => ({
                 ...cell,
-                state: "hidden" as CellState,
+                state: "hidden",
                 ownerTeamId: undefined,
               })),
             ),

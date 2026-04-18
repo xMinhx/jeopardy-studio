@@ -1,4 +1,4 @@
-import { useBoardStore } from "@/store/boardStore";
+import { useBoardStore, type BoardState } from "@/store/boardStore";
 import { useEffect, useRef, useState } from "react";
 import { loadBoardPreset } from "@/services/defaultPreset";
 import { TeamCard } from "@/features/teams/components/TeamCard";
@@ -418,7 +418,6 @@ function DailyDoubleSplash({
       </div>
     </div>
   );
-}
 }
 
 // ---------------------------------------------------------------------------
