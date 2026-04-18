@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { defaultTeams, useBoardStore } from "@/store/boardStore";
-import type { Team } from "@/types/team";
-import type { Cell } from "@/types/cell";
+import { defaultTeams, useBoardStore } from "../src/store/boardStore";
+import type { Team } from "../src/types/team";
+import type { Cell } from "../src/types/cell";
 
 function resetStore() {
   useBoardStore.setState({
