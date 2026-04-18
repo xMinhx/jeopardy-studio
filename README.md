@@ -6,7 +6,7 @@
 
 One window for you. One window for the crowd. Always in sync.
 
-[![CI](https://github.com/xMinhx/jeopardy-scoreboard/actions/workflows/ci.yml/badge.svg)](https://github.com/xMinhx/jeopardy-scoreboard/actions/workflows/ci.yml)
+[![CI](https://github.com/xMinhx/jeopardy-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/xMinhx/jeopardy-studio/actions/workflows/ci.yml)
 [![Electron](https://img.shields.io/badge/Electron-31-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -115,8 +115,8 @@ Designed for clarity and elegance, the **Executive Studio** aesthetic uses:
 ### Install and Run
 
 ```bash
-git clone https://github.com/xMinhx/jeopardy-scoreboard.git
-cd jeopardy-scoreboard
+git clone https://github.com/xMinhx/jeopardy-studio.git
+cd jeopardy-studio
 npm install
 npm run dev
 ```
@@ -151,7 +151,7 @@ The NSIS installer for Windows is written to the `release/` directory.
 ## Project Structure
 
 ```
-jeopardy-scoreboard/
+jeopardy-studio/
 ├── electron/
 │   ├── main/         # Main process: window lifecycle, IPC handlers, file I/O
 │   └── preload/      # Secure context bridge exposed as window.api
