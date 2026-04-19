@@ -70,7 +70,6 @@ export function getActiveQuestionIds(board: Board): string[] {
 export function resolveTimerQuestion(
   current: ActiveQuestionSnapshot | null,
   board: Board,
-  teams: Team[],
   previousActiveCellIds: Iterable<string> = [],
 ): ActiveQuestionSnapshot | null {
   const active = getActiveQuestions(board);

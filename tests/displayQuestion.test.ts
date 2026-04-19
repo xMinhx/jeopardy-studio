@@ -28,8 +28,7 @@ describe("resolveTimerQuestion", () => {
             },
           ],
         ],
-      },
-      teams,
+      }
     );
 
     expect(next).toEqual({
@@ -65,8 +64,7 @@ describe("resolveTimerQuestion", () => {
             },
           ],
         ],
-      },
-      teams,
+      }
     );
 
     expect(next).toEqual(current);
@@ -103,7 +101,6 @@ describe("resolveTimerQuestion", () => {
           ],
         ],
       },
-      teams,
       ["1A"],
     );
 

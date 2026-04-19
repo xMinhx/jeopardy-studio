@@ -49,7 +49,7 @@ export default function Display() {
       const off = api.onStateChanged((s) => {
         const newIds = getActiveQuestionIds(s.board);
         setAll(s);
-        setTimerQuestion((cur) => resolveTimerQuestion(cur, s.board, s.teams, previousActiveQuestionIdsRef.current));
+        setTimerQuestion((cur) => resolveTimerQuestion(cur, s.board, previousActiveQuestionIdsRef.current));
         previousActiveQuestionIdsRef.current = newIds;
       });
       return () => off?.();
@@ -190,7 +190,7 @@ function ScoreboardView({ teams, board, dailyDouble, timerState }: ScoreboardVie
   const leaderCount  = teams.filter((t) => t.score === leaderScore).length;
   const visibleCats  = board.categories.slice(0, board.cols);
   const visibleRows  = board.grid.slice(0, board.rows).map((row) => row.slice(0, board.cols));
-  const activeQ      = getActiveQuestions(board, teams)[0] ?? null;
+  const activeQ      = getActiveQuestions(board)[0] ?? null;
   const activeCell   = activeQ ? visibleRows.flat().find((c) => c.id === activeQ.cellId) : null;
 
   const isAlert = timerState.ended || timerState.displayMs <= SCOREBOARD_ALERT_MS;

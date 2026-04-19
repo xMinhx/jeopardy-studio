@@ -53,7 +53,7 @@ describe("getActiveQuestions", () => {
     const board = makeBoard([
       [makeCell("1A", 100, "Q1", "hidden"), makeCell("1B", 200, "Q2", "claimed")],
     ]);
-    expect(getActiveQuestions(board, teams)).toHaveLength(0);
+    expect(getActiveQuestions(board)).toHaveLength(0);
   });
 
   it("returns snapshot for a single open cell", () => {
@@ -61,7 +61,7 @@ describe("getActiveQuestions", () => {
       [[makeCell("1A", 100, "What is H2O?", "open")]],
       ["Chemistry"],
     );
-    const result = getActiveQuestions(board, teams);
+    const result = getActiveQuestions(board);
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({
       cellId: "1A",
@@ -76,7 +76,7 @@ describe("getActiveQuestions", () => {
       [makeCell("1A", 100, "Q1", "open"), makeCell("1B", 200, "Q2", "hidden")],
       [makeCell("2A", 200, "Q3", "open"), makeCell("2B", 400, "Q4", "claimed")],
     ]);
-    const result = getActiveQuestions(board, teams);
+    const result = getActiveQuestions(board);
     expect(result).toHaveLength(2);
     expect(result.map(r => r.cellId)).toEqual(["1A", "2A"]);
   });
@@ -88,14 +88,14 @@ describe("getActiveQuestions", () => {
       categories: ["Only One"],
       grid: [[makeCell("1A", 100, "Q", "open"), makeCell("1B", 200, "Q2", "open")]],
     };
-    const result = getActiveQuestions(board, teams);
+    const result = getActiveQuestions(board);
     expect(result[0].category).toBe("Only One");
     expect(result[1].category).toBe("Cat 2"); // fallback
   });
 
   it("ignores disabled cells", () => {
     const board = makeBoard([[makeCell("1A", 100, "Q", "disabled")]]);
-    expect(getActiveQuestions(board, teams)).toHaveLength(0);
+    expect(getActiveQuestions(board)).toHaveLength(0);
   });
 });
 
@@ -125,7 +125,7 @@ describe("getActiveQuestionIds", () => {
 describe("resolveTimerQuestion", () => {
   it("returns null when no cells are open and current is null", () => {
     const board = makeBoard([[makeCell("1A", 100, "Q", "hidden")]]);
-    expect(resolveTimerQuestion(null, board, teams)).toBeNull();
+    expect(resolveTimerQuestion(null, board)).toBeNull();
   });
 
   it("keeps current snapshot when no cells are open (no flicker)", () => {
@@ -139,7 +139,7 @@ describe("resolveTimerQuestion", () => {
       [[makeCell("1A", 100, "What is gravity?", "open")]],
       ["Physics"],
     );
-    const result = resolveTimerQuestion(null, board, teams);
+    const result = resolveTimerQuestion(null, board);
     expect(result).toEqual({
       cellId: "1A",
       category: "Physics",
@@ -154,7 +154,7 @@ describe("resolveTimerQuestion", () => {
       [[makeCell("1A", 100, "Old Q", "open")]],
       ["Physics"],
     );
-    const result = resolveTimerQuestion(current, board, teams, ["1A"]);
+    const result = resolveTimerQuestion(current, board, ["1A"]);
     expect(result?.cellId).toBe("1A");
   });
 
@@ -170,7 +170,7 @@ describe("resolveTimerQuestion", () => {
       ["History", "Science"],
     );
     // 1A was already seen, 1B is new
-    const result = resolveTimerQuestion(current, board, teams, ["1A"]);
+    const result = resolveTimerQuestion(current, board, ["1A"]);
     expect(result?.cellId).toBe("1B");
     expect(result?.question).toBe("Q2 -- new!");
   });
@@ -185,7 +185,7 @@ describe("resolveTimerQuestion", () => {
       ],
       ["A", "B"],
     );
-    const result = resolveTimerQuestion(null, board, teams);
+    const result = resolveTimerQuestion(null, board);
     expect(result?.cellId).toBe("1A");
   });
 
@@ -196,7 +196,7 @@ describe("resolveTimerQuestion", () => {
       ["Fallback"],
     );
     // "GONE" is not open, 1A is
-    const result = resolveTimerQuestion(current, board, teams, ["GONE"]);
+    const result = resolveTimerQuestion(current, board, ["GONE"]);
     // "1A" is newly active (not in previous), so it wins
     expect(result?.cellId).toBe("1A");
   });
