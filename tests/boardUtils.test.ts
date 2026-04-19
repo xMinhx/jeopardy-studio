@@ -10,17 +10,11 @@ import {
   resolveTimerQuestion,
 } from "../src/features/board/boardUtils";
 import type { Board } from "../src/types/board";
-import type { Team } from "../src/types/team";
 import type { Cell } from "../src/types/cell";
 
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------
-
-const teams: Team[] = [
-  { id: "A", name: "Team A", color: "#f00", score: 0 },
-  { id: "B", name: "Team B", color: "#00f", score: 0 },
-];
 
 function makeCell(
   id: string,
@@ -131,7 +125,7 @@ describe("resolveTimerQuestion", () => {
   it("keeps current snapshot when no cells are open (no flicker)", () => {
     const current = { cellId: "1A", category: "Sci", value: 100, question: "Q" };
     const board = makeBoard([[makeCell("1A", 100, "Q", "claimed")]]);
-    expect(resolveTimerQuestion(current, board, teams)).toEqual(current);
+    expect(resolveTimerQuestion(current, board)).toEqual(current);
   });
 
   it("captures a newly active (first-seen) open question", () => {

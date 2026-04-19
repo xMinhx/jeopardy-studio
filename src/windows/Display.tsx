@@ -37,7 +37,7 @@ export default function Display() {
         if (s) {
           previousActiveQuestionIdsRef.current = getActiveQuestionIds(s.board);
           setAll(s);
-          setTimerQuestion((cur) => resolveTimerQuestion(cur, s.board, s.teams, previousActiveQuestionIdsRef.current));
+          setTimerQuestion((cur) => resolveTimerQuestion(cur, s.board, previousActiveQuestionIdsRef.current));
         } else {
           const preset = await loadBoardPreset();
           if (preset) setAll({ teams: useBoardStore.getState().teams, board: preset });
