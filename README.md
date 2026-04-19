@@ -196,6 +196,7 @@ If you find this project useful, consider supporting its development:
 - [ ] **Responsive Design**: Optimization for different screen sizes and aspect ratios.
 - [ ] **Internationalization**: Support for multiple languages.
 - [ ] **Advanced Animations**: Smoother transitions for category reveals and point values.
+- [ ] **Home Page**: Add Github Page for this project
 
 ---
 
