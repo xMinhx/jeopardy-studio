@@ -6,7 +6,7 @@
 
 One window for the host. One window for the audience. Always in sync.
 
-[![Latest Release](https://img.shields.io/github/v/release/xMinhx/jeopardy-studio?include_prereleases&color=gold&label=latest%20version)](https://github.com/xMinhx/jeopardy-studio/releases).
+[![Latest Release](https://img.shields.io/github/v/release/xMinhx/jeopardy-studio?include_prereleases&color=gold&label=latest%20version)](https://github.com/xMinhx/jeopardy-studio/releases)
 [![CI](https://github.com/xMinhx/jeopardy-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/xMinhx/jeopardy-studio/actions/workflows/ci.yml)
 [![Electron](https://img.shields.io/badge/Electron-31-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev/)
